@@ -1,0 +1,193 @@
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.6.2
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Added better error handling around the threat intelligence feed
+* Added a better cleanup for Artlilery when uninstalling
+* Fixed a bug that caused Artillery to error out if banlist.txt was not found
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.6.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* bugfix that would cause thread to die under certain circumstances
+* added terms to the banlist.txt file
+* fixed when config or artillery would start with comment signs
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.6
+~~~~~~~~~~~~~~~~~~~~~~
+
+ * fixed a bug in remove_ban that would not remove the ip address
+ * added threat intelligence feed - this is an automatic feed that will pull from trustedsec webservers around attacker IP addresses
+ * added ability to automatically block based on intelligence feed
+ * daily checks added to banlist
+ * fixed a bug when uninstall would not properly kill artillery
+ * added a check in the uninstall to see if artillery is actually running
+ * added some enhancements to the honeypot banning
+ * added new flag for intelligence feed in the config file
+ * added the ability to change threat feeds to a different server of your choice
+ * added threading to reloading the IP tables matrix, was causing a hang on other imports
+ * removed 3306 as a standard port, would cause conflicts at times if it was already installed
+ * added the ability to specify the threat intelligence feed server
+ * added the ability to configure your own threat intelligence feed server
+ * added ability to change the public directory for the HTTP server
+ * added ability to configure multiple threat feeds, can pull in multiple Artillery servers
+ 
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.5.2 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed a bug where ports were not properly starting
+* added the ability to uninstall artillery by re-running setup.py
+* performance improvement on honeypot
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.5.1 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added the ability to specify a NIC interface (thanks Niel)
+* fixed a bug when banlist.txt was not found, artillery would crash
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.5 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added OSX support for setup.py installation (thanks for the help Giulio Bortot)
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.4 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added ability to use cidr notations in the artillery config so you can do something like 127.0.0.1,localhost,192.168.235.1/24,etc.
+* code cleanup and commenting on multiple directories 
+* added a number of new core modules, most specifically cidr notation support
+* changed install.py to be setup.py 
+* moved root README to readme/ and deleted the old one
+* added better detection around restart_server.py if artillery was there
+* cleaned up some old threading syntax issues
+* made some changes to help support OSX (thanks for the help Giulio Bortot)
+ 
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.3 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added a check for ssh brute force on or off.. this was never implmeneted (thanks Jeff Bryner)
+* fixed a bug that referenced iptables chain INPU instead of ARTILLERY (thanks Jeff Bryner)
+* added the artillery chain to INPUT each time artillery starts (thanks Jeff Bryner)
+* cleaned up some old code in honeypot.py that was no longer needed
+* added better descriptions around why a specific IP address would be blocked
+* added timestamp data to when IP addresses are blocked in both email notifications as well as standard log under /var/artillery/log/
+* added support for SMTP versus just gmail... its gmail out of the box however can configure any SMTP server now
+* added a check in artillery for ssh brute on or off
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.2 alpha
+~~~~~~~~~~~~~~~~~~~~~
+
+* added a check to see if we are running on windows or linux
+* added a new anti-dos protection for linux, it will check connections and limit based on how many are connecting, you will probably want to adjust this per server
+* changed honeypot ban method to src.core through ban(ip) versus standalone call for iptables
+* changed iptable chains to be ARTILLERY versus piggy backing INPUT, much cleaner to view
+* fixed a bug that would cause duplicate entries into iptables and in banlist.txt
+* added functionality to support blacklisting via redirection routes on windows machines.. may have better alternatives but this works for now
+* added a ip check routine for when banning IP addresses, ensures sanitization if something crazy is inserted instead of an IP address
+* converted all core.py modules to be windows compliant
+* converted all of honeypot.py modules to be windows compliant
+* converted all of the monitor.py modules, this will only work for linux until I rewrite the module to support difflib versus the actual application diff
+* converted all of the ssh_brute.py modules to be windows compliant.. this will be linux only since nix is primarily used for SSH
+* converted all of the harden.py modules to be windows compliant.. this will be linux only since nix is primarily checked. Will expand later on others
+* fixed a bug that would not properly monitor the overall database for monitored files (thanks Pier)
+* fixed a bug that would not remove an ip properly
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.1.7 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed a bug that would not properly whitelist in the config file on honeypot or ssh_monitor
+* bug fix on honeypot that would cause it to ban without checking whitelist, thanks to Ryan Elkins
+* bug fix for the bug fix, copy and paste didn't work so well
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.1.6 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* created new core function write_log for writing eventually to the logging directory
+* added writing of log file to /var/artillery/logs/alerts.log for all items regardless if email alerting is on or not
+* fixed an issue that would cause whitelist to not properly function in ssh ban
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.1.5 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added new email frequency handler for sending emails after a certain amount of time versus right away, should cut down on spam
+* added the new email frequency handler to all of the triggers/alerting systems
+* started to rewrite the monitor.py, it now hashes the two integrity databases before running diff, eventually will move completely off diff and into native python libraries 
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.1.4 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added new large portions to ssh_monitor to fix potential issues
+* added whitelist capabilities into ssh_monitor.py
+* fixed a bug that caused multiple IP's on SSH ban to repeat and continue to ban the same IP address over and over
+* added new core module for adding path to check for config file
+* added remove_ban which will remove a banned IP address
+* turned auto-update off by default 
+* added a fix in honeypot that would cause socket errors of a full connection wasnt made
+* added a fix in honeypot.py which would still continue to ban whitelisted ip addresses
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.1.3 alpha
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added better handling around list errors when parsing through filesystem
+* added the ban command through iptables to use -I INPUT 1 so that it's always first in the list (happens if other iptables are in affect)
+* fixed a counter issue when checking whitelist
+* added a new config option to leverage excludes for certain files that may change often
+* added a validate_ip routine to make sure the information being sent is in fact an IP address
+* removed almost all references to subprocess.popen and replaced with shutil, os.makedirs, os.stat, etc.
+* added restart_server.py
+
+~~~~~~~~~~~~~~~~~~~~~
+version 0.1.2 alpha
+~~~~~~~~~~~~~~~~~~~~~
+
+* added better detection of ssh logs for CentOS (thanks Quantum) to check for /var/log/secure as well as /var/log/auth.log
+* added a config option for automatic updates. if you want them automatic on or off (note you will need to whitelist svn.secmniac.com on port 80 for automatic updates
+* added config option for whitelisting IP addresses in the config file
+* fixed some code that on other systems may cause issues
+* fixed email delivery to harden.py and ssh_monitor, forgot to add import src.smtp
+* added email deliverys on honeypot blacklisting
+
+~~~~~~~~~~~~~~~~~~~~~
+version 0.1.1 alpha
+~~~~~~~~~~~~~~~~~~~~~
+
+* removed the majority of imports in artillery.py
+* added better handling over missing folders
+* fixed the installer
+* added better wording around what changes were detected
+* added time changes were detected
+* removed __init__.py, not needed
+* added directory checking for monitored folders..different platforms may not have the exact folders
+* changed port range to get detected through config versus hardcoded into src/honeypot.py..it will now use config to generate port ranges
+* added granularity if port was in use
+* added a generate random character sequence upon connect, will send a string between 5 and 30000 to the attacker...should be confusing :)
+* added src/harden.py which now checks for base configurations on a linux system that may be insecure in nature
+* added check for ssh log in harden.py to see if default port running on 22 and if running as root
+* added a check for /var/www to check permissions and ensure files are running as root
+* removed some un-necessary code in install and piped subprocess to stdout and stderr instead of /dev/null
+* added option to checkout svn during install, this will keep artillery up-to-date
+* added automatic-updating when artillery is launched
+* added threading to automatic-update to remove any delay that might happen if Internet isn't working 
+* instead of using rc.local, install.py adds /etc/init.d/artillery then runs update-rc.d to add to startup scripts
+* added an automatic kill in install.py if Artillery was running on the system
+* added two more config options, one do you want to use the honeypot, second, do you want to automatically ban via honeypot
+* tweaked the database to lower CPU time and reduce overall footprint. New tests show it uses 0% of cpu at all times
+
+~~~~~~~~~~~~~~~~~~~~~
+version 0.1 alpha
+~~~~~~~~~~~~~~~~~~~~~
+
+* First release of Artillery

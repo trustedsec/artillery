@@ -1,0 +1,6 @@
+Thanks to sp0rus for a bug fix in harden.py
+Thanks to bryogenic for email alerts in artillery
+Thanks to Ryan Elkins for bug report
+Thanks to Larry Spohn for finding the bugs in honeypot.py
+Thanks to Jeff Bryner for finding some bugs and sending source for additional enhancements
+Thanks to Giulio Bortot for adding some patches for OSX support and OSX support for setup.py
