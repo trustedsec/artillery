@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #####################################################################
 #
-# Artillery v0.6.3
+# Artillery v0.6.4
 #
 # Written by Dave Kennedy (ReL1K)
 #

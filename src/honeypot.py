@@ -55,12 +55,12 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                                 # check to see if we are using frequency
                                 email_frequency = check_config("EMAIL_TIMER=").lower()
                                 if email_alerts == "on" and email_frequency == "off":
-                                        mail(send_email,"%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port" % (now,self.client_address[0]))
+                                        mail(send_email,"%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port: %s" % (now,self.client_address[0], self.server.server_address[1]))
                                 # write our data out
                                 if email_frequency == "on":
-                                        prep_email("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s\n for connecting on a honeypot port" % (now,self.client_address[0]))
+                                        prep_email("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s\n for connecting on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
                                 # write out to log
-                                write_log("%s [!] Artillery has blocked (and blacklisted the IP Address: %s for connecting to a honeypot restricted port" % (now,self.client_address[0]))
+                                write_log("%s [!] Artillery has blocked (and blacklisted the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
                                 # close the socket
                                 self.request.close()
                                 honeypot_ban = check_config("HONEYPOT_BAN=")
