@@ -1,4 +1,17 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.6.5
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added new config option to disable root checks
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 0.6.4
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Added the ability to detect what ports are being blocked via artillery honeypot (thanks spoonman)
+* Changed README to README.txt to fix an OSX bug
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.6.3
 ~~~~~~~~~~~~~~~~~~~~~~
 

@@ -26,11 +26,13 @@ if operating_system == "posix":
         if os.path.isfile("/etc/ssh/sshd_config"):
                 fileopen = file("/etc/ssh/sshd_config", "r")
                 data = fileopen.read()
-                match = re.search("RootLogin yes", data)
-                # if we permit root logins trigger alert
-                if match:
-                        # trigger warning if match
-                        warning = warning + "Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\n"                               
+		root_check = check_confg("ROOT_CHECK=").lower()
+		if root_check == "on":
+	                match = re.search("RootLogin yes", data)
+	                # if we permit root logins trigger alert
+	                if match:
+	                        # trigger warning if match
+	                        warning = warning + "Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\n"                               
                 match = re.search(r"Port 22\b", data)
                 if match:
                         # trigger warning is match
