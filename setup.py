@@ -79,6 +79,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
                 os.makedirs(program_files + "\\Artillery")
                 os.makedirs(program_files + "\\Artillery\\logs")
                 os.makedirs(program_files + "\\Artillery\\database")
+		os.makedirs(program_files + "\\Artillery\\src\\program_junk")
                 install_path = os.getcwd()
                 shutil.copytree(install_path, program_files + "\\Artillery\\")                
 
@@ -94,6 +95,8 @@ if answer.lower() == "y" or answer.lower() == "yes":
                                 shutil.rmtree('/var/artillery')
                                 os.makedirs("/var/artillery") 
                                 os.makedirs("/var/artillery/logs")
+				os.makedirs("/var/artillery/src/program_junk/")
+				os.makedirs("/var/artillery/database")
                         subprocess.Popen("svn co http://svn.secmaniac.com/artillery /var/artillery/", shell=True).wait()
                         print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'svn update'"
                 else:

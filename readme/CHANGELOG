@@ -3,7 +3,7 @@ version 0.6.6
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed a typo that would cause artillery not to start in some cases
-
+* added folder create for src/program_junk and databases/ during installation of artillery
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 0.6.5
