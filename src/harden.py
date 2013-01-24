@@ -26,7 +26,7 @@ if operating_system == "posix":
         if os.path.isfile("/etc/ssh/sshd_config"):
                 fileopen = file("/etc/ssh/sshd_config", "r")
                 data = fileopen.read()
-		root_check = check_confg("ROOT_CHECK=").lower()
+		root_check = check_config("ROOT_CHECK=").lower()
 		if root_check == "on":
 	                match = re.search("RootLogin yes", data)
 	                # if we permit root logins trigger alert

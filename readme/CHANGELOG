@@ -1,4 +1,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.6.6
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed a typo that would cause artillery not to start in some cases
+
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.6.5
 ~~~~~~~~~~~~~~~~~~~~~~
 
