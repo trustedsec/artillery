@@ -28,7 +28,9 @@ if auto_update.lower() == "on":
         thread.start_new_thread(update, ())
 
 # import base monitoring of fs
-from src.monitor import *
+monitor_check = check_config("MONITOR=")
+if monitor_check.lower() == "on":
+	from src.monitor import *
 
 # port ranges to spawn
 port = check_config("PORTS=")

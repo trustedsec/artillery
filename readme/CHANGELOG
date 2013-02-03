@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.6.7
+~~~~~~~~~~~~~~~~~~~~~~
+
+* if monitoring is turned off, it will not import the module
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.6.6
 ~~~~~~~~~~~~~~~~~~~~~~
 
