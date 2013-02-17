@@ -91,13 +91,13 @@ if answer.lower() == "y" or answer.lower() == "yes":
                         print "[*] Checking out Artillery through subversion to /var/artillery"
                         # if old files are there
                         if os.path.isdir("/var/artillery/"):
-                                print "[*] Doing some housecleaning.."
                                 shutil.rmtree('/var/artillery')
-                                os.makedirs("/var/artillery") 
-                                os.makedirs("/var/artillery/logs")
-				os.makedirs("/var/artillery/src/program_junk/")
-				os.makedirs("/var/artillery/database")
                         subprocess.Popen("git clone https://github.com/trustedsec/artillery /var/artillery/", shell=True).wait()
+			if os.path.isdir("/var/artillery/"):
+                                os.makedirs("/var/artillery/logs")
+                                os.makedirs("/var/artillery/src/program_junk/")
+                                os.makedirs("/var/artillery/database")
+
                         print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
                 else:
                         if operating_system == "posix":

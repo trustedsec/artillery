@@ -6,6 +6,7 @@ version 0.7
 * fixed installer to use github versus subversion
 * Artillery now stores logfiles for posix (nix based) in a syslog format. 
 * You can now specify a local or remote syslog server in the config file
+* Bug fix for setup file would cause makedirs error, should be fixed
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 0.6.7
