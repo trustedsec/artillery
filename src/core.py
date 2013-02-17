@@ -9,7 +9,7 @@ import subprocess
 import urllib
 import os
 import time
-
+import shutil
 
 # grab the normal path for config
 def check_config_path():
@@ -68,7 +68,15 @@ def ban(ip):
 def update():
         operating_system = check_os()
         if operating_system == "posix":
-                subprocess.Popen("cd /var/artillery;svn update", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		if os.path.isdir("/var/artillery/.svn"):
+			print "[!] Old installation detected that uses subversion. Fixing and moving to github."
+			try:
+				shutil.rmtree("/var/artillery")
+				subprocess.Popen("git clone https://github.com/trustedsec/artillery", shell=True).wait()
+			except:
+				print "[!] Something failed. Please type 'git clone https://github.com/trustedsec/artillery /var/artillery' to fix!"
+
+		subprocess.Popen("cd /var/artillery;git pull", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 #
 # check if something is whitelisted
@@ -188,45 +196,6 @@ def prep_email(alert):
                 filewrite=file(program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
         filewrite.write(alert)
         filewrite.close()
-        
-# write log
-def write_log(alert):
-        # check os
-        operating_system = check_os()
-        # if we are running nix
-        if operating_system == "posix":
-                if not os.path.isdir("/var/artillery/logs"):
-                                os.makedirs("/var/artillery/logs")
-
-                if not os.path.isfile("/var/artillery/logs/alerts.log"):
-                        filewrite = file("/var/artillery/logs/alerts.log", "w")
-                        filewrite.write("***** Artillery Alerts Log *****\n")
-                        filewrite.close()
-                # write out the alert
-                filewrite = file("/var/artillery/logs/alerts.log", "a")
-                filewrite.write(alert+"\n")
-                filewrite.close()
-        # if os is windows
-        if operating_system == "windows":
-                # expand program files
-                program_files = os.environ["ProgramFiles"]
-                # if not there then make directories 
-                if not os.path.isdir(program_files + "\\Artillery\\logs"):
-                        # make directory
-                        os.makedirs(program_files + "\\Artillery\\logs")
-                # if file isnt there then make it
-                if not os.path.isfile(program_files + "\\Artillery\\logs\\alerts.log"):
-                        # make file
-                        filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "w")
-                        filewrite.write("***** Artillery Alerts Log *****\n")
-                        # close it up
-                        filewrite.close()
-                # write to alerts
-                filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "a")
-                # write the alert
-                filewrite.write(alert+"\n")
-                # close the the file
-                filewrite.close()
 
 # detect operating system version
 def check_os():
@@ -420,3 +389,82 @@ def threat_server():
 			subprocess.Popen("cp /var/artillery/banlist.txt %s" % (public_http), shell=True).wait()
 			time.sleep(800)
 
+# send the message then if its local or remote
+def syslog(message):
+
+	type = check_config("SYSLOG_TYPE=").lower()
+
+	# if we are sending remote syslog
+	if type == "remote":
+
+		import socket
+		FACILITY = {
+		        'kern': 0, 'user': 1, 'mail': 2, 'daemon': 3,
+		        'auth': 4, 'syslog': 5, 'lpr': 6, 'news': 7,
+		        'uucp': 8, 'cron': 9, 'authpriv': 10, 'ftp': 11,
+		        'local0': 16, 'local1': 17, 'local2': 18, 'local3': 19,
+		        'local4': 20, 'local5': 21, 'local6': 22, 'local7': 23,
+			}
+	
+		LEVEL = {
+		        'emerg': 0, 'alert':1, 'crit': 2, 'err': 3,
+		        'warning': 4, 'notice': 5, 'info': 6, 'debug': 7
+			}
+	
+
+		def syslog_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
+        		host='localhost', port=514):
+	
+		        # Send syslog UDP packet to given host and port.
+		
+		        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	        	data = '<%d>%s' % (level + facility*8, message + "\n")
+	       		sock.sendto(data, (host, port))
+	        	sock.close()
+
+		# send the syslog message	
+		remote_syslog = check_config("SYSLOG_REMOTE_HOST=")
+		syslog_send(message, host=remote_syslog)
+
+	# if we are sending local syslog messages
+	if type == "local":
+		import logging
+		import logging.handlers
+	
+		my_logger = logging.getLogger('Artillery')
+		my_logger.setLevel(logging.DEBUG)
+		handler = logging.handlers.SysLogHandler(address = '/dev/log')
+		my_logger.addHandler(handler)
+		my_logger.critical(message + "\n")
+
+# write log
+def write_log(alert):
+        # check os
+        operating_system = check_os()
+        # if we are running nix
+        if operating_system == "posix":
+		print "im here"
+		syslog(alert)
+
+        # if os is windows
+        if operating_system == "windows":
+                # expand program files
+                program_files = os.environ["ProgramFiles"]
+                # if not there then make directories 
+                if not os.path.isdir(program_files + "\\Artillery\\logs"):
+                        # make directory
+                        os.makedirs(program_files + "\\Artillery\\logs")
+                # if file isnt there then make it
+                if not os.path.isfile(program_files + "\\Artillery\\logs\\alerts.log"):
+                        # make file
+                        filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "w")
+                        filewrite.write("***** Artillery Alerts Log *****\n")
+                        # close it up
+                        filewrite.close()
+                # write to alerts
+                filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "a")
+                # write the alert
+                filewrite.write(alert+"\n")
+                # close the the file
+                filewrite.close()
+	

@@ -97,8 +97,8 @@ if answer.lower() == "y" or answer.lower() == "yes":
                                 os.makedirs("/var/artillery/logs")
 				os.makedirs("/var/artillery/src/program_junk/")
 				os.makedirs("/var/artillery/database")
-                        subprocess.Popen("svn co http://svn.secmaniac.com/artillery /var/artillery/", shell=True).wait()
-                        print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'svn update'"
+                        subprocess.Popen("git clone https://github.com/trustedsec/artillery /var/artillery/", shell=True).wait()
+                        print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
                 else:
                         if operating_system == "posix":
                                 print "[*] Copying setup files over..."

@@ -6,7 +6,7 @@
 # Artillery written by: Dave Kennedy (ReL1K)
 # Website: http://www.secmaniac.com
 # Email: davek [at] secmaniac.com
-# Download: svn co http://svn.secmaniac.com/artillery artillery/
+# Download: git clone https://github.com/trustedsec/artillery artillery/
 # Install: python install.py
 #
 #############################################################################################
@@ -109,3 +109,9 @@ THREAT_LOCATION="/var/www/"
 #
 # THIS CHECKS TO SEE WHAT PERMISSIONS ARE RUNNING AS ROOT IN A WEB SERVER DIRECTORY
 ROOT_CHECK=ON
+#
+# Specify SYSLOG TYPE to be local or remote. 
+SYSLOG_TYPE=LOCAL
+#
+# IF YOU SPECIFY SYSLOG TYPE TO REMOTE, SPECIFY A REMOTE SYSLOG SERVER TO SEND ALERTS TO
+SYSLOG_REMOTE_HOST=192.168.0.1
