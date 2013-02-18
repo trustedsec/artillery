@@ -24,26 +24,29 @@ smtp_port = int(smtp_port)
 smtp_from = check_config("SMTP_FROM")
 
 def mail(to, subject, text):
-        msg = MIMEMultipart()
-        # message from
-        msg['From'] = smtp_from
-        # message to
-        msg['To'] = to
-        # subject line
-        msg['Subject'] = subject
-        msg.attach(MIMEText(text))
-        # prep the smtp server
-        mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-        # send ehlo
-        mailServer.ehlo()
-        # tls support?
-        mailServer.starttls()
-        # some servers require ehlo again
-        mailServer.ehlo()
-        # login to server if we aren't using an open mail relay
-	if user != None:
-	        mailServer.login(user, pwd)
-        # send email
-        mailServer.sendmail(to, to, msg.as_string())
-        # close connection
-        mailServer.close()
+	try:
+	        msg = MIMEMultipart()
+	        # message from
+	        msg['From'] = smtp_from
+	        # message to
+	        msg['To'] = to
+	        # subject line
+	        msg['Subject'] = subject
+	        msg.attach(MIMEText(text))
+	        # prep the smtp server
+	        mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
+	        # send ehlo
+	        mailServer.ehlo()
+	        # tls support?
+	        mailServer.starttls()
+	        # some servers require ehlo again
+	        mailServer.ehlo()
+	        # login to server if we aren't using an open mail relay
+		if user != None:
+		        mailServer.login(user, pwd)
+	        # send email
+	        mailServer.sendmail(to, to, msg.as_string())
+	        # close connection
+	        mailServer.close()
+	except:
+		write_log("[!] Error, Artillery was unable to log into the mail server")

@@ -9,6 +9,7 @@ version 0.7.1
 * added check for open relay to != None versus != ""
 * added new started to write_log message "Artillery has started successfully"
 * added ability to remove the default port check for the SSH harden config script, you can now turn this to off
+* added error handling to the mail program versus erroring out and closing artilery if the mail server was not properly found
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 0.7
