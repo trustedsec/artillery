@@ -8,6 +8,7 @@ version 0.7.1
 * removed an old instance of code from src.core, no longer needed
 * added check for open relay to != None versus != ""
 * added new started to write_log message "Artillery has started successfully"
+* added ability to remove the default port check for the SSH harden config script, you can now turn this to off
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 0.7

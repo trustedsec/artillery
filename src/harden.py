@@ -35,8 +35,10 @@ if operating_system == "posix":
 	                        warning = warning + "Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\n"                               
                 match = re.search(r"Port 22\b", data)
                 if match:
-                        # trigger warning is match
-                        warning = warning + "Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\n"
+			ssh_port = check_config("SSH_DEFAULT_PORT_CHECK=").lower()
+			if ssh_port == "on":
+	                        # trigger warning is match
+	                        warning = warning + "Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\n"
 
 
         #
