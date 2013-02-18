@@ -58,9 +58,15 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                                         mail(send_email,"%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port: %s" % (now,self.client_address[0], self.server.server_address[1]))
                                 # write our data out
                                 if email_frequency == "on":
-                                        prep_email("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s\n for connecting on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
-                                # write out to log
-                                write_log("%s [!] Artillery has blocked (and blacklisted the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+					if check_config("HONEYPOT_BAN=").lower() == "on":
+	                                        prep_email("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s\n for connecting on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+						# write out to log
+						write_log("%s [!] Artillery has blocked (and blacklisted the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+					if check_config("HONEYPOT_BAN=").lower() == "off":
+						prep_email "%s [!] Artillery has detected an attack from IP Address: %s\n for a connection on a honeypot port: %s" % (now, self.client_address[0], self.server.server_address[1]))
+						# write out to log
+						write_log("%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+                              
                                 # close the socket
                                 self.request.close()
                                 honeypot_ban = check_config("HONEYPOT_BAN=")

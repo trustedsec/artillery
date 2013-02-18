@@ -10,6 +10,7 @@ version 0.7.1
 * added new started to write_log message "Artillery has started successfully"
 * added ability to remove the default port check for the SSH harden config script, you can now turn this to off
 * added error handling to the mail program versus erroring out and closing artilery if the mail server was not properly found
+* added a check that looks for to see if honeypot_ban is active, if not the wording is changed to detected versus blocked
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 0.7
