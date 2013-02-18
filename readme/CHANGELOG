@@ -5,6 +5,9 @@ version 0.7.1
 * allowed open mail relays for when artillery is deployed internally, will use connection to connect to SMTP servers without creds
 * added new flag to allow SMTP_FROM in the config, can now specify name coming from. For example "Artillery Alert Feed"
 * changed the mailSever.sendmail() to use the alert address as the to/from.
+* removed an old instance of code from src.core, no longer needed
+* added check for open relay to != None versus != ""
+* added new started to write_log message "Artillery has started successfully"
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 0.7

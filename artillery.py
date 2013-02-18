@@ -15,6 +15,9 @@ import time,sys,thread,os
 # import the core modules
 from src.core import *
 
+# let the logfile know artillery has started successfully
+write_log("Artillery has started successfully.")
+
 # check which OS we are running
 operating_system = check_os()
 

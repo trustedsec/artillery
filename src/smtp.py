@@ -41,7 +41,7 @@ def mail(to, subject, text):
         # some servers require ehlo again
         mailServer.ehlo()
         # login to server if we aren't using an open mail relay
-	if user != "":
+	if user != None:
 	        mailServer.login(user, pwd)
         # send email
         mailServer.sendmail(to, to, msg.as_string())

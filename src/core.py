@@ -443,7 +443,6 @@ def write_log(alert):
         operating_system = check_os()
         # if we are running nix
         if operating_system == "posix":
-		print "im here"
 		syslog(alert)
 
         # if os is windows
