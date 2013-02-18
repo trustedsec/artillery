@@ -21,13 +21,12 @@ smtp_address = check_config("SMTP_ADDRESS=")
 smtp_port = check_config("SMTP_PORT=")
 # convert to integer
 smtp_port = int(smtp_port)
-# who we are sending the email to
-smtp_to = check_config("SMTP_TO")
+smtp_from = check_config("SMTP_FROM")
 
 def mail(to, subject, text):
         msg = MIMEMultipart()
         # message from
-        msg['From'] = user
+        msg['From'] = smtp_from
         # message to
         msg['To'] = to
         # subject line
@@ -41,9 +40,10 @@ def mail(to, subject, text):
         mailServer.starttls()
         # some servers require ehlo again
         mailServer.ehlo()
-        # login to server
-        mailServer.login(user, pwd)
+        # login to server if we aren't using an open mail relay
+	if user != "":
+	        mailServer.login(user, pwd)
         # send email
-        mailServer.sendmail(smtp_to, to, msg.as_string())
+        mailServer.sendmail(to, to, msg.as_string())
         # close connection
         mailServer.close()
