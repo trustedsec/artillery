@@ -10,6 +10,8 @@ import urllib
 import os
 import time
 import shutil
+import logging
+import logging.handlers
 
 # grab the normal path for config
 def check_config_path():
@@ -428,9 +430,6 @@ def syslog(message):
 
 	# if we are sending local syslog messages
 	if type == "local":
-		import logging
-		import logging.handlers
-	
 		my_logger = logging.getLogger('Artillery')
 		my_logger.setLevel(logging.DEBUG)
 		handler = logging.handlers.SysLogHandler(address = '/dev/log')
