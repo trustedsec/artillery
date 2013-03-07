@@ -36,7 +36,5 @@ setup.py - copies files to /var/artillery/ then edits /etc/init.d/rc.local to en
 
 TESTED ON:
 
-Ubuntu 11.04
-Ubuntu 9.04
-Back|Track 5
-Windows 7
+Linux
+Windows
