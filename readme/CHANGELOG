@@ -1,4 +1,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.7.2
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added detection for monitor_ssh in /var/log/faillog on debian
+* added better error handling within artillery.py in event of control-c or exceptions
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.7.1
 ~~~~~~~~~~~~~~~~~~~~~~
 
