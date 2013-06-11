@@ -434,7 +434,7 @@ def syslog(message):
 		my_logger.setLevel(logging.DEBUG)
 		handler = logging.handlers.SysLogHandler(address = '/dev/log')
 		my_logger.addHandler(handler)
-        for line in message:
+        for line in message.splitlines():
     		my_logger.critical(line + "\n")
 
 # write log
