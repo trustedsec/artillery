@@ -42,7 +42,7 @@ def ssh_monitor(monitor_time):
                                 filewrite.close()
                 
                 try:
-                
+                        
                         # base ssh counter to see how many attempts we've had
                         ssh_counter = 0
                         counter = 0
@@ -98,11 +98,11 @@ def ssh_monitor(monitor_time):
 
                                                                 # wait one to make sure everything is caught up
                                                                 time.sleep(1)
-                # sleep for defined time
-                time.sleep(monitor_time)
-                                
-        except Exception, e:
-            print "[*] An error occured. Printing it out here: " + str(e)
+                        # sleep for defined time
+                        time.sleep(monitor_time)
+                                            
+                except Exception, e:
+                    print "[*] An error occured. Printing it out here: " + str(e)
 
 # check if we are running posix
 operating_system = check_os()
