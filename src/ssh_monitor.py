@@ -23,35 +23,36 @@ def ssh_monitor(monitor_time):
                 if os.path.isfile("/var/log/auth.log"):
                         fileopen1 = file("/var/log/auth.log", "r")
 
-		# for OS X
- 		if os.path.isfile("/var/log/secure.log"):
-        		fileopen1 = file("/var/log/secure.log", "r")
+        		# for OS X
+ 		        if os.path.isfile("/var/log/secure.log"):
+        		    fileopen1 = file("/var/log/secure.log", "r")
 
-        # for centOS
-        if os.path.isfile("/var/log/secure"):
-            fileopen1 = file("/var/log/secure", "r")
+                # for centOS
+                if os.path.isfile("/var/log/secure"):
+                    fileopen1 = file("/var/log/secure", "r")
 
-        # for Debian
-        if os.path.isfile("/var/log/faillog"):
-            fileopen1 = file("/var/log/faillog", "r")
+                # for Debian
+                if os.path.isfile("/var/log/faillog"):
+                    fileopen1 = file("/var/log/faillog", "r")
 
-        if not os.path.isfile("/var/artillery/banlist.txt"):
-                        # create a blank file
-                        filewrite = file("/var/artillery/banlist.txt", "w")
-                        filewrite.write("")
-                        filewrite.close()
-        try:
-
-                # base ssh counter to see how many attempts we've had
-                ssh_counter = 0
-                counter = 0
-                for line in fileopen1:
+                if not os.path.isfile("/var/artillery/banlist.txt"):
+                                # create a blank file
+                                filewrite = file("/var/artillery/banlist.txt", "w")
+                                filewrite.write("")
+                                filewrite.close()
+                
+                try:
+                
+                        # base ssh counter to see how many attempts we've had
+                        ssh_counter = 0
                         counter = 0
-                        fileopen2 = file("/var/artillery/banlist.txt", "r")
-                        line = line.rstrip()
-                        # search for bad ssh
-                        match = re.search("Failed password for", line)
-                        if match:
+                        for line in fileopen1:
+                            counter = 0
+                            fileopen2 = file("/var/artillery/banlist.txt", "r")
+                            line = line.rstrip()
+                            # search for bad ssh
+                            match = re.search("Failed password for", line)
+                            if match:
                                 ssh_counter = ssh_counter + 1
                                 # split based on spaces
                                 line = line.split(" ")
@@ -99,7 +100,7 @@ def ssh_monitor(monitor_time):
                                                                 time.sleep(1)
                 # sleep for defined time
                 time.sleep(monitor_time)
-
+                                
         except Exception, e:
             print "[*] An error occured. Printing it out here: " + str(e)
 

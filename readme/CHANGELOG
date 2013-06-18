@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.7.3
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed a bug that caused a 100% cpu spike on SSH monitoring
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.7.2
 ~~~~~~~~~~~~~~~~~~~~~~
 
