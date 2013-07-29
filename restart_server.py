@@ -9,7 +9,7 @@ import subprocess
 import os
 import signal
 from src.core import *
-proc = subprocess.Popen("ps -A x | grep artillery", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 try:
         pid = proc.communicate()[0]
         pid = pid.split(" ")
