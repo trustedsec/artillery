@@ -4,10 +4,10 @@
 # this behaves.
 #
 # Artillery written by: Dave Kennedy (ReL1K)
-# Website: http://www.secmaniac.com
-# Email: davek [at] secmaniac.com
+# Website: https://www.trustedsec.com
+# Email: info [at] trustedsec.com
 # Download: git clone https://github.com/trustedsec/artillery artillery/
-# Install: python install.py
+# Install: python setup.py
 #
 #############################################################################################
 #
