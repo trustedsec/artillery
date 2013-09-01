@@ -100,9 +100,8 @@ if answer.lower() == "y" or answer.lower() == "yes":
 
                         print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
                 else:
-                        if operating_system == "posix":
-                                print "[*] Copying setup files over..."
-                                subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
+                        print "[*] Copying setup files over..."
+                        subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
         
                 # if os is Mac Os X than create a .plist daemon - changes added by contributor - Giulio Bortot
                 if os.path.isdir("/Library/LaunchDaemons"):
