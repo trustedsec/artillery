@@ -53,6 +53,10 @@ if answer.lower() == "y" or answer.lower() == "yes":
                         os.makedirs("/var/artillery")
                 if not os.path.isdir("/var/artillery/logs"):
                         os.makedirs("/var/artillery/logs")
+                if not os.path.isdir("/var/artillery/database"):
+                        os.makedirs("/var/artillery/database")
+                if not os.path.isdir("/var/artillery/src/program_junk/"):
+                        os.makedirs("/var/artillery/src/program_junk/")
                 # install to rc.local
                 print "[*] Adding artillery into startup through init scripts.."
                 if os.path.isdir("/etc/init.d"):
@@ -93,16 +97,10 @@ if answer.lower() == "y" or answer.lower() == "yes":
                         if os.path.isdir("/var/artillery/"):
                                 shutil.rmtree('/var/artillery')
                         subprocess.Popen("git clone https://github.com/trustedsec/artillery /var/artillery/", shell=True).wait()
-			if os.path.isdir("/var/artillery/"):
-                                os.makedirs("/var/artillery/logs")
-                                os.makedirs("/var/artillery/src/program_junk/")
-                                os.makedirs("/var/artillery/database")
-
                         print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
                 else:
-                        if operating_system == "posix":
-                                print "[*] Copying setup files over..."
-                                subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
+                        print "[*] Copying setup files over..."
+                        subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
         
                 # if os is Mac Os X than create a .plist daemon - changes added by contributor - Giulio Bortot
                 if os.path.isdir("/Library/LaunchDaemons"):
