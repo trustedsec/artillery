@@ -3,7 +3,7 @@
         Written by: Dave Kennedy (ReL1K)        
         Website: http://www.trustedsec.com
         Email: davek [at] trustedsec.com
-        Twitter: dave_rel1k
+        Twitter: @HackingDave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Artillery is a combination of a honeypot, monitoring tool, and alerting system. Eventually this will evolve into a hardening monitoring platform as well to detect insecure configurations
