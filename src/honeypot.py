@@ -77,7 +77,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                                 honeypot_ban = check_config("HONEYPOT_BAN=")
 
                                 # if it isn't whitelisted and we are set to ban
-                                if honeypot_ban.lower() == "yes":
+                                if honeypot_ban.lower() == "on":
                                         ban(self.client_address[0])
         # handle exceptions
         except Exception, e:
@@ -110,7 +110,7 @@ def main(ports,bind_interface):
                 	line = line.rstrip()
                 	# ban actual IP addresses
                 	honeypot_ban = check_config("HONEYPOT_BAN=")
-                	if honeypot_ban.lower() == "yes":
+                	if honeypot_ban.lower() == "on":
                         	whitelist = check_config("WHITELIST_IP=")
                         	match = re.search(line, whitelist)
                         	if not match:

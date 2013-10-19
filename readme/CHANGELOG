@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.7.4
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed issue with HONEYPOT_BAN being yes on occasions and ON on others.
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.7.3
 ~~~~~~~~~~~~~~~~~~~~~~
 
