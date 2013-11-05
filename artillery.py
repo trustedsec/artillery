@@ -50,6 +50,11 @@ try:
         # import the ssh monitor
         import src.ssh_monitor
 
+    ftp_monitor = check_config("FTP_BRUTE_MONITOR=")
+    if ftp_monitor.lower() == "on":
+        #imprt the ftp monitor
+        import src.ftp_monitor
+
     # start monitor engine
     import src.monitor
 
