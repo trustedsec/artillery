@@ -55,7 +55,7 @@ def ftp_monitor(monitor_time):
                                                 match = re.search(ipaddress, banlist)
                                                 if match: 
                                                         counter = 1
-                                                        # reset SSH counter
+                                                        # reset FTP counter
                                                         ftp_counter = 0
 
                                                 # if counter is equal to 0 then we know that we need to ban
@@ -70,15 +70,15 @@ def ftp_monitor(monitor_time):
                                                                 
                                                                 if email_alerts == "on" and email_frequency == "off":
                                                                         mail(send_email,
-                                                                        "[!] Artillery has banned an SSH brute force. [!]",
+                                                                        "[!] Artillery has banned an FTP brute force. [!]",
                                                                         "The following IP has been blocked: " + ipaddress)
 
                                                                 # check frequency is allowed
                                                                 if email_alerts == "on" and email_frequency == "on":
-                                                                        prep_email("Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress + "\n")
+                                                                        prep_email("Artillery has blocked (blacklisted) the following IP for FTP brute forcing violations: " + ipaddress + "\n")
 
                                                                 # write out to log
-                                                                write_log("Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress)
+                                                                write_log("Artillery has blocked (blacklisted) the following IP for FTP brute forcing violations: " + ipaddress)
 
                                                                 # do the actual ban, this is pulled from src.core
                                                                 ban(ipaddress)
