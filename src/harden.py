@@ -10,7 +10,6 @@ from src.core import *
 from src.smtp import *
 
 # check config files for parameters
-email_alerts = check_config("EMAIL_ALERTS=").lower()
 send_email = check_config("ALERT_USER_EMAIL=")
 
 # flag warnings, base is nothing
@@ -26,17 +25,15 @@ if operating_system == "posix":
         if os.path.isfile("/etc/ssh/sshd_config"):
                 fileopen = file("/etc/ssh/sshd_config", "r")
                 data = fileopen.read()
-		root_check = check_config("ROOT_CHECK=").lower()
-		if root_check == "on":
+		if is_config_enabled("ROOT_CHECK"):
 	                match = re.search("RootLogin yes", data)
 	                # if we permit root logins trigger alert
 	                if match:
 	                        # trigger warning if match
-	                        warning = warning + "Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\n"                               
+	                        warning = warning + "Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\n"
                 match = re.search(r"Port 22\b", data)
                 if match:
-			ssh_port = check_config("SSH_DEFAULT_PORT_CHECK=").lower()
-			if ssh_port == "on":
+			if is_config_enabled("SSH_DEFAULT_PORT_CHECK"):
 	                        # trigger warning is match
 	                        warning = warning + "Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\n"
 
@@ -67,7 +64,7 @@ if operating_system == "posix":
         # if we had warnings then trigger alert
         #
         if len(warning) > 1:
-                if email_alerts == "on":
+                if is_config_enabled("EMAIL_ALERTS"):
                         mail(send_email,"[!] Insecure configuration detected on filesystem.", warning)
 
                 # write out to log file

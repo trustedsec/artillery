@@ -45,13 +45,17 @@ def check_config(param):
                         	line = line.replace('"', "")
                         	line = line.split("=")
                         	return line[1]
+
+def is_config_enabled(param):
+        return check_config(param + "=").lower() == "on"
+
 #
 # ban host
 #
 def ban(ip):
         # ip check routine to see if its a valid IP address
         ipcheck = is_valid_ipv4(ip.strip())
-        if ipcheck != False:         
+        if ipcheck != False:
                 operating_system = check_os()
                 # if we are running nix variant then trigger ban through iptables
                 if operating_system == "posix":
@@ -98,7 +102,7 @@ def whitelist(ipaddress):
                 counter = 1
         # else we'll check cidr notiation
         else:
-                counter = printCIDR(ipaddress)        
+                counter = printCIDR(ipaddress)
 
         # return the counter
         return counter
@@ -218,7 +222,7 @@ def create_iptables():
         if operating_system == "posix":
 		# subprocess.Popen("iptables -F INPUT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)		
+                subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 	#sync our iptables blocks with the existing ban file so we don't forget attackers
@@ -237,8 +241,8 @@ def create_iptables():
 	for ip in banfile:
 		if not ip.startswith("#"):
 			if ip not in iptablesbanlist:
-				subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()		
-		
+				subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
+
 # check to see if its a valid ipv4 address
 def is_valid_ipv4(ip):
         pattern = re.compile(r"""
@@ -350,8 +354,8 @@ def printCIDR(attacker_ip):
                                                         trigger = 1
 
         # return the trigger - 1 = whitelisted 0 = not found in whitelist
-        return trigger             
-                                      
+        return trigger
+
 #
 # threat intelligence module
 #
@@ -359,7 +363,7 @@ def intelligence_update():
   try:
         # loop forever
         while 1:
-		
+
 		try:
 
 			threat_feed = check_config("THREAT_FEED=")
@@ -407,24 +411,24 @@ def syslog(message):
 		        'local0': 16, 'local1': 17, 'local2': 18, 'local3': 19,
 		        'local4': 20, 'local5': 21, 'local6': 22, 'local7': 23,
 			}
-	
+
 		LEVEL = {
 		        'emerg': 0, 'alert':1, 'crit': 2, 'err': 3,
 		        'warning': 4, 'notice': 5, 'info': 6, 'debug': 7
 			}
-	
+
 
 		def syslog_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
         		host='localhost', port=514):
-	
+
 		        # Send syslog UDP packet to given host and port.
-		
+
 		        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	        	data = '<%d>%s' % (level + facility*8, message + "\n")
 	       		sock.sendto(data, (host, port))
 	        	sock.close()
 
-		# send the syslog message	
+		# send the syslog message
 		remote_syslog = check_config("SYSLOG_REMOTE_HOST=")
 		syslog_send(message, host=remote_syslog)
 
@@ -449,7 +453,7 @@ def write_log(alert):
         if operating_system == "windows":
                 # expand program files
                 program_files = os.environ["ProgramFiles"]
-                # if not there then make directories 
+                # if not there then make directories
                 if not os.path.isdir(program_files + "\\Artillery\\logs"):
                         # make directory
                         os.makedirs(program_files + "\\Artillery\\logs")
@@ -466,4 +470,4 @@ def write_log(alert):
                 filewrite.write(alert+"\n")
                 # close the the file
                 filewrite.close()
-	
+

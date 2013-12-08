@@ -6,12 +6,11 @@
 import subprocess
 from src.core import *
 
-enable_dos = check_config("ANTI_DOS=").lower() == "on"
 anti_dos_ports = check_config("ANTI_DOS_PORTS=")
 anti_dos_throttle = check_config("ANTI_DOS_THROTTLE_CONNECTIONS=")
 anti_dos_burst = check_config("ANTI_DOS_LIMIT_BURST=")
 
-if enable_dos:
+if is_config_enabled("ANTI_DOS"):
         # basic throttle for some ports
         anti_dos_ports = anti_dos_ports.split(",")
         for ports in anti_dos_ports:

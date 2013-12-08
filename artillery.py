@@ -28,14 +28,12 @@ check_banlist_path()
 try:
 
     # update artillery
-    auto_update = check_config("AUTO_UPDATE=")
-    if auto_update.lower() == "on":
+    if is_config_enabled("AUTO_UPDATE"):
             # start auto-updates if on
             thread.start_new_thread(update, ())
 
     # import base monitoring of fs
-    monitor_check = check_config("MONITOR=")
-    if monitor_check.lower() == "on":
+    if is_config_enabled("MONITOR"):
 	    from src.monitor import *
 
     # port ranges to spawn
@@ -45,8 +43,7 @@ try:
     import src.honeypot
 
     # spawn ssh monitor
-    ssh_monitor = check_config("SSH_BRUTE_MONITOR=")
-    if ssh_monitor.lower() == "on":
+    if is_config_enabled("SSH_BRUTE_MONITOR"):
         # import the ssh monitor
         import src.ssh_monitor
 
@@ -56,7 +53,7 @@ try:
     # check hardening
     import src.harden
 
-    # start the email handler   
+    # start the email handler
     import src.email_handler
 
     # if we are running posix then lets create a new iptables chain
@@ -69,13 +66,11 @@ try:
         import src.anti_dos
 
     # check to see if we are using the intelligence feed
-    intelligence_feed = check_config("THREAT_INTELLIGENCE_FEED=").lower()
-    if intelligence_feed == "on":
+    if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
 	    thread.start_new_thread(intelligence_update, ())
 
     # check to see if we are a threat server or not
-    threat_server_check = check_config("THREAT_SERVER=").lower()
-    if threat_server_check == "on":
+    if is_config_enabled("THREAT_SERVER"):
 	    thread.start_new_thread(threat_server, ())
 
     # let the program to continue to run
@@ -93,5 +88,5 @@ except sys.excepthook:
 except KeyboardInterrupt:
     sys.exit()
 
-except Exception:  
+except Exception:
     sys.exit()

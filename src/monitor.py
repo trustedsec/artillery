@@ -32,9 +32,9 @@ def monitor_system(time_wait):
                         match = re.search(exclude_check, directory)
                         # if we hit a match then we need to exclude
                         if match:
-                                if exclude_check != "":         
+                                if exclude_check != "":
                                         exclude_counter = 1
-                        # do a try block in case empty 
+                        # do a try block in case empty
                         # if we didn't trigger exclude
                         if exclude_counter == 0:
                                 # this will pull a list of files and associated folders
@@ -45,7 +45,7 @@ def monitor_system(time_wait):
                                                         # check for exclusion
                                                         match = re.search(exclude_check, filename)
                                                         if match:
-                                                                if exclude_check != "": 
+                                                                if exclude_check != "":
                                                                         exclude_counter = 1
                                                         if exclude_counter == 0:
                                                                 # some system protected files may not show up, so we check here
@@ -63,7 +63,7 @@ def monitor_system(time_wait):
 									except: pass
                                                                         # here we split into : with filename : hexdigest
                                                                         compare = filename + ":" + hash.hexdigest() + "\n"
-                                                                        # this will be all of our hashes        
+                                                                        # this will be all of our hashes
                                                                         total_compare = total_compare + compare
 
         # write out temp database
@@ -106,27 +106,28 @@ def monitor_system(time_wait):
 
                                 else:
                                         output_file = "********************************** The following changes were detect at %s **********************************\n" % (datetime.datetime.now()) + output_file + "\n********************************** End of changes. **********************************\n\n"
-                                        email_alerts = check_config("EMAIL_ALERTS=").lower()
+                                        email_alerts = is_config_enabled("EMAIL_ALERTS")
                                         # check email frequency
-                                        email_frequency = check_config("EMAIL_FREQUENCY=").lower()
+                                        email_frequency = is_config_enabled("EMAIL_FREQUENCY")
                                         # if alerts and frequency are off then just send email
-                                        if email_alerts == "on" and email_frequency == "off":
+                                        if email_alerts and not email_frequency:
                                                 mail(send_email,
                                                 "[!] Artillery has detected a change. [!]",
                                                 output_file)
-                                        # if we are using email frequency 
-                                        if email_alerts == "on" and email_frequency == "on":
+                                        # if we are using email frequency
+                                        if email_alerts and email_frequency:
                                                 prep_email(output_file+"\n")
                                         # write out to log
                                         write_log(output_file)
 
         # put the new database as old
         if os.path.isfile("/var/artillery/database/temp.database"):
-                shutil.move("/var/artillery/database/temp.database", "/var/artillery/database/integrity.database") 
+                shutil.move("/var/artillery/database/temp.database", "/var/artillery/database/integrity.database")
 
 def start_monitor():
         # check if we want to monitor files
         monitor_check = check_config("MONITOR=")
+        # why not follow the default "on" and "off"?
         if monitor_check.lower() == "yes":
                 # start the monitoring
                 time_wait = check_config("MONITOR_FREQUENCY=")
