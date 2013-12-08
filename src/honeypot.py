@@ -65,7 +65,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
 						# write out to log
 				if honeypot_ban:
 					# write out to log
-					write_log("%s [!] Artillery has blocked (and blacklisted the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+					write_log("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
 
 				# write out if we turned off honeypot ban
 				else:
