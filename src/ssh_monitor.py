@@ -11,8 +11,7 @@ from src.core import *
 from src.smtp import *
 
 # how frequently we need to monitor
-monitor_time = read_config("MONITOR_FREQUENCY")
-monitor_time = int(monitor_time)
+monitor_time = int(read_config("MONITOR_FREQUENCY"))
 ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")
 # check for whitelist
 def ssh_monitor(monitor_time):
