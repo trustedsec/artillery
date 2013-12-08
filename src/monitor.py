@@ -114,6 +114,7 @@ def monitor_system(time_wait):
                                         # if we are using email frequency
                                         if email_alerts and email_frequency:
                                                 prep_email(output_file+"\n")
+
                                         # write out to log
                                         write_log(output_file)
 

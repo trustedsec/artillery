@@ -62,7 +62,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
 
 					else:
 						prep_email("%s [!] Artillery has detected an attack from IP Address: %s\n for a connection on a honeypot port: %s" % (now, self.client_address[0], self.server.server_address[1]))
-						# write out to log
+
+				# write out to log
 				if honeypot_ban:
 					# write out to log
 					write_log("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))

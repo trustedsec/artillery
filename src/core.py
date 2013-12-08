@@ -201,7 +201,6 @@ def is_windows():
 # create a new iptables subset
 def create_iptables():
         if is_posix():
-		# subprocess.Popen("iptables -F INPUT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
