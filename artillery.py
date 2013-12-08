@@ -58,9 +58,8 @@ try:
             time.sleep(2)
             thread.start_new_thread(create_iptables, ())
 
-    # start anti_dos
-    if is_posix():
-        import src.anti_dos
+            # start anti_dos
+            import src.anti_dos
 
     # check to see if we are using the intelligence feed
     if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
