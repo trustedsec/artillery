@@ -58,8 +58,7 @@ def ssh_monitor(monitor_time):
                                 line = line.split(" ")
                                 # pull ipaddress
                                 ipaddress = line[10]
-                                ip_check = is_valid_ipv4(ipaddress)
-                                if ip_check != False:
+                                if is_valid_ipv4(ipaddress):
 
                                         # if its not a duplicate then ban that ass
                                         if ssh_counter >= int(ssh_attempts):

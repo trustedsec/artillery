@@ -8,8 +8,7 @@ from src.core import *
 
 try:
         ipaddress = sys.argv[1]
-        ip_check = is_valid_ipv4(ipaddress)
-        if ip_check != False:
+        if is_valid_ipv4(ipaddress):
                 path = check_banlist_path()
                 fileopen = file(path, "r")
                 data = fileopen.read()

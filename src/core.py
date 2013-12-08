@@ -54,8 +54,7 @@ def is_config_enabled(param):
 #
 def ban(ip):
         # ip check routine to see if its a valid IP address
-        ipcheck = is_valid_ipv4(ip.strip())
-        if ipcheck != False:
+        if is_valid_ipv4(ip.strip()):
                 operating_system = check_os()
                 # if we are running nix variant then trigger ban through iptables
                 if operating_system == "posix":

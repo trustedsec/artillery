@@ -44,9 +44,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
         try:
                 self.request.send(fake_string)
                 # checking for ipv4
-                ipcheck = is_valid_ipv4(self.client_address[0])
                 # check to ensure its an ipv4 address then move into the rest
-                if ipcheck != False:
+                if is_valid_ipv4(self.client_address[0]):
                         check_whitelist = whitelist(self.client_address[0])
                         # ban the mofos
                         if check_whitelist == 0:
