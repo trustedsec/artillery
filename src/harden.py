@@ -10,7 +10,7 @@ from src.core import *
 from src.smtp import *
 
 # check config files for parameters
-send_email = check_config("ALERT_USER_EMAIL=")
+send_email = read_config("ALERT_USER_EMAIL")
 
 # flag warnings, base is nothing
 warning = ""

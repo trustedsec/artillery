@@ -20,10 +20,10 @@ from src.core import *
 from src.smtp import *
 
 # port ranges to spawn pulled from config
-ports = check_config("PORTS=")
+ports = read_config("PORTS")
 # check to see what IP we need to bind to
-bind_interface = check_config("BIND_INTERFACE=")
-send_email = check_config("ALERT_USER_EMAIL=")
+bind_interface = read_config("BIND_INTERFACE")
+send_email = read_config("ALERT_USER_EMAIL")
 honeypot_ban = is_config_enabled("HONEYPOT_BAN")
 
 # main socket server listener for responses
@@ -109,7 +109,7 @@ def main(ports,bind_interface):
                 	line = line.rstrip()
                 	# ban actual IP addresses
                 	if honeypot_ban:
-                        	whitelist = check_config("WHITELIST_IP=")
+                        	whitelist = read_config("WHITELIST_IP")
                         	match = re.search(line, whitelist)
                         	if not match:
                                 	# ban the ipaddress

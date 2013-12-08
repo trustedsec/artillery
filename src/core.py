@@ -14,7 +14,7 @@ import logging
 import logging.handlers
 
 # grab the normal path for config
-def check_config_path():
+def read_config_path():
         path = ""
         # check operating system
         operating_system = check_os()
@@ -32,22 +32,22 @@ def check_config_path():
 #
 # check config
 #
-def check_config(param):
+def read_config(param):
         # grab the default path
-        path = check_config_path()
+        path = read_config_path()
         fileopen = file(path, "r")
         # iterate through lines in file
         for line in fileopen:
 		if not line.startswith("#"):
-	                match = re.search(param, line)
+	                match = re.search(param + "=", line)
         	        if match:
                 	        line = line.rstrip()
                         	line = line.replace('"', "")
-                        	line = line.split("=")
+                        	line = line.split("")
                         	return line[1]
 
 def is_config_enabled(param):
-        return check_config(param + "=").lower() == "on"
+        return read_config(param).lower() == "on"
 
 #
 # ban host
@@ -93,7 +93,7 @@ def whitelist(ipaddress):
         # grab ipaddresss
         ipaddr = str(ipaddress)
         # check whitelist
-        whitelist = check_config("WHITELIST_IP=")
+        whitelist = read_config("WHITELIST_IP")
         # match regular expression for ipaddress
         match = re.search(ipaddress, whitelist)
         if match:
@@ -288,7 +288,7 @@ def dec2bin(n,d=None):
 # print a list of IP addresses based on the CIDR block specified
 def printCIDR(attacker_ip):
         trigger = 0
-        whitelist = check_config("WHITELIST_IP=")
+        whitelist = read_config("WHITELIST_IP")
         whitelist = whitelist.split(",")
         for c in whitelist:
                 match = re.search("/", c)
@@ -327,7 +327,7 @@ def intelligence_update():
 
 		try:
 
-			threat_feed = check_config("THREAT_FEED=")
+			threat_feed = read_config("THREAT_FEED")
 			threat_feed = threat_feed.split(",")
 			# allow multiple feeds if needed
 			for threats in threat_feed:
@@ -350,7 +350,7 @@ def intelligence_update():
 
 # threat server
 def threat_server():
-	public_http = check_config("THREAT_LOCATION=")
+	public_http = read_config("THREAT_LOCATION")
 	if os.path.isdir(public_http):
 		while 1:
 			subprocess.Popen("cp /var/artillery/banlist.txt %s" % (public_http), shell=True).wait()
@@ -359,7 +359,7 @@ def threat_server():
 # send the message then if its local or remote
 def syslog(message):
 
-	type = check_config("SYSLOG_TYPE=").lower()
+	type = read_config("SYSLOG_TYPE").lower()
 
 	# if we are sending remote syslog
 	if type == "remote":
@@ -390,7 +390,7 @@ def syslog(message):
 	        	sock.close()
 
 		# send the syslog message
-		remote_syslog = check_config("SYSLOG_REMOTE_HOST=")
+		remote_syslog = read_config("SYSLOG_REMOTE_HOST")
 		syslog_send(message, host=remote_syslog)
 
 	# if we are sending local syslog messages

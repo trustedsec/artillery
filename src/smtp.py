@@ -12,16 +12,16 @@ import os
 from src.core import *
 
 # username for smtp server
-user = check_config("SMTP_USERNAME=")
+user = read_config("SMTP_USERNAME")
 # pw for smtp server
-pwd = check_config("SMTP_PASSWORD=")
+pwd = read_config("SMTP_PASSWORD")
 # smtp address for smtp
-smtp_address = check_config("SMTP_ADDRESS=")
+smtp_address = read_config("SMTP_ADDRESS")
 # port we use, default is 25
-smtp_port = check_config("SMTP_PORT=")
+smtp_port = read_config("SMTP_PORT")
 # convert to integer
 smtp_port = int(smtp_port)
-smtp_from = check_config("SMTP_FROM=")
+smtp_from = read_config("SMTP_FROM")
 
 def mail(to, subject, text):
 	try:

@@ -37,7 +37,7 @@ try:
 	    from src.monitor import *
 
     # port ranges to spawn
-    port = check_config("PORTS=")
+    port = read_config("PORTS")
 
     # spawn honeypot
     import src.honeypot

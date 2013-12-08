@@ -8,13 +8,13 @@ import os,re, hashlib, time, subprocess, thread,datetime, shutil
 from src.core import *
 from src.smtp import *
 
-send_email = check_config("ALERT_USER_EMAIL=")
+send_email = read_config("ALERT_USER_EMAIL")
 
 def monitor_system(time_wait):
         # total_compare is a tally of all sha512 hashes
         total_compare = ""
         # what files we need to monitor
-        check_folders = check_config("MONITOR_FOLDERS=")
+        check_folders = read_config("MONITOR_FOLDERS")
         # split lines
         exclude_counter = 0
         check_folders = check_folders.replace('"', "")
@@ -28,7 +28,7 @@ def monitor_system(time_wait):
                 # we need to check to see if the directory is there first, you never know
                 if os.path.isdir(directory):
                         # check to see if theres an include
-                        exclude_check = check_config("EXCLUDE=")
+                        exclude_check = read_config("EXCLUDE")
                         match = re.search(exclude_check, directory)
                         # if we hit a match then we need to exclude
                         if match:
@@ -126,11 +126,11 @@ def monitor_system(time_wait):
 
 def start_monitor():
         # check if we want to monitor files
-        monitor_check = check_config("MONITOR=")
+        monitor_check = read_config("MONITOR")
         # why not follow the default "on" and "off"?
         if monitor_check.lower() == "yes":
                 # start the monitoring
-                time_wait = check_config("MONITOR_FREQUENCY=")
+                time_wait = read_config("MONITOR_FREQUENCY")
 
                 # loop forever
                 while 1:

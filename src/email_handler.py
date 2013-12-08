@@ -9,8 +9,8 @@ from src.core import *
 from src.smtp import *
 
 # check how long to send the email
-mail_time = check_config("EMAIL_FREQUENCY=")
-send_email = check_config("ALERT_USER_EMAIL=")
+mail_time = read_config("EMAIL_FREQUENCY")
+send_email = read_config("ALERT_USER_EMAIL")
 
 # this is what handles the loop for checking email alert frequencies
 def check_alert():
