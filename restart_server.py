@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 #
 # restart artillery
 #
@@ -17,7 +16,7 @@ try:
 	write_log("[!] Killing the old Artillery process...")
         print "[*] Killing Old Artillery Process...."
         os.kill(pid, signal.SIGKILL)
-except: 
+except:
         pass
 
 print "[*] Restarting Artillery Server..."

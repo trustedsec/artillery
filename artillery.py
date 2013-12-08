@@ -10,9 +10,6 @@
 #####################################################################
 import time,sys,thread,os
 
-# all modules are located within src/, core is reusable code
-
-# import the core modules
 from src.core import *
 
 # let the logfile know artillery has started successfully
@@ -21,12 +18,10 @@ write_log("Artillery has started successfully.")
 # prep everything for artillery first run
 check_banlist_path()
 
-# try block starts here
 try:
 
     # update artillery
     if is_config_enabled("AUTO_UPDATE"):
-            # start auto-updates if on
             thread.start_new_thread(update, ())
 
     # import base monitoring of fs
@@ -41,7 +36,6 @@ try:
 
     # spawn ssh monitor
     if is_config_enabled("SSH_BRUTE_MONITOR"):
-        # import the ssh monitor
         import src.ssh_monitor
 
     # start monitor engine
@@ -56,7 +50,7 @@ try:
     # if we are running posix then lets create a new iptables chain
     if is_posix():
             time.sleep(2)
-            thread.start_new_thread(create_iptables, ())
+            thread.start_new_thread(create_iptables_subset, ())
 
             # start anti_dos
             import src.anti_dos

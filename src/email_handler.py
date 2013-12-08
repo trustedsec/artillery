@@ -27,6 +27,5 @@ def check_alert():
                                 shutil.move("/var/artillery/src/program_junk/email_alerts.log", "/var/artillery/src/program_junk/email_alerts.old")
                 time.sleep(int(mail_time))
 
-# start thread
 junk = ""
 thread.start_new_thread(check_alert, ())

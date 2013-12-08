@@ -10,11 +10,10 @@ import time,re, thread
 from src.core import *
 from src.smtp import *
 
-# how frequently we need to monitor
-monitor_time = int(read_config("MONITOR_FREQUENCY"))
+monitor_frequency = int(read_config("MONITOR_FREQUENCY"))
 ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")
-# check for whitelist
-def ssh_monitor(monitor_time):
+
+def ssh_monitor(monitor_frequency):
         while 1:
                 # for debian base
                 if os.path.isfile("/var/log/auth.log"):
@@ -39,7 +38,6 @@ def ssh_monitor(monitor_time):
                                 filewrite.close()
 
                 try:
-
                         # base ssh counter to see how many attempts we've had
                         ssh_counter = 0
                         counter = 0
@@ -51,7 +49,6 @@ def ssh_monitor(monitor_time):
                             match = re.search("Failed password for", line)
                             if match:
                                 ssh_counter = ssh_counter + 1
-                                # split based on spaces
                                 line = line.split(" ")
                                 # pull ipaddress
                                 ipaddress = line[10]
@@ -68,7 +65,7 @@ def ssh_monitor(monitor_time):
 
                                                 # if counter is equal to 0 then we know that we need to ban
                                                 if counter == 0:
-                                                        whitelist_match = whitelist(ipaddress)
+                                                        whitelist_match = is_whitelisted_ip(ipaddress)
                                                         if whitelist_match == 0:
                                                                 subject = "[!] Artillery has banned an SSH brute force. [!]"
                                                                 alert = "Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress
@@ -81,11 +78,10 @@ def ssh_monitor(monitor_time):
                                                                 # wait one to make sure everything is caught up
                                                                 time.sleep(1)
                         # sleep for defined time
-                        time.sleep(monitor_time)
+                        time.sleep(monitor_frequency)
 
                 except Exception, e:
                     print "[*] An error occured. Printing it out here: " + str(e)
 
 if is_posix():
-        # start thread
-        thread.start_new_thread(ssh_monitor,(monitor_time,))
+        thread.start_new_thread(ssh_monitor,(monitor_frequency,))

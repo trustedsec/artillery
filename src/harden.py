@@ -49,7 +49,7 @@ if is_posix():
                                                 trigger_warning = 1
                                         match = re.search("st_gid=0", check_perm)
                                         if not match:
-                                                trigger_warning= 1
+                                                trigger_warning = 1
                                         # if we trigger on vuln
                                         if trigger_warning == 1:
                                                 warning = warning + "Issue identified: %s permissions are not set to root. If an attacker compromises the system and is running under the Apache user account, could view these files. Recommendation: Change the permission of %s to root:root. Command: chown root:root %s\n\n" % (filename,filename,filename)

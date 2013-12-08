@@ -2,7 +2,8 @@
 #
 # quick script for installing artillery
 #
-##
+#
+
 import subprocess,re,os,shutil
 
 from src.core import *
@@ -37,12 +38,12 @@ if os.path.isfile("/etc/init.d/artillery"):
 if not os.path.isfile("/etc/init.d/artillery"):
 	answer = raw_input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
 
-# if they said yes
 if answer.lower() == "y" or answer.lower() == "yes":
         if is_posix():
                 kill_artillery()
 
                 print "[*] Beginning installation. This should only take a moment."
+
                 # if directories aren't there then create them
                 if not os.path.isdir("/var/artillery/logs"):
                         os.makedirs("/var/artillery/logs")
@@ -50,6 +51,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
                         os.makedirs("/var/artillery/database")
                 if not os.path.isdir("/var/artillery/src/program_junk/"):
                         os.makedirs("/var/artillery/src/program_junk/")
+
                 # install to rc.local
                 print "[*] Adding artillery into startup through init scripts.."
                 if os.path.isdir("/etc/init.d"):
@@ -70,7 +72,6 @@ if answer.lower() == "y" or answer.lower() == "yes":
                                 filewrite.write(data)
                                 filewrite.close()
 
-        # if os is running windows then do some stuff
         if is_windows():
                 program_files = os.environ["ProgramFiles"]
                 os.makedirs(program_files + "\\Artillery\\logs")
@@ -80,7 +81,6 @@ if answer.lower() == "y" or answer.lower() == "yes":
                 shutil.copytree(install_path, program_files + "\\Artillery\\")
 
 
-        # copy the files
         if is_posix():
                 choice = raw_input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
                 if choice == "y" or choice == "yes":
@@ -109,7 +109,6 @@ if answer.lower() == "y" or answer.lower() == "yes":
                 if is_posix():
                         subprocess.Popen("python /var/artillery/artillery.py &", shell=True).wait()
 
-        # if we are running posix
         if is_posix():
                 print "[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking.."
 

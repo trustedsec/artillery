@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 #
 # simple mailer for artillery
 #
@@ -11,11 +10,8 @@ from email import Encoders
 import os
 from src.core import *
 
-# username for smtp server
 user = read_config("SMTP_USERNAME")
-# pw for smtp server
 pwd = read_config("SMTP_PASSWORD")
-# smtp address for smtp
 smtp_address = read_config("SMTP_ADDRESS")
 # port we use, default is 25
 smtp_port = int(read_config("SMTP_PORT"))
@@ -27,11 +23,8 @@ def mail(subject, text):
 def mail(to, subject, text):
 	try:
 	        msg = MIMEMultipart()
-	        # message from
 	        msg['From'] = smtp_from
-	        # message to
 	        msg['To'] = to
-	        # subject line
 	        msg['Subject'] = subject
 	        msg.attach(MIMEText(text))
 	        # prep the smtp server
@@ -45,9 +38,7 @@ def mail(to, subject, text):
 	        # login to server if we aren't using an open mail relay
 		if user != None:
 		        mailServer.login(user, pwd)
-	        # send email
 	        mailServer.sendmail(to, to, msg.as_string())
-	        # close connection
 	        mailServer.close()
 	except:
 		write_log("[!] Error, Artillery was unable to log into the mail server")

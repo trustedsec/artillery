@@ -50,11 +50,9 @@ def monitor_system(time_wait):
                                                                 if os.path.isfile(filename):
                                                                         try:
                                                                                 fileopen = file(filename, "rb")
-                                                                                # read in the data
                                                                                 data = fileopen.read()
 
                                                                         except: pass
-                                                                        # hash it with sha512
                                                                         hash = hashlib.sha512()
 									try:
 	                                                                        hash.update(data)
@@ -65,36 +63,36 @@ def monitor_system(time_wait):
                                                                         total_compare = total_compare + compare
 
         # write out temp database
-        filewrite = file("/var/artillery/database/temp.database", "w")
-        filewrite.write(total_compare)
-        filewrite.close()
+        temp_database_file = file("/var/artillery/database/temp.database", "w")
+        temp_database_file.write(total_compare)
+        temp_database_file.close()
 
         # once we are done write out the database, if this is the first time, create a database then compare
         if not os.path.isfile("/var/artillery/database/integrity.database"):
                 # prep the integrity database to be written for first time
-                filewrite = file("/var/artillery/database/integrity.database", "w")
-                # write out the database
-                filewrite.write(total_compare)
-                # close the database
-                filewrite.close()
+                database_file = file("/var/artillery/database/integrity.database", "w")
+                database_file.write(total_compare)
+                database_file.close()
 
         # hash the original database
         if os.path.isfile("/var/artillery/database/integrity.database"):
-                fileopen1 = file("/var/artillery/database/integrity.database", "r")
-                data1 = fileopen1.read()
+                database_file = file("/var/artillery/database/integrity.database", "r")
+                database_content = database_file.read()
                 if os.path.isfile("/var/artillery/database/temp.database"):
-                        fileopen2 = file("/var/artillery/database/temp.database", "r")
-                        data2 = fileopen2.read()
+                        temp_database_file = file("/var/artillery/database/temp.database", "r")
+                        temp_hash = temp_database_file.read()
+
                         # hash the databases then compare
-                        hash1 = hashlib.sha512()
-                        hash1.update(data1)
-                        hash1 = hash1.hexdigest()
+                        database_hash = hashlib.sha512()
+                        database_hash.update(database_content)
+                        database_hash = database_hash.hexdigest()
+
                         # this is the temp integrity database
-                        hash2 = hashlib.sha512()
-                        hash2.update(data2)
-                        hash2 = hash2.hexdigest()
+                        temp_database_hash = hashlib.sha512()
+                        temp_database_hash.update(temp_hash)
+                        temp_database_hash = temp_database_hash.hexdigest()
                         # if we don't match then there was something that was changed
-                        if hash1 != hash2:
+                        if database_hash != temp_database_hash:
                                 # using diff for now, this will be rewritten properly at a later time
                                 compare_files = subprocess.Popen("diff /var/artillery/database/integrity.database /var/artillery/database/temp.database", shell=True, stdout=subprocess.PIPE)
                                 output_file = compare_files.communicate()[0]

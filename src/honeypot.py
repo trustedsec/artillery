@@ -1,8 +1,6 @@
 #!/usr/bin/python
 #
-#
 # this is the honeypot stuff
-#
 #
 #
 import thread
@@ -15,7 +13,7 @@ import SocketServer
 import os
 import random
 import datetime
-# import artillery modules
+
 from src.core import *
 from src.smtp import *
 
@@ -29,10 +27,9 @@ honeypot_ban = is_config_enabled("HONEYPOT_BAN")
 class SocketListener((SocketServer.BaseRequestHandler)):
 
     def handle(self):
-        #print self.server.server_name, self.server.server_port
 	pass
-    def setup(self):
 
+    def setup(self):
         # hehe send random length garbage to the attacker
         length = random.randint(5, 30000)
 
@@ -42,11 +39,9 @@ class SocketListener((SocketServer.BaseRequestHandler)):
         # try the actual sending and banning
         try:
                 self.request.send(fake_string)
-                # checking for ipv4
-                # check to ensure its an ipv4 address then move into the rest
                 ip = self.client_address[0]
                 if is_valid_ipv4(ip):
-                        check_whitelist = whitelist(ip)
+                        check_whitelist = is_whitelisted_ip(ip)
                         # ban the mofos
                         if check_whitelist == 0:
                                 now = str(datetime.datetime.today())
@@ -65,14 +60,12 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                                 # if it isn't whitelisted and we are set to ban
                                 if honeypot_ban:
                                         ban(self.client_address[0])
-        # handle exceptions
         except Exception, e:
                 print "[!] Error detected. Printing: " + str(e)
                 pass
 
 # here we define a basic server
 def listen_server(port,bind_interface):
-                # specify port
                 try:
                         port = int(port)
 			if bind_interface == "":
