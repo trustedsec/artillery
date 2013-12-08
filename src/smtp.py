@@ -18,9 +18,7 @@ pwd = read_config("SMTP_PASSWORD")
 # smtp address for smtp
 smtp_address = read_config("SMTP_ADDRESS")
 # port we use, default is 25
-smtp_port = read_config("SMTP_PORT")
-# convert to integer
-smtp_port = int(smtp_port)
+smtp_port = int(read_config("SMTP_PORT"))
 smtp_from = read_config("SMTP_FROM")
 
 def mail(subject, text):
