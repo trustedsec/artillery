@@ -123,9 +123,7 @@ def monitor_system(time_wait):
 
 def start_monitor():
         # check if we want to monitor files
-        monitor_check = read_config("MONITOR")
-        # why not follow the default "on" and "off"?
-        if monitor_check.lower() == "yes":
+        if is_config_enabled("MONITOR")
                 # start the monitoring
                 time_wait = read_config("MONITOR_FREQUENCY")
 

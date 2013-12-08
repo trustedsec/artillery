@@ -44,7 +44,8 @@ def read_config(param):
                         	return line[1]
 
 def is_config_enabled(param):
-        return read_config(param).lower() == "on"
+        config = read_config(param).lower()
+        return config in ("on", "yes")
 
 #
 # ban host
