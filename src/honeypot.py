@@ -44,33 +44,20 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                 self.request.send(fake_string)
                 # checking for ipv4
                 # check to ensure its an ipv4 address then move into the rest
-                if is_valid_ipv4(self.client_address[0]):
-                        check_whitelist = whitelist(self.client_address[0])
+		ip = self.client_address[0]
+		if is_valid_ipv4(ip):
+                        check_whitelist = whitelist(ip)
                         # ban the mofos
                         if check_whitelist == 0:
                                 now = str(datetime.datetime.today())
-                                # check to see if we are sending emails
-                                email_alerts = is_config_enabled("EMAIL_ALERTS")
-                                # check to see if we are using frequency
-                                email_frequency = is_config_enabled("EMAIL_TIMER")
-                                if email_alerts and not email_frequency:
-                                        mail("%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port: %s" % (now,self.client_address[0], self.server.server_address[1]))
-                                # write our data out
-                                if email_frequency:
-					if honeypot_ban:
-	                                        prep_email("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s\n for connecting on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
-
-					else:
-						prep_email("%s [!] Artillery has detected an attack from IP Address: %s\n for a connection on a honeypot port: %s" % (now, self.client_address[0], self.server.server_address[1]))
-
-				# write out to log
+				port = self.server.server_address[1]
+				subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (now, ip)
+				alert = ""
 				if honeypot_ban:
-					# write out to log
-					write_log("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
-
-				# write out if we turned off honeypot ban
+					alert = "%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now, ip, port)
 				else:
-					write_log("%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+					alert = "%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now, ip, port)
+				warn_the_good_guys(subject, alert)
 
                                 # close the socket
                                 self.request.close()

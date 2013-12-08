@@ -58,8 +58,5 @@ if is_posix():
         # if we had warnings then trigger alert
         #
         if len(warning) > 1:
-                if is_config_enabled("EMAIL_ALERTS"):
-                        mail("[!] Insecure configuration detected on filesystem.", warning)
-
-                # write out to log file
-                write_log("[!] Insecure configuration detect on filesystem: " + warning)
+		subject = "[!] Insecure configuration detected on filesystem"
+		warn_the_good_guys(subject, subject + warning)

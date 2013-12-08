@@ -71,21 +71,9 @@ def ssh_monitor(monitor_time):
                                                         whitelist_match = whitelist(ipaddress)
                                                         if whitelist_match == 0:
 
-                                                                # if we have email alerting on we can send email messages
-                                                                email_alerts = is_config_enabled("EMAIL_ALERTS")
-                                                                # check email frequency
-                                                                email_frequency = is_config_enabled("EMAIL_FREQUENCY")
-
-                                                                if email_alerts and not email_frequency:
-                                                                        mail("[!] Artillery has banned an SSH brute force. [!]",
-                                                                        "The following IP has been blocked: " + ipaddress)
-
-                                                                # check frequency is allowed
-                                                                if email_alerts and email_frequency:
-                                                                        prep_email("Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress + "\n")
-
-                                                                # write out to log
-                                                                write_log("Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress)
+								subject = "[!] Artillery has banned an SSH brute force. [!]"
+								alert = "Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress
+								warn_the_good_guys(subject, alert)
 
                                                                 # do the actual ban, this is pulled from src.core
                                                                 ban(ipaddress)

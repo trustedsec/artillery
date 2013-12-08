@@ -103,20 +103,9 @@ def monitor_system(time_wait):
                                         pass
 
                                 else:
+					subject = "[!] Artillery has detected a change. [!]"
                                         output_file = "********************************** The following changes were detect at %s **********************************\n" % (datetime.datetime.now()) + output_file + "\n********************************** End of changes. **********************************\n\n"
-                                        email_alerts = is_config_enabled("EMAIL_ALERTS")
-                                        # check email frequency
-                                        email_frequency = is_config_enabled("EMAIL_FREQUENCY")
-                                        # if alerts and frequency are off then just send email
-                                        if email_alerts and not email_frequency:
-                                                mail("[!] Artillery has detected a change. [!]",
-                                                output_file)
-                                        # if we are using email frequency
-                                        if email_alerts and email_frequency:
-                                                prep_email(output_file+"\n")
-
-                                        # write out to log
-                                        write_log(output_file)
+					warn_the_good_guys(subject, output_file)
 
         # put the new database as old
         if os.path.isfile("/var/artillery/database/temp.database"):

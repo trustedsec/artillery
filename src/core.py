@@ -410,3 +410,19 @@ def write_log(alert):
                 # close the the file
                 filewrite.close()
 
+def warn_the_good_guys(subject, alert):
+        # if we have email alerting on we can send email messages
+        email_alerts = is_config_enabled("EMAIL_ALERTS")
+        # check email frequency
+        email_frequency = is_config_enabled("EMAIL_FREQUENCY")
+
+        if email_alerts and not email_frequency:
+                mail(subject, alert)
+
+        # check frequency is allowed
+        if email_alerts and email_frequency:
+                prep_email(alert + "\n")
+
+        # write out to log
+        write_log(alert)
+
