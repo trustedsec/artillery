@@ -21,7 +21,7 @@ smtp_address = check_config("SMTP_ADDRESS=")
 smtp_port = check_config("SMTP_PORT=")
 # convert to integer
 smtp_port = int(smtp_port)
-smtp_from = check_config("SMTP_FROM")
+smtp_from = check_config("SMTP_FROM=")
 
 def mail(to, subject, text):
 	try:
