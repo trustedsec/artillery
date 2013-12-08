@@ -9,9 +9,6 @@ import os
 from src.core import *
 from src.smtp import *
 
-# check config files for parameters
-send_email = read_config("ALERT_USER_EMAIL")
-
 # flag warnings, base is nothing
 warning = ""
 
@@ -62,7 +59,7 @@ if is_posix():
         #
         if len(warning) > 1:
                 if is_config_enabled("EMAIL_ALERTS"):
-                        mail(send_email,"[!] Insecure configuration detected on filesystem.", warning)
+                        mail("[!] Insecure configuration detected on filesystem.", warning)
 
                 # write out to log file
                 write_log("[!] Insecure configuration detect on filesystem: " + warning)

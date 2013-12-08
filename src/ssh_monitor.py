@@ -10,8 +10,6 @@ import time,re, thread
 from src.core import *
 from src.smtp import *
 
-send_email = read_config("ALERT_USER_EMAIL")
-
 # how frequently we need to monitor
 monitor_time = read_config("MONITOR_FREQUENCY")
 monitor_time = int(monitor_time)
@@ -80,8 +78,7 @@ def ssh_monitor(monitor_time):
                                                                 email_frequency = is_config_enabled("EMAIL_FREQUENCY")
 
                                                                 if email_alerts and not email_frequency:
-                                                                        mail(send_email,
-                                                                        "[!] Artillery has banned an SSH brute force. [!]",
+                                                                        mail("[!] Artillery has banned an SSH brute force. [!]",
                                                                         "The following IP has been blocked: " + ipaddress)
 
                                                                 # check frequency is allowed

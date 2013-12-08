@@ -8,8 +8,6 @@ import os,re, hashlib, time, subprocess, thread,datetime, shutil
 from src.core import *
 from src.smtp import *
 
-send_email = read_config("ALERT_USER_EMAIL")
-
 def monitor_system(time_wait):
         # total_compare is a tally of all sha512 hashes
         total_compare = ""
@@ -111,8 +109,7 @@ def monitor_system(time_wait):
                                         email_frequency = is_config_enabled("EMAIL_FREQUENCY")
                                         # if alerts and frequency are off then just send email
                                         if email_alerts and not email_frequency:
-                                                mail(send_email,
-                                                "[!] Artillery has detected a change. [!]",
+                                                mail("[!] Artillery has detected a change. [!]",
                                                 output_file)
                                         # if we are using email frequency
                                         if email_alerts and email_frequency:

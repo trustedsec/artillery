@@ -23,7 +23,6 @@ from src.smtp import *
 ports = read_config("PORTS")
 # check to see what IP we need to bind to
 bind_interface = read_config("BIND_INTERFACE")
-send_email = read_config("ALERT_USER_EMAIL")
 honeypot_ban = is_config_enabled("HONEYPOT_BAN")
 
 # main socket server listener for responses
@@ -55,7 +54,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                                 # check to see if we are using frequency
                                 email_frequency = is_config_enabled("EMAIL_TIMER")
                                 if email_alerts and not email_frequency:
-                                        mail(send_email,"%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port: %s" % (now,self.client_address[0], self.server.server_address[1]))
+                                        mail("%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port: %s" % (now,self.client_address[0], self.server.server_address[1]))
                                 # write our data out
                                 if email_frequency:
 					if honeypot_ban:

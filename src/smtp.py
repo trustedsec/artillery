@@ -23,6 +23,9 @@ smtp_port = read_config("SMTP_PORT")
 smtp_port = int(smtp_port)
 smtp_from = read_config("SMTP_FROM")
 
+def mail(subject, text):
+    mail(read_config("ALERT_USER_EMAIL"), subject, text)
+
 def mail(to, subject, text):
 	try:
 	        msg = MIMEMultipart()
