@@ -18,7 +18,3 @@ access_log = tail(access)
 # grab the error logs and tail them
 errors = "/var/log/apache2/error.log"
 error_log = tail(errors)
-
-
-
-

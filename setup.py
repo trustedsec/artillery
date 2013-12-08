@@ -3,7 +3,6 @@
 # quick script for installing artillery
 #
 #
-
 import subprocess,re,os,shutil
 
 from src.core import *
@@ -119,5 +118,3 @@ if answer == "uninstall":
 		subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
                 kill_artillery()
                 print "[*] Artillery has been uninstalled. Manually kill the process if it is still running."
-
-

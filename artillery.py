@@ -19,7 +19,6 @@ write_log("Artillery has started successfully.")
 check_banlist_path()
 
 try:
-
     # update artillery
     if is_config_enabled("AUTO_UPDATE"):
             thread.start_new_thread(update, ())
@@ -70,7 +69,6 @@ try:
         except KeyboardInterrupt:
                 print "\n[!] Exiting Artillery... hack the gibson.\n"
                 sys.exit()
-
 
 except sys.excepthook:
     pass

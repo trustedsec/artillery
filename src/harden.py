@@ -1,9 +1,7 @@
 #!/usr/bin/python
-
 #
 # eventual home for checking some base files for security configurations
 #
-
 import re
 import os
 from src.core import *
@@ -30,7 +28,6 @@ if is_posix():
 			if is_config_enabled("SSH_DEFAULT_PORT_CHECK"):
 	                        # trigger warning is match
 	                        warning = warning + "Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\n"
-
 
         #
         # check /var/www permissions

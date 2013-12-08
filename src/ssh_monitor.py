@@ -1,11 +1,7 @@
 #!/usr/bin/python
-
-#############################
 #
 # monitor ssh and ban
 #
-#############################
-
 import time,re, thread
 from src.core import *
 from src.smtp import *

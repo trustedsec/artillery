@@ -3,7 +3,6 @@
 # restart artillery
 #
 #
-
 import subprocess
 import os
 import signal

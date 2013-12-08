@@ -1,9 +1,7 @@
 #!/usr/bin/python
-###################################################################
 #
 # This one monitors file system integrity
 #
-###################################################################
 import os,re, hashlib, time, subprocess, thread,datetime, shutil
 from src.core import *
 from src.smtp import *
