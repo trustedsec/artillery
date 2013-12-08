@@ -14,6 +14,21 @@ tool used to protect your nix systems.
 Written by: Dave Kennedy (ReL1K)
 """
 
+def kill_artillery():
+        print "[*] Checking to see if Artillery is currently running..."
+        proc = subprocess.Popen("ps -au | grep /var/artillery/artillery.py", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        stdout = proc.communicate()
+        try:
+                for line in stdout:
+                        match = re.search("python /var/artillery/artillery.py", line) or re.search("python artillery.py", line)
+                        if match:
+                                print "[*] Killing running version of Artillery.."
+                                line = line.split(" ")
+                                pid = line[6]
+                                subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+                                print "[*] Killed the Artillery process: " + pid
+        except: pass
+
 if os.path.isfile("/etc/init.d/artillery"):
 	answer = raw_input("Artillery detected. Do you want to uninstall [y/n:] ")
 	if answer.lower() == "yes" or answer.lower() == "y":
@@ -25,24 +40,7 @@ if not os.path.isfile("/etc/init.d/artillery"):
 # if they said yes
 if answer.lower() == "y" or answer.lower() == "yes":
         if is_posix():
-                print "[*] Checking to see if Artillery is currently running..."
-                proc = subprocess.Popen("ps -au | grep /var/artillery/artillery.py", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                stdout = proc.communicate()
-                for line in stdout:
-                        match = re.search("python /var/artillery/artillery.py", line)
-                        if match:
-                                print "[*] Killing running version of Artillery.."
-                                line = line.split(" ")
-                                pid = line[6]
-                                subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
-                                print "[*] Killed the Artillery process: " + pid
-			match = re.search("python artillery.py", line)
-			if match:
-                                print "[*] Killing running version of Artillery.."
-                                line = line.split(" ")
-                                pid = line[6]
-                                subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
-                                print "[*] Killed the Artillery process: " + pid
+                kill_artillery()
 
                 print "[*] Beginning installation. This should only take a moment."
                 # if directories aren't there then create them
@@ -120,27 +118,7 @@ if answer == "uninstall":
 		os.remove("/etc/init.d/artillery")
 		subprocess.Popen("rm -rf /var/artillery", shell=True)
 		subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
-                print "[*] Checking to see if Artillery is currently running..."
-                proc = subprocess.Popen("ps -au | grep /var/artillery/artillery.py", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                stdout = proc.communicate()
-		try:
-	                for line in stdout:
-        	                match = re.search("python /var/artillery/artillery.py", line)
-                	        if match:
-                        	        print "[*] Killing running version of Artillery.."
-                                	line = line.split(" ")
-                                	pid = line[6]
-                                	subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
-                                	print "[*] Killed the Artillery process: " + pid
-	                        match = re.search("python artillery.py", line)
-        	                if match:
-                	                print "[*] Killing running version of Artillery.."
-                        	        line = line.split(" ")
-                                	pid = line[6]
-                              	  	subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
-                                	print "[*] Killed the Artillery process: " + pid
-
-		except: pass
-		print "[*] Artillery has been uninstalled. Manually kill the process if it is still running."
+                kill_artillery()
+                print "[*] Artillery has been uninstalled. Manually kill the process if it is still running."
 
 
