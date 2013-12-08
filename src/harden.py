@@ -58,5 +58,5 @@ if is_posix():
         # if we had warnings then trigger alert
         #
         if len(warning) > 1:
-		subject = "[!] Insecure configuration detected on filesystem"
-		warn_the_good_guys(subject, subject + warning)
+                subject = "[!] Insecure configuration detected on filesystem"
+                warn_the_good_guys(subject, subject + warning)

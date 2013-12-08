@@ -70,10 +70,9 @@ def ssh_monitor(monitor_time):
                                                 if counter == 0:
                                                         whitelist_match = whitelist(ipaddress)
                                                         if whitelist_match == 0:
-
-								subject = "[!] Artillery has banned an SSH brute force. [!]"
-								alert = "Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress
-								warn_the_good_guys(subject, alert)
+                                                                subject = "[!] Artillery has banned an SSH brute force. [!]"
+                                                                alert = "Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress
+                                                                warn_the_good_guys(subject, alert)
 
                                                                 # do the actual ban, this is pulled from src.core
                                                                 ban(ipaddress)

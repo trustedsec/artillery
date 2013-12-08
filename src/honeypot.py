@@ -44,20 +44,20 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                 self.request.send(fake_string)
                 # checking for ipv4
                 # check to ensure its an ipv4 address then move into the rest
-		ip = self.client_address[0]
-		if is_valid_ipv4(ip):
+                ip = self.client_address[0]
+                if is_valid_ipv4(ip):
                         check_whitelist = whitelist(ip)
                         # ban the mofos
                         if check_whitelist == 0:
                                 now = str(datetime.datetime.today())
-				port = self.server.server_address[1]
-				subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (now, ip)
-				alert = ""
-				if honeypot_ban:
-					alert = "%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now, ip, port)
-				else:
-					alert = "%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now, ip, port)
-				warn_the_good_guys(subject, alert)
+                                port = self.server.server_address[1]
+                                subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (now, ip)
+                                alert = ""
+                                if honeypot_ban:
+                                        alert = "%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now, ip, port)
+                                else:
+                                        alert = "%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now, ip, port)
+                                warn_the_good_guys(subject, alert)
 
                                 # close the socket
                                 self.request.close()

@@ -103,9 +103,9 @@ def monitor_system(time_wait):
                                         pass
 
                                 else:
-					subject = "[!] Artillery has detected a change. [!]"
+                                        subject = "[!] Artillery has detected a change. [!]"
                                         output_file = "********************************** The following changes were detect at %s **********************************\n" % (datetime.datetime.now()) + output_file + "\n********************************** End of changes. **********************************\n\n"
-					warn_the_good_guys(subject, output_file)
+                                        warn_the_good_guys(subject, output_file)
 
         # put the new database as old
         if os.path.isfile("/var/artillery/database/temp.database"):
