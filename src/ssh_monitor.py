@@ -103,8 +103,6 @@ def ssh_monitor(monitor_time):
                 except Exception, e:
                     print "[*] An error occured. Printing it out here: " + str(e)
 
-# check if we are running posix
-operating_system = check_os()
-if operating_system == "posix":
+if is_posix():
         # start thread
         thread.start_new_thread(ssh_monitor,(monitor_time,))

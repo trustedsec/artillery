@@ -18,9 +18,6 @@ from src.core import *
 # let the logfile know artillery has started successfully
 write_log("Artillery has started successfully.")
 
-# check which OS we are running
-operating_system = check_os()
-
 # prep everything for artillery first run
 check_banlist_path()
 
@@ -57,12 +54,12 @@ try:
     import src.email_handler
 
     # if we are running posix then lets create a new iptables chain
-    if operating_system == "posix":
+    if is_posix():
             time.sleep(2)
             thread.start_new_thread(create_iptables, ())
 
     # start anti_dos
-    if operating_system == "posix":
+    if is_posix():
         import src.anti_dos
 
     # check to see if we are using the intelligence feed

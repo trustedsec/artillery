@@ -16,15 +16,12 @@ import logging.handlers
 # grab the normal path for config
 def read_config_path():
         path = ""
-        # check operating system
-        operating_system = check_os()
-        # see if we are running posix
-        if operating_system == "posix":
+        if is_posix():
                 if os.path.isfile("/var/artillery/config"):
                         path = "/var/artillery/config"
                 if os.path.isfile("config"):
                         path = "config"
-        if operating_system =="windows":
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
                 if os.path.isfile(program_files + "\\Artillery\\config"):
                         path = program_files + "\\Artillery\\config"
@@ -55,9 +52,8 @@ def is_config_enabled(param):
 def ban(ip):
         # ip check routine to see if its a valid IP address
         if is_valid_ipv4(ip.strip()):
-                operating_system = check_os()
                 # if we are running nix variant then trigger ban through iptables
-                if operating_system == "posix":
+                if is_posix():
                         fileopen = file("/var/artillery/banlist.txt", "r")
                         data = fileopen.read()
                         if ip not in data:
@@ -67,12 +63,11 @@ def ban(ip):
                                 filewrite.close()
 
                 # if running windows then route attacker to some bs address
-                if operating_system == "windows":
+                if is_windows():
                         subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def update():
-        operating_system = check_os()
-        if operating_system == "posix":
+        if is_posix():
 		if os.path.isdir("/var/artillery/.svn"):
 			print "[!] Old installation detected that uses subversion. Fixing and moving to github."
 			try:
@@ -148,11 +143,7 @@ def is_valid_ipv4(ip):
 def check_banlist_path():
         # set default path to nill
         path = ""
-        # check operating system
-        operating_system = check_os()
-
-        # check for posix
-        if operating_system == "posix":
+        if is_posix():
                 # check for banlist if there then use banlist.txt in root
                 if os.path.isfile("banlist.txt"):
                         # set path
@@ -171,7 +162,7 @@ def check_banlist_path():
                                 path = "/var/artillery/banlist.txt"
 
         # if os is windows based
-        if operating_system == "windows":
+        if is_windows():
                 # grab program files
                 program_files = os.environ["ProgramFiles"]
                 # if artillery directory is already there
@@ -191,34 +182,24 @@ def check_banlist_path():
 
 # this will write out a log file for us to be sent eventually
 def prep_email(alert):
-        # check os
-        operating_system = check_os()
-        if operating_system == "posix":
+        if is_posix():
                 # write the file out to program_junk
                 filewrite=file("/var/artillery/src/program_junk/email_alerts.log", "w")
-        if operating_system == "windows":
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
                 filewrite=file(program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
         filewrite.write(alert)
         filewrite.close()
 
-# detect operating system version
-def check_os():
-        # detect if we're on windows
-        if os.name == "nt":
-                operating_system = "windows"
-                return operating_system
+def is_posix():
+    return os.name == "posix"
 
-        # detect if we're on nix/osx
-        if os.name == "posix":
-                operating_system = "posix"
-                return operating_system
+def is_windows():
+    return os.name == "nt"
 
 # create a new iptables subset
 def create_iptables():
-        # ensure we are only using posix based OS versus windows
-        operating_system = check_os()
-        if operating_system == "posix":
+        if is_posix():
 		# subprocess.Popen("iptables -F INPUT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -404,14 +385,11 @@ def syslog(message):
 
 # write log
 def write_log(alert):
-        # check os
-        operating_system = check_os()
-        # if we are running nix
-        if operating_system == "posix":
+        if is_posix():
 		syslog(alert)
 
         # if os is windows
-        if operating_system == "windows":
+        if is_windows():
                 # expand program files
                 program_files = os.environ["ProgramFiles"]
                 # if not there then make directories

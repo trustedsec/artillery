@@ -7,12 +7,9 @@ import subprocess,re,os,shutil
 
 from src.core import *
 
-# grab the operating system version
-operating_system = check_os()
-
-print """ 
+print """
 Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security
-tool used to protect your nix systems. 
+tool used to protect your nix systems.
 
 Written by: Dave Kennedy (ReL1K)
 """
@@ -27,7 +24,7 @@ if not os.path.isfile("/etc/init.d/artillery"):
 
 # if they said yes
 if answer.lower() == "y" or answer.lower() == "yes":
-        if operating_system == "posix":
+        if is_posix():
                 print "[*] Checking to see if Artillery is currently running..."
                 proc = subprocess.Popen("ps -au | grep /var/artillery/artillery.py", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 stdout = proc.communicate()
@@ -37,7 +34,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
                                 print "[*] Killing running version of Artillery.."
                                 line = line.split(" ")
                                 pid = line[6]
-                                subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait() 
+                                subprocess.Popen("kill %s" % (pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
                                 print "[*] Killed the Artillery process: " + pid
 			match = re.search("python artillery.py", line)
 			if match:
@@ -78,18 +75,18 @@ if answer.lower() == "y" or answer.lower() == "yes":
                                 filewrite.close()
 
         # if os is running windows then do some stuff
-        if operating_system == "windows":
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
                 os.makedirs(program_files + "\\Artillery")
                 os.makedirs(program_files + "\\Artillery\\logs")
                 os.makedirs(program_files + "\\Artillery\\database")
 		os.makedirs(program_files + "\\Artillery\\src\\program_junk")
                 install_path = os.getcwd()
-                shutil.copytree(install_path, program_files + "\\Artillery\\")                
+                shutil.copytree(install_path, program_files + "\\Artillery\\")
 
 
         # copy the files
-        if operating_system == "posix":
+        if is_posix():
                 choice = raw_input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
                 if choice == "y" or choice == "yes":
                         print "[*] Checking out Artillery through subversion to /var/artillery"
@@ -101,28 +98,28 @@ if answer.lower() == "y" or answer.lower() == "yes":
                 else:
                         print "[*] Copying setup files over..."
                         subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
-        
+
                 # if os is Mac Os X than create a .plist daemon - changes added by contributor - Giulio Bortot
                 if os.path.isdir("/Library/LaunchDaemons"):
                         # check if file is already in place
                         if not os.path.isfile("/Library/LaunchDaemons/com.artillery.plist"):
                                 print "[*] Creating com.artillery.plist in your Daemons directory"
                                 filewrite = file("/Library/LaunchDaemons/com.artillery.plist", "w")
-                                filewrite.write('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n<key>Disabled</key>\n<false/>\n<key>ProgramArguments</key>\n<array>\n<string>/usr/bin/python</string>\n<string>/var/artillery/artillery.py</string>\n</array>\n<key>KeepAlive</key>\n<true/>\n<key>RunAtLoad</key>\n<true/>\n<key>Label</key>\n<string>com.artillery</string>\n<key>Debug</key>\n<true/>\n</dict>\n</plist>')                                
+                                filewrite.write('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n<key>Disabled</key>\n<false/>\n<key>ProgramArguments</key>\n<array>\n<string>/usr/bin/python</string>\n<string>/var/artillery/artillery.py</string>\n</array>\n<key>KeepAlive</key>\n<true/>\n<key>RunAtLoad</key>\n<true/>\n<key>Label</key>\n<string>com.artillery</string>\n<key>Debug</key>\n<true/>\n</dict>\n</plist>')
                                 print "[*] Adding right permissions"
                                 subprocess.Popen("chown root:wheel /Library/LaunchDaemons/com.artillery.plist", shell=True).wait()
 
         choice = raw_input("Would you like to start Artillery now? [y/n]: ")
         if choice == "yes" or choice == "y":
-                if operating_system == "posix":
+                if is_posix():
                         subprocess.Popen("python /var/artillery/artillery.py &", shell=True).wait()
 
         # if we are running posix
-        if operating_system == "posix":
+        if is_posix():
                 print "[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking.."
-        
+
 if answer == "uninstall":
-	if operating_system == "posix":
+	if is_posix():
 		os.remove("/etc/init.d/artillery")
 		subprocess.Popen("rm -rf /var/artillery", shell=True)
 		subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
@@ -148,5 +145,5 @@ if answer == "uninstall":
 
 		except: pass
 		print "[*] Artillery has been uninstalled. Manually kill the process if it is still running."
- 
-		
+
+

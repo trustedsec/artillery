@@ -139,6 +139,5 @@ def start_monitor():
                         time.sleep(time_wait)
 
 # start the thread only if its running posix will rewrite this module to use difflib and some others butfor now its reliant on linux
-operating_system = check_os()
-if operating_system == "posix":
+if is_posix():
         thread.start_new_thread(start_monitor, ())

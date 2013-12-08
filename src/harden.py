@@ -15,10 +15,7 @@ send_email = read_config("ALERT_USER_EMAIL")
 # flag warnings, base is nothing
 warning = ""
 
-# check operating system
-operating_system = check_os()
-
-if operating_system == "posix":
+if is_posix():
         #
         # check ssh config
         #
