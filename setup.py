@@ -46,8 +46,6 @@ if answer.lower() == "y" or answer.lower() == "yes":
 
                 print "[*] Beginning installation. This should only take a moment."
                 # if directories aren't there then create them
-                if not os.path.isdir("/var/artillery"):
-                        os.makedirs("/var/artillery")
                 if not os.path.isdir("/var/artillery/logs"):
                         os.makedirs("/var/artillery/logs")
                 if not os.path.isdir("/var/artillery/database"):
@@ -77,7 +75,6 @@ if answer.lower() == "y" or answer.lower() == "yes":
         # if os is running windows then do some stuff
         if is_windows():
                 program_files = os.environ["ProgramFiles"]
-                os.makedirs(program_files + "\\Artillery")
                 os.makedirs(program_files + "\\Artillery\\logs")
                 os.makedirs(program_files + "\\Artillery\\database")
 		os.makedirs(program_files + "\\Artillery\\src\\program_junk")
