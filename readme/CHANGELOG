@@ -1,4 +1,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.8
+~~~~~~~~~~~~~~~~~~~~~~
+
+* large amounts of refactoring and recoding (thanks to plentz)
+* added ftp brute force detection (thanks johns3ej)
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.7.4
 ~~~~~~~~~~~~~~~~~~~~~~
 
