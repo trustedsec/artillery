@@ -10,44 +10,31 @@
 #####################################################################
 import time,sys,thread,os
 
-# all modules are located within src/, core is reusable code
-
-# import the core modules
 from src.core import *
 
 # let the logfile know artillery has started successfully
 write_log("Artillery has started successfully.")
 
-# check which OS we are running
-operating_system = check_os()
-
 # prep everything for artillery first run
 check_banlist_path()
 
-# try block starts here
 try:
-
     # update artillery
-    auto_update = check_config("AUTO_UPDATE=")
-    if auto_update.lower() == "on":
-            # start auto-updates if on
+    if is_config_enabled("AUTO_UPDATE"):
             thread.start_new_thread(update, ())
 
     # import base monitoring of fs
-    monitor_check = check_config("MONITOR=")
-    if monitor_check.lower() == "on":
+    if is_config_enabled("MONITOR"):
 	    from src.monitor import *
 
     # port ranges to spawn
-    port = check_config("PORTS=")
+    port = read_config("PORTS")
 
     # spawn honeypot
     import src.honeypot
 
     # spawn ssh monitor
-    ssh_monitor = check_config("SSH_BRUTE_MONITOR=")
-    if ssh_monitor.lower() == "on":
-        # import the ssh monitor
+    if is_config_enabled("SSH_BRUTE_MONITOR"):
         import src.ssh_monitor
 
     # start monitor engine
@@ -56,26 +43,23 @@ try:
     # check hardening
     import src.harden
 
-    # start the email handler   
+    # start the email handler
     import src.email_handler
 
     # if we are running posix then lets create a new iptables chain
-    if operating_system == "posix":
+    if is_posix():
             time.sleep(2)
-            thread.start_new_thread(create_iptables, ())
+            thread.start_new_thread(create_iptables_subset, ())
 
-    # start anti_dos
-    if operating_system == "posix":
-        import src.anti_dos
+            # start anti_dos
+            import src.anti_dos
 
     # check to see if we are using the intelligence feed
-    intelligence_feed = check_config("THREAT_INTELLIGENCE_FEED=").lower()
-    if intelligence_feed == "on":
+    if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
 	    thread.start_new_thread(intelligence_update, ())
 
     # check to see if we are a threat server or not
-    threat_server_check = check_config("THREAT_SERVER=").lower()
-    if threat_server_check == "on":
+    if is_config_enabled("THREAT_SERVER"):
 	    thread.start_new_thread(threat_server, ())
 
     # let the program to continue to run
@@ -86,12 +70,11 @@ try:
                 print "\n[!] Exiting Artillery... hack the gibson.\n"
                 sys.exit()
 
-
 except sys.excepthook:
     pass
 
 except KeyboardInterrupt:
     sys.exit()
 
-except Exception:  
+except Exception:
     sys.exit()

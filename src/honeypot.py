@@ -1,8 +1,6 @@
 #!/usr/bin/python
 #
-#
 # this is the honeypot stuff
-#
 #
 #
 import thread
@@ -15,24 +13,23 @@ import SocketServer
 import os
 import random
 import datetime
-# import artillery modules
+
 from src.core import *
 from src.smtp import *
 
 # port ranges to spawn pulled from config
-ports = check_config("PORTS=")
+ports = read_config("PORTS")
 # check to see what IP we need to bind to
-bind_interface = check_config("BIND_INTERFACE=")
-send_email = check_config("ALERT_USER_EMAIL=")
+bind_interface = read_config("BIND_INTERFACE")
+honeypot_ban = is_config_enabled("HONEYPOT_BAN")
 
 # main socket server listener for responses
 class SocketListener((SocketServer.BaseRequestHandler)):
 
     def handle(self):
-        #print self.server.server_name, self.server.server_port
 	pass
-    def setup(self):
 
+    def setup(self):
         # hehe send random length garbage to the attacker
         length = random.randint(5, 30000)
 
@@ -42,63 +39,45 @@ class SocketListener((SocketServer.BaseRequestHandler)):
         # try the actual sending and banning
         try:
                 self.request.send(fake_string)
-                # checking for ipv4
-                ipcheck = is_valid_ipv4(self.client_address[0])
-                # check to ensure its an ipv4 address then move into the rest
-                if ipcheck != False:
-                        check_whitelist = whitelist(self.client_address[0])
+                ip = self.client_address[0]
+                if is_valid_ipv4(ip):
+                        check_whitelist = is_whitelisted_ip(ip)
                         # ban the mofos
                         if check_whitelist == 0:
                                 now = str(datetime.datetime.today())
-                                # check to see if we are sending emails
-                                email_alerts = check_config("EMAIL_ALERTS=").lower()
-                                # check to see if we are using frequency
-                                email_frequency = check_config("EMAIL_TIMER=").lower()
-                                if email_alerts == "on" and email_frequency == "off":
-                                        mail(send_email,"%s [!] Artillery has blocked the IP Address: %s" % (now,self.client_address[0]), "%s The following IP address has been blacklisted: %s due to connecting to a honeypot port: %s" % (now,self.client_address[0], self.server.server_address[1]))
-                                # write our data out
-                                if email_frequency == "on":
-					if check_config("HONEYPOT_BAN=").lower() == "on":
-	                                        prep_email("%s [!] Artillery has blocked (and blacklisted) the IP Address: %s\n for connecting on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
-						
-					if check_config("HONEYPOT_BAN=").lower() == "off":
-						prep_email("%s [!] Artillery has detected an attack from IP Address: %s\n for a connection on a honeypot port: %s" % (now, self.client_address[0], self.server.server_address[1]))
-						# write out to log
-				if check_config("HONEYPOT_BAN=").lower() == "on":
-					# write out to log
-					write_log("%s [!] Artillery has blocked (and blacklisted the IP Address: %s for connecting to a honeypot restricted port: %s" % (now,self.client_address[0],self.server.server_address[1]))
+                                port = self.server.server_address[1]
+                                subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (now, ip)
+                                alert = ""
+                                if honeypot_ban:
+                                        alert = "%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now, ip, port)
+                                else:
+                                        alert = "%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now, ip, port)
+                                warn_the_good_guys(subject, alert)
 
-				# write out if we turned off honeypot ban
-				if check_config("HONEYPOT_BAN=").lower() == "off":
-					write_log("%s [!] Artillery has detected an attack from IP address: %s\n for a connection on a honeypot port: %s" % (now,self.client_address[0],self.server.server_address[1]))
-                              
                                 # close the socket
                                 self.request.close()
-                                honeypot_ban = check_config("HONEYPOT_BAN=")
 
                                 # if it isn't whitelisted and we are set to ban
-                                if honeypot_ban.lower() == "on":
+                                if honeypot_ban:
                                         ban(self.client_address[0])
-        # handle exceptions
         except Exception, e:
-                print "[!] Error detected. Printing: " + str(e) 
-                pass           
+                print "[!] Error detected. Printing: " + str(e)
+                pass
 
 # here we define a basic server
 def listen_server(port,bind_interface):
-                # specify port
                 try:
                         port = int(port)
 			if bind_interface == "":
 		                server = SocketServer.ThreadingTCPServer(('', port), SocketListener)
-			else:		
+			else:
 				server = SocketServer.ThreadingTCPServer(('%s' % bind_interface, port), SocketListener)
                         server.serve_forever()
 
                 # if theres already something listening on this port
                 except Exception: pass
 
-# check to see which ports we are using and ban if ports are touched        
+# check to see which ports we are using and ban if ports are touched
 def main(ports,bind_interface):
 
         # pull the banlist path
@@ -109,9 +88,8 @@ def main(ports,bind_interface):
                 	# remove any bogus characters
                 	line = line.rstrip()
                 	# ban actual IP addresses
-                	honeypot_ban = check_config("HONEYPOT_BAN=")
-                	if honeypot_ban.lower() == "on":
-                        	whitelist = check_config("WHITELIST_IP=")
+                	if honeypot_ban:
+                        	whitelist = read_config("WHITELIST_IP")
                         	match = re.search(line, whitelist)
                         	if not match:
                                 	# ban the ipaddress
@@ -122,6 +100,4 @@ def main(ports,bind_interface):
 	        thread.start_new_thread(listen_server, (port,bind_interface,))
 
 # launch the application
-honeypot_enabled = check_config("HONEYPOT=")
-#if honeypot_enabled.lower() == "yes":
 main(ports,bind_interface)

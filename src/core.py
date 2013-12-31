@@ -13,48 +13,40 @@ import shutil
 import logging
 import logging.handlers
 
-# grab the normal path for config
-def check_config_path():
+def get_config_path():
         path = ""
-        # check operating system
-        operating_system = check_os()
-        # see if we are running posix
-        if operating_system == "posix":
+        if is_posix():
                 if os.path.isfile("/var/artillery/config"):
                         path = "/var/artillery/config"
                 if os.path.isfile("config"):
                         path = "config"
-        if operating_system =="windows":
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
                 if os.path.isfile(program_files + "\\Artillery\\config"):
                         path = program_files + "\\Artillery\\config"
         return path
-#
-# check config
-#
-def check_config(param):
-        # grab the default path
-        path = check_config_path()
+
+def read_config(param):
+        path = get_config_path()
         fileopen = file(path, "r")
-        # iterate through lines in file
         for line in fileopen:
 		if not line.startswith("#"):
-	                match = re.search(param, line)
+	                match = re.search(param + "=", line)
         	        if match:
                 	        line = line.rstrip()
                         	line = line.replace('"', "")
-                        	line = line.split("=")
+                        	line = line.split("")
                         	return line[1]
-#
-# ban host
-#
+
+def is_config_enabled(param):
+        config = read_config(param).lower()
+        return config in ("on", "yes")
+
 def ban(ip):
         # ip check routine to see if its a valid IP address
-        ipcheck = is_valid_ipv4(ip.strip())
-        if ipcheck != False:         
-                operating_system = check_os()
+        if is_valid_ipv4(ip.strip()):
                 # if we are running nix variant then trigger ban through iptables
-                if operating_system == "posix":
+                if is_posix():
                         fileopen = file("/var/artillery/banlist.txt", "r")
                         data = fileopen.read()
                         if ip not in data:
@@ -64,12 +56,11 @@ def ban(ip):
                                 filewrite.close()
 
                 # if running windows then route attacker to some bs address
-                if operating_system == "windows":
+                if is_windows():
                         subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def update():
-        operating_system = check_os()
-        if operating_system == "posix":
+        if is_posix():
 		if os.path.isdir("/var/artillery/.svn"):
 			print "[!] Old installation detected that uses subversion. Fixing and moving to github."
 			try:
@@ -80,27 +71,20 @@ def update():
 
 		subprocess.Popen("cd /var/artillery;git pull", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-#
-# check if something is whitelisted
-#
-def whitelist(ipaddress):
-
+def is_whitelisted_ip(ip):
         # set base counter
         counter = 0
-        # grab ipaddresss
-        ipaddr = str(ipaddress)
-        # check whitelist
-        whitelist = check_config("WHITELIST_IP=")
-        # match regular expression for ipaddress
-        match = re.search(ipaddress, whitelist)
+        # grab ips
+        ipaddr = str(ip)
+        whitelist = read_config("WHITELIST_IP")
+        match = re.search(ip, whitelist)
         if match:
-                # if we return one, the ipaddress has already beeb banned
+                # if we return one, the ip has already beeb banned
                 counter = 1
         # else we'll check cidr notiation
         else:
-                counter = printCIDR(ipaddress)        
+                counter = printCIDR(ip)
 
-        # return the counter
         return counter
 
 # validate that its an actual ip address versus something else stupid
@@ -141,21 +125,12 @@ def is_valid_ipv4(ip):
         """, re.VERBOSE | re.IGNORECASE)
         return pattern.match(ip) is not None
 
-# check banlist path
 def check_banlist_path():
-        # set default path to nill
         path = ""
-        # check operating system
-        operating_system = check_os()
-
-        # check for posix
-        if operating_system == "posix":
-                # check for banlist if there then use banlist.txt in root
+        if is_posix():
                 if os.path.isfile("banlist.txt"):
-                        # set path
                         path = "banlist.txt"
 
-                # check if banlist exists in default directory
                 if os.path.isfile("/var/artillery/banlist.txt"):
                         path = "/var/artillery/banlist.txt"
 
@@ -167,64 +142,45 @@ def check_banlist_path():
                                 filewrite.close()
                                 path = "/var/artillery/banlist.txt"
 
-        # if os is windows based
-        if operating_system == "windows":
-                # grab program files
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
-                # if artillery directory is already there
                 if os.path.isfile(program_files + "\\Artillery\\banlist.txt"):
                         # grab the path
                         path = program_files + "\\Artillery\\banlist.txt"
-                # if path is equal to nothing then
                 if path == "":
-                        # check directory
                         if os.path.isdir(program_files + "\\Artillery"):
                                 path = program_files + "\\Artillery"
                                 filewrite = file(program_files + "\\Artillery\\banlist.txt", "w")
                                 filewrite.write("#\n#\n#\n# TrustedSec's Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.trustedsec.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                                 filewrite.close()
-        # return the path
         return path
 
 # this will write out a log file for us to be sent eventually
 def prep_email(alert):
-        # check os
-        operating_system = check_os()
-        if operating_system == "posix":
+        if is_posix():
                 # write the file out to program_junk
                 filewrite=file("/var/artillery/src/program_junk/email_alerts.log", "w")
-        if operating_system == "windows":
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
                 filewrite=file(program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
         filewrite.write(alert)
         filewrite.close()
 
-# detect operating system version
-def check_os():
-        # detect if we're on windows
-        if os.name == "nt":
-                operating_system = "windows"
-                return operating_system
+def is_posix():
+    return os.name == "posix"
 
-        # detect if we're on nix/osx
-        if os.name == "posix":
-                operating_system = "posix"
-                return operating_system
+def is_windows():
+    return os.name == "nt"
 
-# create a new iptables subset
-def create_iptables():
-        # ensure we are only using posix based OS versus windows
-        operating_system = check_os()
-        if operating_system == "posix":
-		# subprocess.Popen("iptables -F INPUT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+def create_iptables_subset():
+        if is_posix():
                 subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)		
+                subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 	#sync our iptables blocks with the existing ban file so we don't forget attackers
         proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        # cycle through stdout
-        iptablesbanlist=proc.stdout.readlines()
+        iptablesbanlist = proc.stdout.readlines()
 
 	if os.path.isfile(check_banlist_path()):
 	        banfile = file(check_banlist_path(), "r")
@@ -233,49 +189,12 @@ def create_iptables():
 		filewrite.write("")
 		filewrite.close()
 		banfile = file("banlist.txt", "r")
+
         # iterate through lines in ban file and ban them if not already banned
 	for ip in banfile:
 		if not ip.startswith("#"):
 			if ip not in iptablesbanlist:
-				subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()		
-		
-# check to see if its a valid ipv4 address
-def is_valid_ipv4(ip):
-        pattern = re.compile(r"""
-        ^
-        (?:
-          # Dotted variants:
-          (?:
-            # Decimal 1-255 (no leading 0's)
-            [3-9]\d?|2(?:5[0-5]|[0-4]?\d)?|1\d{0,2}
-          |
-            0x0*[0-9a-f]{1,2}  # Hexadecimal 0x0 - 0xFF (possible leading 0's)
-          |
-            0+[1-3]?[0-7]{0,2} # Octal 0 - 0377 (possible leading 0's)
-          )
-          (?:                  # Repeat 0-3 times, separated by a dot
-            \.
-            (?:
-              [3-9]\d?|2(?:5[0-5]|[0-4]?\d)?|1\d{0,2}
-            |
-              0x0*[0-9a-f]{1,2}
-            |
-              0+[1-3]?[0-7]{0,2}
-            )
-          ){0,3}
-        |
-          0x0*[0-9a-f]{1,8}    # Hexadecimal notation, 0x0 - 0xffffffff
-        |
-          0+[0-3]?[0-7]{0,10}  # Octal notation, 0 - 037777777777
-        |
-          # Decimal notation, 1-4294967295:
-          429496729[0-5]|42949672[0-8]\d|4294967[01]\d\d|429496[0-6]\d{3}|
-          42949[0-5]\d{4}|4294[0-8]\d{5}|429[0-3]\d{6}|42[0-8]\d{7}|
-          4[01]\d{8}|[1-3]\d{0,9}|[4-9]\d{0,8}
-        )
-        $
-        """, re.VERBOSE | re.IGNORECASE)
-        return pattern.match(ip) is not None
+				subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
 
 # valid if IP address is legit
 def is_valid_ip(ip):
@@ -288,8 +207,7 @@ def bin2ip(b):
                 ip += str(int(b[i:i+8],2))+"."
         return ip[:-1]
 
-# convert an IP address from its dotted-quad format to its
-# 32 binary digit representation
+# convert an IP address from its dotted-quad format to its 32 binary digit representation
 def ip2bin(ip):
         b = ""
         inQuads = ip.split(".")
@@ -323,7 +241,7 @@ def dec2bin(n,d=None):
 # print a list of IP addresses based on the CIDR block specified
 def printCIDR(attacker_ip):
         trigger = 0
-        whitelist = check_config("WHITELIST_IP=")
+        whitelist = read_config("WHITELIST_IP")
         whitelist = whitelist.split(",")
         for c in whitelist:
                 match = re.search("/", c)
@@ -350,24 +268,20 @@ def printCIDR(attacker_ip):
                                                         trigger = 1
 
         # return the trigger - 1 = whitelisted 0 = not found in whitelist
-        return trigger             
-                                      
-#
-# threat intelligence module
-#
+        return trigger
+
 def intelligence_update():
   try:
         # loop forever
         while 1:
-		
+
 		try:
 
-			threat_feed = check_config("THREAT_FEED=")
+			threat_feed = read_config("THREAT_FEED")
 			threat_feed = threat_feed.split(",")
 			# allow multiple feeds if needed
 			for threats in threat_feed:
 	                	banlist = urllib.urlopen('%s' % (threats))
-	                	# start to ban list
         	        	for line in banlist:
                 	        	line = line.rstrip()
                         		ban(line)
@@ -379,13 +293,11 @@ def intelligence_update():
 
 		except Exception: pass
 
-  # catch errors
   except Exception, e:
         print "Unable to fully load banlist, something went wrong: " + str(e)
 
-# threat server
 def threat_server():
-	public_http = check_config("THREAT_LOCATION=")
+	public_http = read_config("THREAT_LOCATION")
 	if os.path.isdir(public_http):
 		while 1:
 			subprocess.Popen("cp /var/artillery/banlist.txt %s" % (public_http), shell=True).wait()
@@ -393,8 +305,7 @@ def threat_server():
 
 # send the message then if its local or remote
 def syslog(message):
-
-	type = check_config("SYSLOG_TYPE=").lower()
+	type = read_config("SYSLOG_TYPE").lower()
 
 	# if we are sending remote syslog
 	if type == "remote":
@@ -407,25 +318,24 @@ def syslog(message):
 		        'local0': 16, 'local1': 17, 'local2': 18, 'local3': 19,
 		        'local4': 20, 'local5': 21, 'local6': 22, 'local7': 23,
 			}
-	
+
 		LEVEL = {
 		        'emerg': 0, 'alert':1, 'crit': 2, 'err': 3,
 		        'warning': 4, 'notice': 5, 'info': 6, 'debug': 7
 			}
-	
+
 
 		def syslog_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
         		host='localhost', port=514):
-	
+
 		        # Send syslog UDP packet to given host and port.
-		
 		        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	        	data = '<%d>%s' % (level + facility*8, message + "\n")
 	       		sock.sendto(data, (host, port))
 	        	sock.close()
 
-		# send the syslog message	
-		remote_syslog = check_config("SYSLOG_REMOTE_HOST=")
+		# send the syslog message
+		remote_syslog = read_config("SYSLOG_REMOTE_HOST")
 		syslog_send(message, host=remote_syslog)
 
 	# if we are sending local syslog messages
@@ -437,33 +347,30 @@ def syslog(message):
         for line in message.splitlines():
     		my_logger.critical(line + "\n")
 
-# write log
 def write_log(alert):
-        # check os
-        operating_system = check_os()
-        # if we are running nix
-        if operating_system == "posix":
+        if is_posix():
 		syslog(alert)
 
-        # if os is windows
-        if operating_system == "windows":
-                # expand program files
+        if is_windows():
                 program_files = os.environ["ProgramFiles"]
-                # if not there then make directories 
                 if not os.path.isdir(program_files + "\\Artillery\\logs"):
-                        # make directory
                         os.makedirs(program_files + "\\Artillery\\logs")
-                # if file isnt there then make it
                 if not os.path.isfile(program_files + "\\Artillery\\logs\\alerts.log"):
-                        # make file
                         filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "w")
                         filewrite.write("***** Artillery Alerts Log *****\n")
-                        # close it up
                         filewrite.close()
-                # write to alerts
                 filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "a")
-                # write the alert
                 filewrite.write(alert+"\n")
-                # close the the file
                 filewrite.close()
-	
+
+def warn_the_good_guys(subject, alert):
+        email_alerts = is_config_enabled("EMAIL_ALERTS")
+        email_frequency = is_config_enabled("EMAIL_FREQUENCY")
+
+        if email_alerts and not email_frequency:
+                mail(subject, alert)
+
+        if email_alerts and email_frequency:
+                prep_email(alert + "\n")
+
+        write_log(alert)
