@@ -47,7 +47,7 @@ def ssh_monitor(monitor_frequency):
                                 ssh_counter = ssh_counter + 1
                                 line = line.split(" ")
                                 # pull ipaddress
-                                ipaddress = line[10]
+                                ipaddress = line[-4]
                                 if is_valid_ipv4(ipaddress):
 
                                         # if its not a duplicate then ban that ass
