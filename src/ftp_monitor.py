@@ -22,6 +22,9 @@ def ftp_monitor(monitor_time):
                 # for debian base
                 if os.path.isfile("/var/log/vsftpd.log"):
                         fileopen1 = file("/var/log/auth.log", "r")
+                else:
+                        print "Has not found configuration file for ftp. Ftp monitor now stops."
+                        break
 
 
                 if not os.path.isfile("/var/artillery/banlist.txt"):
