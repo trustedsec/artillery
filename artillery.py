@@ -37,7 +37,7 @@ try:
     if is_config_enabled("SSH_BRUTE_MONITOR"):
         import src.ssh_monitor
 
-    ftp_monitor = check_config("FTP_BRUTE_MONITOR=")
+    ftp_monitor = read_config("FTP_BRUTE_MONITOR")
     if ftp_monitor.lower() == "on":
         #imprt the ftp monitor
         import src.ftp_monitor
@@ -75,11 +75,13 @@ try:
                 print "\n[!] Exiting Artillery... hack the gibson.\n"
                 sys.exit()
 
-except sys.excepthook:
+except sys.excepthook, e:
+    print "Excepthook exception: " + format(e)
     pass
 
 except KeyboardInterrupt:
     sys.exit()
 
-except Exception:
+except Exception, e:
+    print "General exception: " + format(e)
     sys.exit()

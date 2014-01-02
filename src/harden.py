@@ -35,7 +35,7 @@ if is_posix():
         if os.path.isfile("/etc/vsftpd.conf"):
                 fileopen = file("/etc/vsftpd.conf", "r")
                 data = fileopen.read()
-		anon_check = check_config("anonymous_enable=").lower()
+		anon_check = read_config("anonymous_enable").lower()
 		if anon_check == "yes":
 	            # trigger warning if match
 	            warning = warning + "Issue identified: /etc/vsftpd.conf allows Anonymous login. An attacker can gain a foothold to the system with absolutel zero effort. Recommendation: Change anonymous_enable yes to anonymous_enable no\n\n"                               

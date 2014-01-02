@@ -10,18 +10,21 @@ import time,re, thread
 from src.core import *
 from src.smtp import *
 
-send_email = check_config("ALERT_USER_EMAIL=")
+send_email = read_config("ALERT_USER_EMAIL")
 
 # how frequently we need to monitor
-monitor_time = check_config("MONITOR_FREQUENCY=")
+monitor_time = read_config("MONITOR_FREQUENCY")
 monitor_time = int(monitor_time)
-ftp_attempts = check_config("FTP_BRUTE_ATTEMPTS=")
+ftp_attempts = read_config("FTP_BRUTE_ATTEMPTS")
 # check for whitelist
 def ftp_monitor(monitor_time):
         while 1:
                 # for debian base
                 if os.path.isfile("/var/log/vsftpd.log"):
                         fileopen1 = file("/var/log/auth.log", "r")
+                else:
+                        print "Has not found configuration file for ftp. Ftp monitor now stops."
+                        break
 
 
                 if not os.path.isfile("/var/artillery/banlist.txt"):
@@ -64,9 +67,9 @@ def ftp_monitor(monitor_time):
                                                         if whitelist_match == 0:
                                                               
                                                                 # if we have email alerting on we can send email messages
-                                                                email_alerts = check_config("EMAIL_ALERTS=").lower()
+                                                                email_alerts = read_config("EMAIL_ALERTS").lower()
                                                                 # check email frequency
-                                                                email_frequency = check_config("EMAIL_FREQUENCY=").lower()
+                                                                email_frequency = read_config("EMAIL_FREQUENCY").lower()
                                                                 
                                                                 if email_alerts == "on" and email_frequency == "off":
                                                                         mail(send_email,
@@ -90,10 +93,8 @@ def ftp_monitor(monitor_time):
                         time.sleep(monitor_time)
                                             
                 except Exception, e:
-                    print "[*] An error occured. Printing it out here: " + str(e)
+                    print "[*] An error in ftp monitor occured. Printing it out here: " + str(e)
 
-# check if we are running posix
-operating_system = check_os()
-if operating_system == "posix":
+if is_posix():
         # start thread
         thread.start_new_thread(ftp_monitor,(monitor_time,))

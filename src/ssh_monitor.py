@@ -77,7 +77,7 @@ def ssh_monitor(monitor_frequency):
                         time.sleep(monitor_frequency)
 
                 except Exception, e:
-                    print "[*] An error occured. Printing it out here: " + str(e)
+                    print "[*] An error in ssh monitor occured. Printing it out here: " + str(e)
 
 if is_posix():
         thread.start_new_thread(ssh_monitor,(monitor_frequency,))
