@@ -90,7 +90,7 @@ def ftp_monitor(monitor_time):
                         time.sleep(monitor_time)
                                             
                 except Exception, e:
-                    print "[*] An error occured. Printing it out here: " + str(e)
+                    print "[*] An error in ftp monitor occured. Printing it out here: " + str(e)
 
 if is_posix():
         # start thread
