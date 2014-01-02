@@ -75,11 +75,13 @@ try:
                 print "\n[!] Exiting Artillery... hack the gibson.\n"
                 sys.exit()
 
-except sys.excepthook:
+except sys.excepthook, e:
+    print "Excepthook exception: " + format(e)
     pass
 
 except KeyboardInterrupt:
     sys.exit()
 
-except Exception:
+except Exception, e:
+    print "General exception: " + format(e)
     sys.exit()
