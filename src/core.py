@@ -35,7 +35,7 @@ def read_config(param):
         	        if match:
                 	        line = line.rstrip()
                         	line = line.replace('"', "")
-                        	line = line.split("")
+                        	line = line.split("=")
                         	return line[1]
 
 def is_config_enabled(param):
