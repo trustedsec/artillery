@@ -21,11 +21,11 @@ check_banlist_path()
 try:
     # update artillery
     if is_config_enabled("AUTO_UPDATE"):
-            thread.start_new_thread(update, ())
+        thread.start_new_thread(update, ())
 
     # import base monitoring of fs
     if is_config_enabled("MONITOR"):
-	    from src.monitor import *
+        from src.monitor import *
 
     # port ranges to spawn
     port = read_config("PORTS")
@@ -53,27 +53,27 @@ try:
 
     # if we are running posix then lets create a new iptables chain
     if is_posix():
-            time.sleep(2)
-            thread.start_new_thread(create_iptables_subset, ())
+        time.sleep(2)
+        thread.start_new_thread(create_iptables_subset, ())
 
-            # start anti_dos
-            import src.anti_dos
+        # start anti_dos
+        import src.anti_dos
 
     # check to see if we are using the intelligence feed
     if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
-	    thread.start_new_thread(intelligence_update, ())
+        thread.start_new_thread(intelligence_update, ())
 
     # check to see if we are a threat server or not
     if is_config_enabled("THREAT_SERVER"):
-	    thread.start_new_thread(threat_server, ())
+        thread.start_new_thread(threat_server, ())
 
     # let the program to continue to run
     while 1:
         try:
-                time.sleep(100000)
+            time.sleep(100000)
         except KeyboardInterrupt:
-                print "\n[!] Exiting Artillery... hack the gibson.\n"
-                sys.exit()
+            print "\n[!] Exiting Artillery... hack the gibson.\n"
+            sys.exit()
 
 except sys.excepthook, e:
     print "Excepthook exception: " + format(e)

@@ -21,24 +21,24 @@ def mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
 def mail(to, subject, text):
-	try:
-	        msg = MIMEMultipart()
-	        msg['From'] = smtp_from
-	        msg['To'] = to
-	        msg['Subject'] = subject
-	        msg.attach(MIMEText(text))
-	        # prep the smtp server
-	        mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-	        # send ehlo
-	        mailServer.ehlo()
-	        # tls support?
-	        mailServer.starttls()
-	        # some servers require ehlo again
-	        mailServer.ehlo()
-	        # login to server if we aren't using an open mail relay
-		if user != None:
-		        mailServer.login(user, pwd)
-	        mailServer.sendmail(to, to, msg.as_string())
-	        mailServer.close()
-	except:
-		write_log("[!] Error, Artillery was unable to log into the mail server")
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = smtp_from
+        msg['To'] = to
+        msg['Subject'] = subject
+        msg.attach(MIMEText(text))
+        # prep the smtp server
+        mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
+        # send ehlo
+        mailServer.ehlo()
+        # tls support?
+        mailServer.starttls()
+        # some servers require ehlo again
+        mailServer.ehlo()
+        # login to server if we aren't using an open mail relay
+        if user != None:
+            mailServer.login(user, pwd)
+        mailServer.sendmail(to, to, msg.as_string())
+        mailServer.close()
+    except:
+        write_log("[!] Error, Artillery was unable to log into the mail server")

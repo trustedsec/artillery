@@ -6,10 +6,10 @@ def tail(some_file):
     this_file.seek(0,2)
 
     while True:
-         line = this_file.readline()
-         if line:
-             yield line
-         yield None
+        line = this_file.readline()
+        if line:
+            yield line
+        yield None
 
 # grab the access logs and tail them
 access = "/var/log/apache2/access.log"
