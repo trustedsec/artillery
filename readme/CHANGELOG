@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.8.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added a better init.d script for startup, now supports stop/start. Will need to run setup.py in order to get the new file, or copy src/startup_artillery to /etc/init.d/artillery
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.8
 ~~~~~~~~~~~~~~~~~~~~~~
 

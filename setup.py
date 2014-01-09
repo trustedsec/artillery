@@ -55,8 +55,10 @@ if answer.lower() == "y" or answer.lower() == "yes":
         print "[*] Adding artillery into startup through init scripts.."
         if os.path.isdir("/etc/init.d"):
             if not os.path.isfile("/etc/init.d/artillery"):
+                fileopen = file("src/startup_artillery", "r")
+                config = fileopen.read()
                 filewrite = file("/etc/init.d/artillery", "w")
-                filewrite.write('#!/bin/sh\ncd /var/artillery\nsudo python artillery.py &\necho "Starting Artillery, it may take a few moments for it to come online..."')
+                filewrite.write(config)
                 filewrite.close()
                 print "[*] Triggering update-rc.d on artillery to automatic start..."
                 subprocess.Popen("chmod +x /etc/init.d/artillery", shell=True).wait()
@@ -106,7 +108,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
     choice = raw_input("Would you like to start Artillery now? [y/n]: ")
     if choice == "yes" or choice == "y":
         if is_posix():
-            subprocess.Popen("python /var/artillery/artillery.py &", shell=True).wait()
+            subprocess.Popen("/etc/init.d/artillery start", shell=True).wait()
 
     if is_posix():
         print "[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking.."
