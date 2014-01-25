@@ -26,7 +26,7 @@ For those technical folks you can find all of the code in the following structur
 - ```src/honeypot.py``` - main module for honeypot detection
 - ```src/harden.py``` - check for basic hardening to the OS
 - ```database/integrity.data``` - main database for maintaining sha512 hashes of filesystem
-- ```setup.py``` - copies files to ```/var/artillery/``` then edits ```/etc/init.d/rc.local``` to ensure artillery starts per each reboot
+- ```setup.py``` - copies files to ```/var/artillery/``` then edits ```/etc/init.d/artillery``` to ensure artillery starts per each reboot
 
 ### Supported platforms
 

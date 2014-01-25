@@ -85,7 +85,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
     if is_posix():
         choice = raw_input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
         if choice == "y" or choice == "yes":
-            print "[*] Checking out Artillery through subversion to /var/artillery"
+            print "[*] Checking out Artillery through github to /var/artillery"
             # if old files are there
             if os.path.isdir("/var/artillery/"):
                 shutil.rmtree('/var/artillery')
