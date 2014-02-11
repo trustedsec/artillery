@@ -10,8 +10,6 @@ import time,re, thread
 from src.core import *
 from src.smtp import *
 
-send_email = read_config("ALERT_USER_EMAIL")
-
 # how frequently we need to monitor
 monitor_time = read_config("MONITOR_FREQUENCY")
 monitor_time = int(monitor_time)
@@ -72,8 +70,7 @@ def ftp_monitor(monitor_time):
                                     email_frequency = read_config("EMAIL_FREQUENCY").lower()
 
                                     if email_alerts == "on" and email_frequency == "off":
-                                        mail(send_email,
-                                        "[!] Artillery has banned an FTP brute force. [!]",
+                                        mail("[!] Artillery has banned an FTP brute force. [!]",
                                         "The following IP has been blocked: " + ipaddress)
 
                                     # check frequency is allowed
