@@ -18,13 +18,10 @@ smtp_port = int(read_config("SMTP_PORT"))
 smtp_from = read_config("SMTP_FROM")
 
 def mail(subject, text):
-    mail(read_config("ALERT_USER_EMAIL"), subject, text)
-
-def mail(to, subject, text):
     try:
         msg = MIMEMultipart()
         msg['From'] = smtp_from
-        msg['To'] = to
+        msg['To'] = read_config("ALERT_USER_EMAIL")
         msg['Subject'] = subject
         msg.attach(MIMEText(text))
         # prep the smtp server
@@ -42,3 +39,16 @@ def mail(to, subject, text):
         mailServer.close()
     except:
         write_log("[!] Error, Artillery was unable to log into the mail server")
+
+def warn_the_good_guys(subject, alert):
+    email_alerts = is_config_enabled("EMAIL_ALERTS")
+    email_frequency = is_config_enabled("EMAIL_FREQUENCY")
+
+    if email_alerts and not email_frequency:
+        mail(subject, alert)
+
+    if email_alerts and email_frequency:
+        prep_email(alert + "\n")
+    prep_email(alert + "\n")
+
+    write_log(alert)

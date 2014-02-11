@@ -362,15 +362,3 @@ def write_log(alert):
         filewrite = file(program_files + "\\Artillery\\logs\\alerts.log", "a")
         filewrite.write(alert+"\n")
         filewrite.close()
-
-def warn_the_good_guys(subject, alert):
-    email_alerts = is_config_enabled("EMAIL_ALERTS")
-    email_frequency = is_config_enabled("EMAIL_FREQUENCY")
-
-    if email_alerts and not email_frequency:
-        mail(subject, alert)
-
-    if email_alerts and email_frequency:
-        prep_email(alert + "\n")
-
-    write_log(alert)
