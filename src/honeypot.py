@@ -15,7 +15,6 @@ import random
 import datetime
 
 from src.core import *
-from src.smtp import *
 
 # port ranges to spawn pulled from config
 ports = read_config("PORTS")

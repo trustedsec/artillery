@@ -1,4 +1,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 0.9
+~~~~~~~~~~~~~~~~~~~~~~
+
+* removed smtp and merged into core
+* fixed duplicate mail() tag that was causing email alerts to not be sent
+* fixed a bug that would cause valid_ip() to throw an error due to library mismatch
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.8.1
 ~~~~~~~~~~~~~~~~~~~~~~
 

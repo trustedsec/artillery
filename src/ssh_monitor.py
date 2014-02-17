@@ -4,7 +4,6 @@
 #
 import time,re, thread
 from src.core import *
-from src.smtp import *
 
 monitor_frequency = int(read_config("MONITOR_FREQUENCY"))
 ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")

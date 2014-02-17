@@ -5,7 +5,6 @@
 import re
 import os
 from src.core import *
-from src.smtp import *
 
 # flag warnings, base is nothing
 warning = ""

@@ -4,7 +4,6 @@
 #
 import os,re, hashlib, time, subprocess, thread,datetime, shutil
 from src.core import *
-from src.smtp import *
 
 def monitor_system(time_wait):
     # total_compare is a tally of all sha512 hashes

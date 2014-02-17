@@ -8,7 +8,6 @@
 
 import time,re, thread
 from src.core import *
-from src.smtp import *
 
 send_email = read_config("ALERT_USER_EMAIL")
 

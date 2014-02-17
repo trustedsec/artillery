@@ -6,7 +6,6 @@
 #
 import shutil,time,thread
 from src.core import *
-from src.smtp import *
 
 # check how long to send the email
 mail_time = read_config("EMAIL_FREQUENCY")
