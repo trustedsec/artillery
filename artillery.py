@@ -1,14 +1,20 @@
 #!/usr/bin/python
 #####################################################################
 #
-#  Artillery v0.7.3
+#  Artillery v1.0
 #
 # Written by Dave Kennedy (ReL1K)
 #
 # Still a work in progress.
 #
 #####################################################################
-import time,sys,thread,os
+import time,sys,thread,os,subprocess
+
+# check if its installed
+if not os.path.isfile("/var/artillery/artillery.py"):
+    print "[*] Artillery is not installed, running setup.py.."
+    subprocess.Popen("python setup.py", shell=True).wait()
+    sys.exit()
 
 from src.core import *
 
