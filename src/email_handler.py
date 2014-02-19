@@ -20,7 +20,7 @@ def check_alert():
             fileopen = file("/var/artillery/src/program_junk/email_alerts.log", "r")
             data = fileopen.read()
             if is_config_enabled("EMAIL_ALERTS"):
-                mail("[!] Artillery has new notifications for you. [!]",
+                send_mail("[!] Artillery has new notifications for you. [!]",
                 data)
                 # save this for later just in case we need it
                 shutil.move("/var/artillery/src/program_junk/email_alerts.log", "/var/artillery/src/program_junk/email_alerts.old")
