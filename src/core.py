@@ -279,7 +279,6 @@ def intelligence_update():
     try:
     # loop forever
         while 1:
-
             try:
 
                 threat_feed = read_config("THREAT_FEED")
@@ -291,7 +290,7 @@ def intelligence_update():
                         line = line.rstrip()
                         ban(line)
                         # sleep a millisecond as to not spike CPU up
-                        time.sleep(0.1)
+                        time.sleep(1)
 
                 # wait 24 hours
                 time.sleep(86400)

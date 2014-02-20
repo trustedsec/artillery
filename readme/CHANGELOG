@@ -1,4 +1,19 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.0.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* changed time delay if intelligence feed is turned to ON
+* turned intelligence feed to OFF by default in the config
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 1.0
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added auto detection if artillery wasn't installed to kick off the setup.py script
+* fixed database creation error if directory wasn't already created during a fresh install
+* fixed an issue that would cause email_handler to throw an exceptions for mail() taking two arguments, needed to be changed to send_mail
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 0.9
 ~~~~~~~~~~~~~~~~~~~~~~
 
