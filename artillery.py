@@ -18,6 +18,14 @@ if not os.path.isfile("/var/artillery/artillery.py"):
 
 from src.core import *
 
+# create the database directories if they aren't there
+if not os.path.isdir("/var/artillery/database/"):
+        os.makedirs("/var/artillery/database/")
+if not os.path.isfile("/var/artillery/database/temp.database"):
+        filewrite = file("/var/artillery/database/temp.database", "w")
+        filewrite.write("")
+        filewrite.close()
+
 # let the logfile know artillery has started successfully
 write_log("Artillery has started successfully.")
 

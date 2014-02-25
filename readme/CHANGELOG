@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.0.2
+~~~~~~~~~~~~~~~~~~~~~~
+
+* quick fix to add a check for database file, if its not there it'll create it
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.0.1
 ~~~~~~~~~~~~~~~~~~~~~~
 
