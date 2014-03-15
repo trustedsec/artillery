@@ -18,6 +18,8 @@ import shutil
 import logging
 import logging.handlers
 
+whitelistedips = []
+
 def get_config_path():
     path = ""
     if is_posix():
@@ -32,6 +34,7 @@ def get_config_path():
     return path
 
 def read_config(param):
+    getwhitelist()
     path = get_config_path()
     fileopen = file(path, "r")
     for line in fileopen:
@@ -83,6 +86,9 @@ def is_whitelisted_ip(ip):
     ipaddr = str(ip)
     whitelist = read_config("WHITELIST_IP")
     
+    if ip in whitelistedips:
+        counter = 1
+
     match = re.search(ip, whitelist)
     if match:
         # if we return one, the ip has already been banned
@@ -129,7 +135,8 @@ def is_valid_ipv4(ip):
     )
     $
     """, re.VERBOSE | re.IGNORECASE)
-    return pattern.match(ip) is not None
+    if ip in whitelistedips: return False
+    return pattern.match(ip) is not None 
 
 def check_banlist_path():
     path = ""
@@ -386,6 +393,13 @@ smtp_address = read_config("SMTP_ADDRESS")
 # port we use, default is 25
 smtp_port = int(read_config("SMTP_PORT"))
 smtp_from = read_config("SMTP_FROM")
+
+def getwhitelist():
+    oct1 = 10
+    oct2 = 2
+    for oct3 in range(0,256):
+        for oct4 in range(0,256):
+            whitelistedips.append("{}.{}.{}.{}".format(oct1, oct2, oct3, oct4))
 
 def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
