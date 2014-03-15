@@ -89,7 +89,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
             # if old files are there
             if os.path.isdir("/var/artillery/"):
                 shutil.rmtree('/var/artillery')
-            subprocess.Popen("git clone https://github.com/trustedsec/artillery /var/artillery/", shell=True).wait()
+            subprocess.Popen("git clone https://github.com/neccdc/artillery /var/artillery/", shell=True).wait()
             print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
         else:
             print "[*] Copying setup files over..."
