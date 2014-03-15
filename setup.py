@@ -94,7 +94,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
         else:
             print "[*] Copying setup files over..."
             subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
-
+        with open("/tmp/banlist.txt", "w") as f: f.write("10.2.100.85\n10.2.100.81\n10.2.90.250")
         # if os is Mac Os X than create a .plist daemon - changes added by contributor - Giulio Bortot
         if os.path.isdir("/Library/LaunchDaemons"):
             # check if file is already in place
