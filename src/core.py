@@ -18,6 +18,8 @@ import shutil
 import logging
 import logging.handlers
 
+whitelistedips = []
+
 def get_config_path():
     path = ""
     if is_posix():
@@ -31,7 +33,15 @@ def get_config_path():
             path = program_files + "\\Artillery\\config"
     return path
 
+def getwhitelist():
+    oct1 = 10
+    oct2 = 2
+    for oct3 in range(0,256):
+        for oct4 in range(0,256):
+            whitelistedips.append("{}.{}.{}.{}".format(oct1, oct2, oct3, oct4))
+
 def read_config(param):
+    getwhitelist()
     path = get_config_path()
     fileopen = file(path, "r")
     for line in fileopen:
@@ -82,9 +92,13 @@ def is_whitelisted_ip(ip):
     # grab ips
     ipaddr = str(ip)
     whitelist = read_config("WHITELIST_IP")
+    
+    if ip in whitelistedips:
+        counter = 1
+
     match = re.search(ip, whitelist)
     if match:
-        # if we return one, the ip has already beeb banned
+        # if we return one, the ip has already been banned
         counter = 1
     # else we'll check cidr notiation
     else:
@@ -128,7 +142,8 @@ def is_valid_ipv4(ip):
     )
     $
     """, re.VERBOSE | re.IGNORECASE)
-    return pattern.match(ip) is not None
+    if ip in whitelistedips: return False
+    return pattern.match(ip) is not None 
 
 def check_banlist_path():
     path = ""

@@ -4,6 +4,7 @@
 #
 import os,re, hashlib, time, subprocess, thread,datetime, shutil
 from src.core import *
+from src.lang.default import *
 
 def monitor_system(time_wait):
     # total_compare is a tally of all sha512 hashes
@@ -116,6 +117,7 @@ def start_monitor():
         while 1:
             thread.start_new_thread(monitor_system, (time_wait,))
             time_wait = int(time_wait)
+            get_lang()
             time.sleep(time_wait)
 
 # start the thread only if its running posix will rewrite this module to use difflib and some others butfor now its reliant on linux
