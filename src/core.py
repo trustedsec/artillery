@@ -82,9 +82,10 @@ def is_whitelisted_ip(ip):
     # grab ips
     ipaddr = str(ip)
     whitelist = read_config("WHITELIST_IP")
+    
     match = re.search(ip, whitelist)
     if match:
-        # if we return one, the ip has already beeb banned
+        # if we return one, the ip has already been banned
         counter = 1
     # else we'll check cidr notiation
     else:
