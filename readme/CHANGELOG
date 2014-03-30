@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.0.3
+~~~~~~~~~~~~~~~~~~~~~~
+
+* removed a newline when honeypot puts an alert out
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.0.2
 ~~~~~~~~~~~~~~~~~~~~~~
 
