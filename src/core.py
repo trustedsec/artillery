@@ -377,6 +377,9 @@ def warn_the_good_guys(subject, alert):
     if email_alerts and email_frequency:
         prep_email(alert + "\n")
 
+    if is_config_enabled("CONSOLE_LOGGING"):
+        print "{}".format(alert)
+
     write_log(alert)
 
 user = read_config("SMTP_USERNAME")
