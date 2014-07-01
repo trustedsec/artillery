@@ -379,18 +379,18 @@ def warn_the_good_guys(subject, alert):
 
     write_log(alert)
 
-user = read_config("SMTP_USERNAME")
-pwd = read_config("SMTP_PASSWORD")
-smtp_address = read_config("SMTP_ADDRESS")
-# port we use, default is 25
-smtp_port = int(read_config("SMTP_PORT"))
-smtp_from = read_config("SMTP_FROM")
-
 def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
 def mail(to, subject, text):
     try:
+
+        user = read_config("SMTP_USERNAME")
+        pwd = read_config("SMTP_PASSWORD")
+        smtp_address = read_config("SMTP_ADDRESS")
+        # port we use, default is 25
+        smtp_port = int(read_config("SMTP_PORT"))
+        smtp_from = read_config("SMTP_FROM")
         msg = MIMEMultipart()
         msg['From'] = smtp_from
         msg['To'] = to
