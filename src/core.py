@@ -408,7 +408,7 @@ def mail(to, subject, text):
         # some servers require ehlo again
         mailServer.ehlo()
         # login to server if we aren't using an open mail relay
-        if user != None:
+        if user != "":
             mailServer.login(user, pwd)
         mailServer.sendmail(to, to, msg.as_string())
         mailServer.close()
