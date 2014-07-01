@@ -28,6 +28,8 @@ if not os.path.isfile("/var/artillery/database/temp.database"):
 
 # let the logfile know artillery has started successfully
 write_log("Artillery has started successfully.")
+if is_config_enabled("CONSOLE_LOGGING"):
+    print "Artillery has started successfully.\nConsole logging enabled.\n"
 
 # prep everything for artillery first run
 check_banlist_path()
