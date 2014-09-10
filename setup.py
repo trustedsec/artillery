@@ -7,12 +7,11 @@ import subprocess,re,os,shutil
 
 from src.core import *
 
-print """
-Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security
-tool used to protect your nix systems.
+print '''
+Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security tool used to protect your nix systems.
 
 Written by: Dave Kennedy (ReL1K)
-"""
+'''
 
 def kill_artillery():
     print "[*] Checking to see if Artillery is currently running..."
