@@ -1,4 +1,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed loop issue when "local" was specified for syslog
+* added "file" as config option for saving to local files
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.0.3
 ~~~~~~~~~~~~~~~~~~~~~~
 
