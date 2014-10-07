@@ -351,6 +351,16 @@ def syslog(message):
         for line in message.splitlines():
             my_logger.critical(line + "\n")
 
+    # if we don't want to use local syslog and just write to file in logs/alerts.log
+    if type == "file":
+        if not os.path.isfile("/var/artillery/logs/alerts.log"):
+            filewrite = file("/var/artillery/logs/alerts.log", "w")
+            filewrite.write("***** Artillery Alerts Log *****\n")
+            filewrite.close()
+        filewrite = file("/var/artillery/logs/alerts.log", "a")
+        filewrite.write(alert+"\n")
+        filewrite.close()
+
 def write_log(alert):
     if is_posix():
         syslog(alert)
