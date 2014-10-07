@@ -14,7 +14,19 @@ import os
 import random
 import datetime
 
+
 from src.core import *
+
+GEO = read_config("GEO_DB")
+
+if GEO == "ON":
+    try:
+        from geoip2 import database
+        dbfile = read_config("GEO_DB_PATH")
+        geodb = database.Reader(dbfile)
+    except Exception:
+        print "Please install MaxMind GeoIP2 Python Library (e.g. pip install geoip2) and try again."
+        sys.exit(1)
 
 # port ranges to spawn pulled from config
 ports = read_config("PORTS")
@@ -39,6 +51,11 @@ class SocketListener((SocketServer.BaseRequestHandler)):
         try:
             self.request.send(fake_string)
             ip = self.client_address[0]
+            if GEO == "ON":
+                iploc = geodb.city(ip)
+                city = iploc.city.name
+                country = iploc.country.name
+
             if is_valid_ipv4(ip):
                 check_whitelist = is_whitelisted_ip(ip)
                 # ban the mofos
@@ -47,10 +64,17 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     port = self.server.server_address[1]
                     subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (now, ip)
                     alert = ""
-                    if honeypot_ban:
-                        alert = "%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (now, ip, port)
-                    else:
-                        alert = "%s [!] Artillery has detected an attack from IP address: %s for a connection on a honeypot port: %s" % (now, ip, port)
+
+                    if GEO == "ON":
+                        if honeypot_ban:
+                            alert = "Artillery has blocked (and blacklisted) the IP Address: %s (%s, %s) for connecting to a restricted port: %s at: %s" % (ip, city, country, port, now)
+                        else:
+                            alert = "Artillery has detected an attack from IP address: %s (%s, %s) for a connection on a honeypot port: %s at: %s" % (ip, city, country, port, now)           else:
+                        if honeypot_ban:
+                            alert = "Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a restricted port: %s at: %s" % (ip, port, now)
+                        else:
+                            alert = "Artillery has detected an attack from IP address: %s for a connection on a honeypot port: %s" % (ip, port, now)
+
                     warn_the_good_guys(subject, alert)
 
                     # close the socket
