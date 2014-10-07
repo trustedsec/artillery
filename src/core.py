@@ -348,8 +348,8 @@ def syslog(message):
         my_logger.setLevel(logging.DEBUG)
         handler = logging.handlers.SysLogHandler(address = '/dev/log')
         my_logger.addHandler(handler)
-    for line in message.splitlines():
-        my_logger.critical(line + "\n")
+        for line in message.splitlines():
+            my_logger.critical(line + "\n")
 
 def write_log(alert):
     if is_posix():
