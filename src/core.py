@@ -183,9 +183,10 @@ def create_iptables_subset():
         rules = subprocess.Popen("iptables -vnL", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         rulematch = '--match-set artillery'
         ruleset = rules.stdout.readlines()
+        matched = ''
         for rule in ruleset: 
-        	if rulematch in rules:
-        		matched = 'true'
+        	if rulematch in rule:
+        		matched == 'true'
         if matched == 'true':
         	subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     
