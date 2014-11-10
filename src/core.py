@@ -181,12 +181,12 @@ def create_iptables_subset():
     if is_posix():
         subprocess.Popen("ipset create artillery hash:ip", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         rules = subprocess.Popen("iptables -vnL", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        # rulematch = '--match-set artillery'
+        rulematch = 'match-set artillery'
         ruleset = rules.stdout.readlines()
         matched = 'false'
         for rule in ruleset: 
-        	if 'artillery' in rule:
-        		matched == 'true'
+        	if rulematch in rule:
+        		matched = 'true'
         if matched == 'true':
         	subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     
