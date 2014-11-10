@@ -182,7 +182,11 @@ def create_iptables_subset():
         subprocess.Popen("ipset create artillery hash:ip", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         rules = subprocess.Popen("iptables -vnL", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         rulematch = '--match-set artillery'
-        if  rulematch not in rules:
+        ruleset = rules.stdout.readlines()
+        for rule in ruleset: 
+        	if rulematch in rules:
+        		matched = 'true'
+        if matched = 'true':
         	subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     
     #sync our iptables blocks with the existing ban file so we don't forget attackers
