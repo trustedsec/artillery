@@ -17,6 +17,13 @@ import time
 import shutil
 import logging
 import logging.handlers
+import datetime
+import signal
+
+# grab the current time
+def grab_time():
+        ts = time.time()
+        return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 def get_config_path():
     path = ""
@@ -358,7 +365,7 @@ def syslog(message):
             filewrite.write("***** Artillery Alerts Log *****\n")
             filewrite.close()
         filewrite = file("/var/artillery/logs/alerts.log", "a")
-        filewrite.write(alert+"\n")
+        filewrite.write(message+"\n")
         filewrite.close()
 
 def write_log(alert):
@@ -423,4 +430,25 @@ def mail(to, subject, text):
         mailServer.sendmail(to, to, msg.as_string())
         mailServer.close()
     except:
-        write_log("[!] Error, Artillery was unable to log into the mail server")
+        write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (grab_time()))
+
+# kill running instances of artillery
+def kill_artillery():
+	try:
+		proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    		pid = proc.communicate()[0]
+    		pid = pid.split(" ")
+		try:
+	    		pid = int(pid[0])
+		except:
+			# depends on OS on integer
+			pid = int(pid[2])
+
+    		write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
+    		print "[!] %s: Killing Old Artillery Process...." % (grab_time())
+	        os.kill(pid, signal.SIGKILL)
+
+	except Exception, e:
+	    print e
+	    pass
+

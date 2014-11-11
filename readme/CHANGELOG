@@ -1,4 +1,20 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.3
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added new function for grabbing date and time
+* added new function kill_artillery() to kill any running processes of artillery using signal and os.kill
+* added timestamp data for when a new instance of artillery is killed and restarted
+* removed old kill_artillery() legacy function in setup that did not properly terminate prior versions of artillery
+* added a write_log function that will notify when Artillery is unable to bind to a specific port and included timestamp data
+* fixed spacing issues inside of syslog on remote and local
+* corrected Issue identified spacing into one line in harden.py
+* added timestamp data to error artillery unable to log to mail server
+* fixed an issue that would cause the process to not properly be terminated on certain Linux versions
+* added datetime for when artillery successfully started from normal artillery.py located in /var/artillery
+* fixed a bug when using FILE as a designator that would cause an exception for alert not being defined (should have been assigned as variable)
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.2
 ~~~~~~~~~~~~~~~~~~~~~~
 
