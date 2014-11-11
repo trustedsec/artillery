@@ -18,6 +18,17 @@ import shutil
 import logging
 import logging.handlers
 
+
+def runProcess(exe):    
+    p = subprocess.Popen(exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while(True):
+      retcode = p.poll() #returns None while subprocess is running
+      line = p.stdout.readline()
+      yield line
+      if(retcode is not None):
+        break
+
+
 def get_config_path():
     path = ""
     if is_posix():
@@ -180,15 +191,13 @@ def is_windows():
 def create_iptables_subset():
     if is_posix():
         subprocess.Popen("ipset create artillery hash:ip", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        # rules = subprocess.Popen("iptables -vnL", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        # rulematch = 'match-set artillery'
-        # ruleset = rules.stdout.readlines()
-        # matched = 'false'
-        # for rule in ruleset: 
-        # 	if rulematch in rule:
-        # 		matched = 'true'
-        # if matched == 'true':
-        subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        execstring = 'iptables -vnL'
+        matched = 0
+        for line in runProcess(execstring.split()):
+            if 'match-set artillery' in line:
+                matched = 1
+        if matched == 0:        
+            subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     
     #sync our iptables blocks with the existing ban file so we don't forget attackers
     proc = subprocess.Popen("ipset -L artillery", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
