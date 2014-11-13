@@ -76,8 +76,10 @@ def ban(ip):
                 filewrite = file("/var/artillery/banlist.txt", "a")
                 if runmode == 'IPTABLES':
                     subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
+                    print "processed %s " % ip.strip()
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip, shell=True).wait()
+                    print "processed %s " % ip.strip()
                 filewrite.write(ip+"\n")
                 filewrite.close()
 
@@ -239,6 +241,7 @@ def create_iptables_subset():
                     subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip.strip(), shell=True).wait()
+                    print "processed %s " % ip.strip()
 
 # valid if IP address is legit
 def is_valid_ip(ip):
