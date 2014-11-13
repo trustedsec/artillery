@@ -9,6 +9,11 @@ from src.core import *
 try:
     ipaddress = sys.argv[1]
     if is_valid_ipv4(ipaddress):
+        # check iptables mode
+    	runmode = read_config("MODE")
+    	print "RUN MODE IS %s " % runmode
+
+
         path = check_banlist_path()
         fileopen = file(path, "r")
         data = fileopen.read()
@@ -28,8 +33,12 @@ try:
                 line = line.split(" ")
                 line = line[0]
                 print line
-                # delete it
-                subprocess.Popen("ipset del artillery %s" % (line), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+               
+				if runmode == 'IPTABLES':
+                	subprocess.Popen("iptables -D ARTILLERY %s" % (line), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+                else:
+	                # delete it
+	                subprocess.Popen("ipset del artillery %s" % (line), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
 
 
     # if not valid then flag
