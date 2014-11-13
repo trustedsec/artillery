@@ -74,7 +74,7 @@ def ban(ip):
             data = fileopen.read()
             if ip not in data:
                 filewrite = file("/var/artillery/banlist.txt", "a")
-                if runmode = 'IPTABLES':
+                if runmode == 'IPTABLES':
                     subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip, shell=True).wait()
@@ -199,8 +199,11 @@ def is_windows():
     return os.name == "nt"
 
 def create_iptables_subset():
+    # check iptables mode
+    runmode = read_config("MODE")
+    print "RUN MODE IS %s " % runmode
     if is_posix():
-        if runmode = 'IPTABLES':
+        if runmode == 'IPTABLES':
             subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -232,7 +235,7 @@ def create_iptables_subset():
     for ip in banfile:
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
-                if runmode = 'IPTABLES'
+                if runmode == 'IPTABLES':
                     subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip.strip(), shell=True).wait()
