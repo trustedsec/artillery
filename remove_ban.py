@@ -23,7 +23,10 @@ try:
         filewrite.close()
 
         print "Listing all iptables looking for a match... if there is a massive amount of blocked IP's this could take a few minutes.."
-        proc = subprocess.Popen("iptables -L artillery | grep %s" % (ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        if runmode == 'IPTABLES':
+        	proc = subprocess.Popen("iptables -L artillery | grep %s" % (ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        else:
+        	proc = subprocess.Popen("ipset -L artillery | grep %s" % (ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
         for line in proc.stdout.readlines():
             line = str(line)
