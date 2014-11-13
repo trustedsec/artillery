@@ -46,6 +46,9 @@ try:
     # port ranges to spawn
     port = read_config("PORTS")
 
+    # check iptables mode
+    runmode = read_config("MODE")
+    
     # spawn honeypot
     import src.honeypot
 
