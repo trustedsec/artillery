@@ -4,8 +4,8 @@
 # this behaves.
 #
 # Artillery written by: Dave Kennedy (ReL1K)
-# Website: https://www.trustedsec.com
-# Email: info [at] trustedsec.com
+# Website: https://www.binarydefense.com
+# Email: info [at] binarydefense.com
 # Download: git clone https://github.com/trustedsec/artillery artillery/
 # Install: python setup.py
 #
@@ -102,7 +102,7 @@ THREAT_INTELLIGENCE_FEED=ON
 #
 # CONFIGURE THIS TO BE WHATEVER THREAT FEED YOU WANT BY DEFAULT IT WILL USE TRUSTEDSEC
 # NOTE YOU CAN SPECIFY MULTIPLE THREAT FEEDS BY DOING http://urlthreatfeed1,http://urlthreadfeed2
-THREAT_FEED="https://www.trustedsec.com/banlist.txt"
+THREAT_FEED="https://www.binarydefense.com/banlist.txt"
 #
 # A THREAT SERVER IS A SERVER THAT WILL COPY THE BANLIST.TXT TO A PUBLIC HTTP LOCATION TO BE PULLED BY
 # OTHER ARTILLERY SERVER. THIS IS USED IF YOU DO NOT WANT TO USE THE STANDARD TRUSTEDSEC ONE.
@@ -116,7 +116,7 @@ THREAT_LOCATION="/var/www/"
 # THIS CHECKS TO SEE WHAT PERMISSIONS ARE RUNNING AS ROOT IN A WEB SERVER DIRECTORY
 ROOT_CHECK=ON
 #
-# Specify SYSLOG TYPE to be local or remote.
+# Specify SYSLOG TYPE to be local, file or remote. LOCAL will pipe to syslog, REMOTE will pipe to remote SYSLOG, and file will send to alerts.log in local artillery directory
 SYSLOG_TYPE=LOCAL
 #
 # IF YOU SPECIFY SYSLOG TYPE TO REMOTE, SPECIFY A REMOTE SYSLOG SERVER TO SEND ALERTS TO

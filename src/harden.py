@@ -21,12 +21,12 @@ if is_posix():
             # if we permit root logins trigger alert
             if match:
                 # trigger warning if match
-                warning = warning + "Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\n"
+                warning = warning + "[!] Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\r\n\r"
         match = re.search(r"Port 22\b", data)
         if match:
             if is_config_enabled("SSH_DEFAULT_PORT_CHECK"):
                 # trigger warning is match
-                warning = warning + "Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\n"
+                warning = warning + "[!] Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\r\n\r"
 
     #
     # check ftp config
@@ -37,7 +37,7 @@ if is_posix():
         match = re.search("anonymous_enable=YES", data)
         if match:	
             # trigger warning if match
-            warning = warning + "Issue identified: /etc/vsftpd.conf allows Anonymous login. An attacker can gain a foothold to the system with absolutel zero effort. Recommendation: Change anonymous_enable yes to anonymous_enable no\n\n"
+            warning = warning + "[!] Issue identified: /etc/vsftpd.conf allows Anonymous login. An attacker can gain a foothold to the system with absolutel zero effort. Recommendation: Change anonymous_enable yes to anonymous_enable no\n\r\n\r"
 
 
     #
@@ -66,5 +66,5 @@ if is_posix():
     # if we had warnings then trigger alert
     #
     if len(warning) > 1:
-        subject = "[!] Insecure configuration detected on filesystem"
+        subject = "[!] Insecure configuration detected on filesystem: "
         warn_the_good_guys(subject, subject + warning)

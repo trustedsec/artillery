@@ -32,3 +32,8 @@ For those technical folks you can find all of the code in the following structur
 
 - Linux
 - Windows
+
+
+Project Artillery - A project by Binary Defense Systems (https://www.binarydefense.com).
+
+Binary Defense Systems (BDS) is a sister company of TrustedSec, LLC

@@ -17,6 +17,13 @@ import time
 import shutil
 import logging
 import logging.handlers
+import datetime
+import signal
+
+# grab the current time
+def grab_time():
+        ts = time.time()
+        return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 
 def runProcess(exe):    
@@ -154,7 +161,7 @@ def check_banlist_path():
         if path == "":
             if os.path.isdir("/var/artillery"):
                 filewrite=file("/var/artillery/banlist.txt", "w")
-                filewrite.write("#\n#\n#\n# TrustedSec's Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.trustedsec.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
+                filewrite.write("#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
                 path = "/var/artillery/banlist.txt"
 
@@ -167,7 +174,7 @@ def check_banlist_path():
             if os.path.isdir(program_files + "\\Artillery"):
                 path = program_files + "\\Artillery"
                 filewrite = file(program_files + "\\Artillery\\banlist.txt", "w")
-                filewrite.write("#\n#\n#\n# TrustedSec's Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.trustedsec.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
+                filewrite.write("#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
     return path
 
@@ -364,8 +371,18 @@ def syslog(message):
         my_logger.setLevel(logging.DEBUG)
         handler = logging.handlers.SysLogHandler(address = '/dev/log')
         my_logger.addHandler(handler)
-    for line in message.splitlines():
-        my_logger.critical(line + "\n")
+        for line in message.splitlines():
+            my_logger.critical(line + "\n")
+
+    # if we don't want to use local syslog and just write to file in logs/alerts.log
+    if type == "file":
+        if not os.path.isfile("/var/artillery/logs/alerts.log"):
+            filewrite = file("/var/artillery/logs/alerts.log", "w")
+            filewrite.write("***** Artillery Alerts Log *****\n")
+            filewrite.close()
+        filewrite = file("/var/artillery/logs/alerts.log", "a")
+        filewrite.write(message+"\n")
+        filewrite.close()
 
 def write_log(alert):
     if is_posix():
@@ -429,4 +446,25 @@ def mail(to, subject, text):
         mailServer.sendmail(to, to, msg.as_string())
         mailServer.close()
     except:
-        write_log("[!] Error, Artillery was unable to log into the mail server")
+        write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (grab_time()))
+
+# kill running instances of artillery
+def kill_artillery():
+	try:
+		proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    		pid = proc.communicate()[0]
+    		pid = pid.split(" ")
+		try:
+	    		pid = int(pid[0])
+		except:
+			# depends on OS on integer
+			pid = int(pid[2])
+
+    		write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
+    		print "[!] %s: Killing Old Artillery Process...." % (grab_time())
+	        os.kill(pid, signal.SIGKILL)
+
+	except Exception, e:
+	    print e
+	    pass
+

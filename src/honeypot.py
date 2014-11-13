@@ -13,7 +13,6 @@ import SocketServer
 import os
 import random
 import datetime
-
 from src.core import *
 
 # port ranges to spawn pulled from config
@@ -74,7 +73,10 @@ def listen_server(port,bind_interface):
         server.serve_forever()
 
     # if theres already something listening on this port
-    except Exception: pass
+    except Exception:
+	# write a log if we are unable to bind to an interface
+	write_log("[!] %s: Artillery was unable to bind to port: %s. This could be to an active port in use." % (grab_time(),port))	 
+	pass
 
 # check to see which ports we are using and ban if ports are touched
 def main(ports,bind_interface):
