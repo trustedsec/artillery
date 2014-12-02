@@ -76,10 +76,10 @@ def ban(ip):
                 filewrite = file("/var/artillery/banlist.txt", "a")
                 if runmode == 'IPTABLES':
                     subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-                    print "processed %s " % ip.strip()
+                    print "processed iptables %s " % ip.strip()
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip, shell=True).wait()
-                    print "processed %s " % ip.strip()
+                    print "processed ipset %s " % ip.strip()
                 filewrite.write(ip+"\n")
                 filewrite.close()
 
@@ -211,8 +211,9 @@ def create_iptables_subset():
             subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             iptablesbanlist = proc.stdout.readlines()
+            print "processing banlist files."
         else:
-            subprocess.Popen("ipset create artillery hash:ip", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            subprocess.Popen("ipset create artillery hash:ip maxelem 100000 ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             execstring = 'iptables -vnL'
             matched = 0
             for line in runProcess(execstring.split()):
@@ -220,7 +221,7 @@ def create_iptables_subset():
                     matched = 1
             if matched == 0:        
                 subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    
+    		print "processing banlist files."
             #sync our iptables blocks with the existing ban file so we don't forget attackers
             proc = subprocess.Popen("ipset -L artillery", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             iptablesbanlist = proc.stdout.readlines()
@@ -238,10 +239,12 @@ def create_iptables_subset():
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
                 if runmode == 'IPTABLES':
-                    subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
+                    subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), stdout=subprocess.PIPE, shell=True).wait()
+                    print "processing itpables entries"
                 else:
-                    subprocess.Popen("ipset -exist add artillery %s" % ip.strip(), shell=True).wait()
-                    print "processed %s " % ip.strip()
+                    subprocess.Popen("ipset -exist add artillery %s" % ip.strip(), stdout=subprocess.PIPE, shell=True).wait()
+                    print "processing ipset entries"
+                
 
 # valid if IP address is legit
 def is_valid_ip(ip):
