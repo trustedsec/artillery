@@ -204,24 +204,21 @@ def create_iptables_subset():
     # check iptables mode
     runmode = read_config("MODE")
     print "RUN MODE IS %s " % runmode
+    subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    import src.anti_dos
+
+    proc = subprocess.Popen("iptables -L INPUT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    checker = proc.stdout.readlines()
+    if 'ARTILLERY' in checker:
+        subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if is_posix():
         if runmode == 'IPTABLES':
-            subprocess.Popen("iptables -N ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             iptablesbanlist = proc.stdout.readlines()
-            print "processing banlist files."
         else:
-            subprocess.Popen("ipset create artillery hash:ip maxelem 100000 ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            execstring = 'iptables -vnL'
-            matched = 0
-            for line in runProcess(execstring.split()):
-                if 'match-set artillery' in line:
-                    matched = 1
-            if matched == 0:        
-                subprocess.Popen("  iptables -A INPUT -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    		print "processing banlist files."
+            subprocess.Popen("ipset create artillery hash:ip maxelem 200000 ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            subprocess.Popen("  iptables -A ARTILLERY -m set --match-set artillery src -p TCP -m multiport --dports 22,80,443 -j REJECT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             #sync our iptables blocks with the existing ban file so we don't forget attackers
             proc = subprocess.Popen("ipset -L artillery", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             iptablesbanlist = proc.stdout.readlines()
@@ -243,8 +240,7 @@ def create_iptables_subset():
                     print "processing itpables entries"
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip.strip(), stdout=subprocess.PIPE, shell=True).wait()
-                    print "processing ipset entries"
-                
+                    print('.'),
 
 # valid if IP address is legit
 def is_valid_ip(ip):
@@ -472,21 +468,21 @@ def mail(to, subject, text):
 
 # kill running instances of artillery
 def kill_artillery():
-	try:
-		proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    		pid = proc.communicate()[0]
-    		pid = pid.split(" ")
-		try:
-	    		pid = int(pid[0])
-		except:
-			# depends on OS on integer
-			pid = int(pid[2])
+    try:
+        proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            pid = proc.communicate()[0]
+            pid = pid.split(" ")
+        try:
+                pid = int(pid[0])
+        except:
+            # depends on OS on integer
+            pid = int(pid[2])
 
-    		write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
-    		print "[!] %s: Killing Old Artillery Process...." % (grab_time())
-	        os.kill(pid, signal.SIGKILL)
+            write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
+            print "[!] %s: Killing Old Artillery Process...." % (grab_time())
+            os.kill(pid, signal.SIGKILL)
 
-	except Exception, e:
-	    print e
-	    pass
+    except Exception, e:
+        print e
+        pass
 
