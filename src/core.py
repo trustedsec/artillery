@@ -208,10 +208,16 @@ def create_iptables_subset():
     subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     import src.anti_dos
 
-    proc = subprocess.Popen("iptables -L INPUT", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen("iptables -L INPUT | grep ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     checker = proc.stdout.readlines()
-    if 'ARTILLERY' in checker:
+    matched = 'no'
+    if any("ARTILLERY" in s for s in checker):
+        matched = 'yes'
+        print 'rule found'
+    if matched == 'no':
+        print 'Rule not found'
         subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
     if is_posix():
         if runmode == 'IPTABLES':
             proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -241,6 +247,7 @@ def create_iptables_subset():
                 else:
                     subprocess.Popen("ipset -exist add artillery %s" % ip.strip(), stdout=subprocess.PIPE, shell=True).wait()
                     print('.'),
+    print "loading complete."
 
 # valid if IP address is legit
 def is_valid_ip(ip):
@@ -468,21 +475,21 @@ def mail(to, subject, text):
 
 # kill running instances of artillery
 def kill_artillery():
-    try:
-        proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            pid = proc.communicate()[0]
-            pid = pid.split(" ")
-        try:
-                pid = int(pid[0])
-        except:
-            # depends on OS on integer
-            pid = int(pid[2])
+	try:
+		proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    		pid = proc.communicate()[0]
+    		pid = pid.split(" ")
+		try:
+	    		pid = int(pid[0])
+		except:
+			# depends on OS on integer
+			pid = int(pid[2])
 
-            write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
-            print "[!] %s: Killing Old Artillery Process...." % (grab_time())
-            os.kill(pid, signal.SIGKILL)
+    		write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
+    		print "[!] %s: Killing Old Artillery Process...." % (grab_time())
+	        os.kill(pid, signal.SIGKILL)
 
-    except Exception, e:
-        print e
-        pass
+	except Exception, e:
+	    print e
+	    pass
 
