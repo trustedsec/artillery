@@ -9,6 +9,11 @@ from src.core import *
 try:
     ipaddress = sys.argv[1]
     if is_valid_ipv4(ipaddress):
+        # check iptables mode
+    	runmode = read_config("MODE")
+    	print "RUN MODE IS %s " % runmode
+
+
         path = check_banlist_path()
         fileopen = file(path, "r")
         data = fileopen.read()
@@ -18,7 +23,10 @@ try:
         filewrite.close()
 
         print "Listing all iptables looking for a match... if there is a massive amount of blocked IP's this could take a few minutes.."
-        proc = subprocess.Popen("iptables -L ARTILLERY -n -v --line-numbers | grep %s" % (ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        if runmode == 'IPTABLES':
+        	proc = subprocess.Popen("iptables -L ARTILLERY | grep %s" % (ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        else:
+        	proc = subprocess.Popen("ipset -L artillery | grep %s" % (ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
         for line in proc.stdout.readlines():
             line = str(line)
@@ -28,8 +36,12 @@ try:
                 line = line.split(" ")
                 line = line[0]
                 print line
-                # delete it
-                subprocess.Popen("iptables -D ARTILLERY %s" % (line), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+               
+				if runmode == 'IPTABLES':
+                	subprocess.Popen("iptables -D ARTILLERY %s" % (line), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+                else:
+	                # delete it
+	                subprocess.Popen("ipset del artillery %s" % (line), stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
 
 
     # if not valid then flag
