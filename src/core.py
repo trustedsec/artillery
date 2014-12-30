@@ -347,7 +347,8 @@ def syslog(message):
 
         # send the syslog message
         remote_syslog = read_config("SYSLOG_REMOTE_HOST")
-        syslog_send(message, host=remote_syslog)
+	remote_port = int(read_config("SYSLOG_REMOTE_PORT"))
+        syslog_send(message, host=remote_syslog, port=remote_port)
 
     # if we are sending local syslog messages
     if type == "local":
@@ -399,9 +400,11 @@ def warn_the_good_guys(subject, alert):
 
     write_log(alert)
 
+# send the actual email
 def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
+# mail function preping to send
 def mail(to, subject, text):
     try:
 
@@ -420,15 +423,18 @@ def mail(to, subject, text):
         mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
         # send ehlo
         mailServer.ehlo()
-        # tls support?
-        mailServer.starttls()
-        # some servers require ehlo again
-        mailServer.ehlo()
-        # login to server if we aren't using an open mail relay
-        if user != "":
-            mailServer.login(user, pwd)
-        mailServer.sendmail(to, to, msg.as_string())
+	# if we aren't using open relays
+	if user != "":
+	        # tls support?
+        	mailServer.starttls()
+       		# some servers require ehlo again
+        	mailServer.ehlo()
+	        mailServer.login(user, pwd)
+
+	# send the mail
+        mailServer.sendmail(smtp_from, to, msg.as_string())
         mailServer.close()
+
     except:
         write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (grab_time()))
 
