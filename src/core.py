@@ -440,21 +440,21 @@ def mail(to, subject, text):
 
 # kill running instances of artillery
 def kill_artillery():
-	try:
-		proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    		pid = proc.communicate()[0]
-    		pid = pid.split(" ")
-		try:
-	    		pid = int(pid[0])
-		except:
+    try:
+        proc = subprocess.Popen("ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        pid, err = proc.communicate()
+        pid = [int(x.strip()) for line in pid.split('\n') for x in line.split(" ") if int(x.isdigit())]
+		#try:
+	    		#pid = int(pid[0])
+		#except:
 			# depends on OS on integer
-			pid = int(pid[2])
+			#pid = int(pid[2])
+        for i in pid:
+            write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
+            print "[!] %s: Killing Old Artillery Process...." % (grab_time())
+            os.kill(i, signal.SIGKILL)
 
-    		write_log("[!] %s: Killing the old Artillery process..." % (grab_time()))
-    		print "[!] %s: Killing Old Artillery Process...." % (grab_time())
-	        os.kill(pid, signal.SIGKILL)
-
-	except Exception, e:
-	    print e
-	    pass
+    except Exception, e:
+        print e
+        pass
 
