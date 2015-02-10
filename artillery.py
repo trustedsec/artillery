@@ -83,6 +83,16 @@ try:
     if is_config_enabled("THREAT_SERVER"):
         thread.start_new_thread(threat_server, ())
 
+
+    # recycle IP addresses if enabled
+    if is_config_enabled("RECYCLE_IPS"):
+	    thread.start_new_thread(refresh_log, ())
+
+
+    # pull additional source feeds from external parties other than artillery - pulls every 2 hours
+    if is_config_enabled("SOURCE_FEEDS"):
+	   thread.start_new_thread(pull_source_feeds, ())
+
     # let the program to continue to run
     while 1:
         try:

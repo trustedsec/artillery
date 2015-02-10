@@ -12,6 +12,7 @@ import os
 import re
 import subprocess
 import urllib
+import urllib2
 import os
 import time
 import shutil
@@ -63,7 +64,9 @@ def ban(ip):
             data = fileopen.read()
             if ip not in data:
                 filewrite = file("/var/artillery/banlist.txt", "a")
-                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
+		ban_check = read_config("HONEYPOT_BAN").lower()
+		if ban_check == "on":
+	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
                 filewrite.write(ip+"\n")
                 filewrite.close()
 
@@ -296,8 +299,10 @@ def intelligence_update():
                     for line in banlist:
                         line = line.rstrip()
                         ban(line)
-                        # sleep a millisecond as to not spike CPU up
-                        time.sleep(1)
+                        # sleep a millisecond as to not spike CPU up if we are using ban
+			ban_check = read_config("HONEYPOT_BAN").lower()
+			if ban_check == "on":
+	                        time.sleep(1)
 
                 # wait 24 hours
                 time.sleep(86400)
@@ -458,3 +463,48 @@ def kill_artillery():
         print e
         pass
 
+
+# overwrite artillery banlist after certain time interval
+def refresh_log():
+	while 1:
+		interval = read_config("ARTILLERY_REFRESH=")
+		try:
+			interval = int(interval)
+		except:
+			# if the interval was not an integer, then just pass and don't do it again
+			break
+		# sleep until interval is up
+		time.sleep(interval)
+		# overwrite the log with nothing
+		filewrite = file("/var/artillery/banlist.txt", "w")
+		filewrite.write("")
+		filewrite.close()
+
+
+# format the ip addresses and check to ensure they aren't duplicates
+def format_ips(url):
+        req = urllib2.Request(url)
+        f = urllib2.urlopen(req).readlines()
+	fileopen = file("/var/artillery/banlist.txt", "r").read()
+	# write the file
+	filewrite = file("/var/artillery/banlist.txt", "a")
+	# iterate through
+	for line in f:
+		line=line.rstrip()
+		if not "#" in line:
+			if not "//" in line: 	
+				# if we don't have the IP yet
+				if not line in fileopen:
+					filewrite.write(line + "\n")
+	# close the file
+	filewrite.close()
+
+# update threat intelligence feed with other sources - special thanks for the feed list from here: http://www.deepimpact.io/blog/splunkandfreeopen-sourcethreatintelligencefeeds
+def pull_source_feeds():
+	while 1:
+		# pull source feeds
+		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt']
+		for urls in url:
+			format_ips(urls)	
+		time.sleep(7200) # sleep for 2 hours
+	
