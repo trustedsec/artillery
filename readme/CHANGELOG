@@ -1,4 +1,14 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.4
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added the ability to remove old records after a certain interval - this will overwrite the banlist and start from scratch based on certain time intervals - options are available under the config files
+* added multiple feeds based on the script from http://www.deepimpact.io/blog/splunkandfreeopen-sourcethreatintelligencefeeds - much appreciated. Artillery can now pull from multiple banlist IP addresses and will continue to add onto these as time goes on
+* added new functions to handle multiple different aspects including downloading files and new additions for parsing through banlist ips
+* turned banning to OFF by default and added threat intelligence feed to ON as defaults
+* added a check to turn on intelligence feed and also turn off ban if it is selected in the options this will allow you to pull intelligence feeds, check IP adddresses, and add to banlist, but not actively ban
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.3.1
 ~~~~~~~~~~~~~~~~~~~~~~
 
