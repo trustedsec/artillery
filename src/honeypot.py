@@ -56,8 +56,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     self.request.close()
 
                     # if it isn't whitelisted and we are set to ban
-                    if honeypot_ban:
-                        ban(self.client_address[0])
+                    ban(self.client_address[0])
+
         except Exception, e:
             print "[!] Error detected. Printing: " + str(e)
             pass

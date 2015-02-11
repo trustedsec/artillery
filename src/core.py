@@ -20,6 +20,8 @@ import logging
 import logging.handlers
 import datetime
 import signal
+from string import split, join
+import socket
 
 # grab the current time
 def grab_time():
@@ -69,6 +71,8 @@ def ban(ip):
 	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
                 filewrite.write(ip+"\n")
                 filewrite.close()
+		# after write, sort the banlist
+		sort_banlist()
 
         # if running windows then route attacker to some bs address
         if is_windows():
@@ -205,11 +209,13 @@ def create_iptables_subset():
         filewrite.close()
         banfile = file("banlist.txt", "r")
 
+
     # iterate through lines in ban file and ban them if not already banned
     for ip in banfile:
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
-                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
+		ip = ip.strip()
+                ban(ip) #subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
 
 # valid if IP address is legit
 def is_valid_ip(ip):
@@ -508,3 +514,35 @@ def pull_source_feeds():
 			format_ips(urls)	
 		time.sleep(7200) # sleep for 2 hours
 	
+def sort_banlist():
+	ips = file("/var/artillery/banlist.txt", "r").read()
+	banner = """#
+#
+#
+# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed
+# https://www.binarydefense.com
+#
+# Note that this is for public use only.
+# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.
+# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.
+#
+#
+#
+"""
+	ips = ips.replace(banner, "")
+	ips = ips.replace(" ", "")
+	ips = split(ips, '\n')
+	ips = filter(None, ips)
+	ips = filter(str.strip, ips)
+	tempips = [socket.inet_aton(ip) for ip in ips]
+	tempips.sort()
+	tempips.reverse()
+	filewrite = file("/var/artillery/banlist.txt", "w")
+	ips2 = [socket.inet_ntoa(ip) for ip in tempips]
+	ips_parsed = ""
+	for ips in ips2:
+		ips_parsed = ips + "\n" + ips_parsed
+	filewrite.write(banner + "\n" + ips_parsed)
+	filewrite.close()
+
+

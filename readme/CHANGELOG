@@ -1,4 +1,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.4.1
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added a new function for sorting IP addresses when adding to the banlist, when an IP address is added, it will sort the text file banlist after an append action
+* fixed an issue when artillery would initially launch it would not honor the ban() function for check to see if the IPs are already there. 
+* fixed an issue when honeypot ban was specified to no, it would not populate the banlist even if it banned or not
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.4
 ~~~~~~~~~~~~~~~~~~~~~~
 
