@@ -17,6 +17,7 @@ if not os.path.isfile("/var/artillery/artillery.py"):
     sys.exit()
 
 from src.core import *
+from src.config import *
 
 # create the database directories if they aren't there
 if not os.path.isdir("/var/artillery/database/"):
@@ -53,9 +54,8 @@ try:
     if is_config_enabled("SSH_BRUTE_MONITOR"):
         import src.ssh_monitor
 
-    ftp_monitor = read_config("FTP_BRUTE_MONITOR")
-    if ftp_monitor.lower() == "on":
-        #imprt the ftp monitor
+    # spawn ftp monitor
+    if is_config_enabled("FTP_BRUTE_MONITOR")
         import src.ftp_monitor
 
     # start monitor engine
@@ -86,12 +86,12 @@ try:
 
     # recycle IP addresses if enabled
     if is_config_enabled("RECYCLE_IPS"):
-	    thread.start_new_thread(refresh_log, ())
+        thread.start_new_thread(refresh_log, ())
 
 
     # pull additional source feeds from external parties other than artillery - pulls every 2 hours
     if is_config_enabled("SOURCE_FEEDS"):
-	   thread.start_new_thread(pull_source_feeds, ())
+        thread.start_new_thread(pull_source_feeds, ())
 
     # let the program to continue to run
     while 1:

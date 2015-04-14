@@ -14,6 +14,7 @@ import subprocess
 import urllib
 import urllib2
 import os
+import platform
 import time
 import shutil
 import logging
@@ -189,7 +190,11 @@ def is_posix():
     return os.name == "posix"
 
 def is_windows():
-    return os.name == "nt"
+    # text from: http://stackoverflow.com/a/11674977
+    # sys.platform is specified as a compiler define during the build configuration.
+    # os.name checks whether certain os specific modules are available (e.g. posix, nt, ...)
+    # platform.system() actually runs uname and potentially several other functions to determine the system type at run time.
+    return ((os.name == "nt") or (platform.system() == "Windows"))
 
 def create_iptables_subset():
     if is_posix():
@@ -214,7 +219,7 @@ def create_iptables_subset():
     for ip in banfile:
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
-		ip = ip.strip()
+                ip = ip.strip()
                 ban(ip) #subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
 
 # valid if IP address is legit
@@ -498,7 +503,7 @@ def format_ips(url):
 	for line in f:
 		line=line.rstrip()
 		if not "#" in line:
-			if not "//" in line: 	
+			if not "//" in line:
 				# if we don't have the IP yet
 				if not line in fileopen:
 					filewrite.write(line + "\n")
@@ -511,9 +516,9 @@ def pull_source_feeds():
 		# pull source feeds
 		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt']
 		for urls in url:
-			format_ips(urls)	
+			format_ips(urls)
 		time.sleep(7200) # sleep for 2 hours
-	
+
 def sort_banlist():
 	ips = file("/var/artillery/banlist.txt", "r").read()
 	banner = """#
@@ -544,5 +549,3 @@ def sort_banlist():
 		ips_parsed = ips + "\n" + ips_parsed
 	filewrite.write(banner + "\n" + ips_parsed)
 	filewrite.close()
-
-
