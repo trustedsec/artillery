@@ -489,21 +489,25 @@ def refresh_log():
 
 # format the ip addresses and check to ensure they aren't duplicates
 def format_ips(url):
-        req = urllib2.Request(url)
-        f = urllib2.urlopen(req).readlines()
-	fileopen = file("/var/artillery/banlist.txt", "r").read()
-	# write the file
-	filewrite = file("/var/artillery/banlist.txt", "a")
-	# iterate through
-	for line in f:
-		line=line.rstrip()
-		if not "#" in line:
-			if not "//" in line: 	
-				# if we don't have the IP yet
-				if not line in fileopen:
-					filewrite.write(line + "\n")
-	# close the file
-	filewrite.close()
+  try:
+      req = urllib2.Request(url)      
+      f = urllib2.urlopen(req).readlines()
+  except HTTPError:
+      return 
+  else:
+	    fileopen = file("/var/artillery/banlist.txt", "r").read()
+	    # write the file
+	    filewrite = file("/var/artillery/banlist.txt", "a")
+	    # iterate through
+	    for line in f:
+	    	line=line.rstrip()
+	    	if not "#" in line:
+	    		if not "//" in line: 	
+	    			# if we don't have the IP yet
+	    			if not line in fileopen:
+	    				filewrite.write(line + "\n")
+	    # close the file
+	    filewrite.close()
 
 # update threat intelligence feed with other sources - special thanks for the feed list from here: http://www.deepimpact.io/blog/splunkandfreeopen-sourcethreatintelligencefeeds
 def pull_source_feeds():
