@@ -492,7 +492,10 @@ def format_ips(url):
   try:
       req = urllib2.Request(url)      
       f = urllib2.urlopen(req).readlines()
-  except HTTPError:
+  except urllib2.HTTPError, err:
+      if err == '404':
+          #do nothing
+          pass
       return 
   else:
 	    fileopen = file("/var/artillery/banlist.txt", "r").read()
