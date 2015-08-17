@@ -498,9 +498,8 @@ def format_ips(url):
           write_log("HTTPError: Error 404, URL {} not found.".format(url))
       return 
   except urllib2.URLError, err: 
-      if err.code == '-2':
-          # Name or service not found known, DNS unreachable, try again later!
-          write_log("Name or service not found known. Host {} lookup failed.".format(url))
+        # Name or service not found known, DNS unreachable, try again later!
+        write_log("Received URL Error, Reason: {}".format(err.reason))
       return
   else:
       fileopen = file("/var/artillery/banlist.txt", "r").read()
