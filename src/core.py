@@ -1,3 +1,4 @@
+
 #
 #
 # core module for reusable / central code
@@ -496,11 +497,11 @@ def format_ips(url):
       if err.code == '404':
           # Error 404, page not found!
           write_log("HTTPError: Error 404, URL {} not found.".format(url))
-      return 
+          return 
   except urllib2.URLError, err: 
         # Name or service not found known, DNS unreachable, try again later!
-        write_log("Received URL Error, Reason: {}".format(err.reason))
-      return
+     write_log("Received URL Error, Reason: {}".format(err.reason))
+     return
   else:
       fileopen = file("/var/artillery/banlist.txt", "r").read()
       # write the file
@@ -555,5 +556,4 @@ def sort_banlist():
 		ips_parsed = ips + "\n" + ips_parsed
 	filewrite.write(banner + "\n" + ips_parsed)
 	filewrite.close()
-
 
