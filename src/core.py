@@ -496,11 +496,11 @@ def format_ips(url):
       if err.code == '404':
           # Error 404, page not found!
           write_log("HTTPError: Error 404, URL {} not found.".format(url))
-      return 
+          return 
   except urllib2.URLError, err: 
         # Name or service not found known, DNS unreachable, try again later!
         write_log("Received URL Error, Reason: {}".format(err.reason))
-      return
+        return
   else:
       fileopen = file("/var/artillery/banlist.txt", "r").read()
       # write the file
