@@ -55,7 +55,7 @@ try:
         import src.ssh_monitor
 
     # spawn ftp monitor
-    if is_config_enabled("FTP_BRUTE_MONITOR")
+    if is_config_enabled("FTP_BRUTE_MONITOR"):
         import src.ftp_monitor
 
     # start monitor engine
