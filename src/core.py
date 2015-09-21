@@ -14,7 +14,6 @@ import subprocess
 import urllib
 import urllib2
 import os
-import platform
 import time
 import shutil
 import logging
@@ -190,11 +189,7 @@ def is_posix():
     return os.name == "posix"
 
 def is_windows():
-    # text from: http://stackoverflow.com/a/11674977
-    # sys.platform is specified as a compiler define during the build configuration.
-    # os.name checks whether certain os specific modules are available (e.g. posix, nt, ...)
-    # platform.system() actually runs uname and potentially several other functions to determine the system type at run time.
-    return ((os.name == "nt") or (platform.system() == "Windows"))
+    return os.name == "nt"
 
 def create_iptables_subset():
     if is_posix():
@@ -219,7 +214,7 @@ def create_iptables_subset():
     for ip in banfile:
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
-                ip = ip.strip()
+		ip = ip.strip()
                 ban(ip) #subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
 
 # valid if IP address is legit
@@ -494,21 +489,32 @@ def refresh_log():
 
 # format the ip addresses and check to ensure they aren't duplicates
 def format_ips(url):
-        req = urllib2.Request(url)
-        f = urllib2.urlopen(req).readlines()
-	fileopen = file("/var/artillery/banlist.txt", "r").read()
-	# write the file
-	filewrite = file("/var/artillery/banlist.txt", "a")
-	# iterate through
-	for line in f:
-		line=line.rstrip()
-		if not "#" in line:
-			if not "//" in line:
-				# if we don't have the IP yet
-				if not line in fileopen:
-					filewrite.write(line + "\n")
-	# close the file
-	filewrite.close()
+  try:
+      req = urllib2.Request(url)      
+      f = urllib2.urlopen(req).readlines()
+  except urllib2.HTTPError, err:
+      if err.code == '404':
+          # Error 404, page not found!
+          write_log("HTTPError: Error 404, URL {} not found.".format(url))
+          return 
+  except urllib2.URLError, err: 
+        # Name or service not found known, DNS unreachable, try again later!
+        write_log("Received URL Error, Reason: {}".format(err.reason))
+        return
+  else:
+      fileopen = file("/var/artillery/banlist.txt", "r").read()
+      # write the file
+      filewrite = file("/var/artillery/banlist.txt", "a")
+      # iterate through
+      for line in f:
+          line=line.rstrip()
+          if not "#" in line:
+              if not "//" in line:  
+                  # if we don't have the IP yet
+                  if not line in fileopen:
+                      filewrite.write(line + "\n")
+      # close the file
+      filewrite.close()
 
 # update threat intelligence feed with other sources - special thanks for the feed list from here: http://www.deepimpact.io/blog/splunkandfreeopen-sourcethreatintelligencefeeds
 def pull_source_feeds():
@@ -516,9 +522,9 @@ def pull_source_feeds():
 		# pull source feeds
 		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt']
 		for urls in url:
-			format_ips(urls)
+			format_ips(urls)	
 		time.sleep(7200) # sleep for 2 hours
-
+	
 def sort_banlist():
 	ips = file("/var/artillery/banlist.txt", "r").read()
 	banner = """#
@@ -549,3 +555,5 @@ def sort_banlist():
 		ips_parsed = ips + "\n" + ips_parsed
 	filewrite.write(banner + "\n" + ips_parsed)
 	filewrite.close()
+
+
