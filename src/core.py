@@ -59,7 +59,8 @@ def is_config_enabled(param):
 
 def ban(ip):
     # ip check routine to see if its a valid IP address
-    if is_valid_ipv4(ip.strip()):
+    if not ip.startswith("#"):
+      if is_valid_ipv4(ip.strip()):
         # if we are running nix variant then trigger ban through iptables
         if is_posix():
             fileopen = file("/var/artillery/banlist.txt", "r")
@@ -109,6 +110,7 @@ def is_whitelisted_ip(ip):
 
 # validate that its an actual ip address versus something else stupid
 def is_valid_ipv4(ip):
+  if not ip.startswith("#"):
     pattern = re.compile(r"""
     ^
     (?:
@@ -216,7 +218,7 @@ def create_iptables_subset():
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
 		ip = ip.strip()
-                ban(ip) #subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
+                ban(ip) 
 
 # valid if IP address is legit
 def is_valid_ip(ip):
