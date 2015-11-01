@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.5
+~~~~~~~~~~~~~~~~~~~~~~
+
+* disabled yaml config as this breaks configuration reading
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.4.1
 ~~~~~~~~~~~~~~~~~~~~~~
 

@@ -5,6 +5,14 @@
 #
 import subprocess,re,os,shutil
 from src.core import *
+import sys
+
+try:
+	import yaml
+
+except ImportError:
+	print "[!] Unable to import yaml - install python-yaml (apt-get install python-yaml)"
+	sys.exit()
 
 print '''
 Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security tool used to protect your nix systems.

@@ -17,7 +17,7 @@ if not os.path.isfile("/var/artillery/artillery.py"):
     sys.exit()
 
 from src.core import *
-from src.config import *
+# from src.config import * # yaml breaks config reading - disabling
 
 # create the database directories if they aren't there
 if not os.path.isdir("/var/artillery/database/"):

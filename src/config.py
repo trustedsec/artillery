@@ -1,13 +1,14 @@
 #
 #
 # config module for configuration reading/writing/translating
-#
-#
+# 
+# module is disabled for now as this breaks config reading
 
 import os
 import platform
 if platform.system() == "Windows":
     import ntpath
+
 import yaml
 
 from src.core import *
