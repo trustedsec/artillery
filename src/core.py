@@ -67,9 +67,10 @@ def ban(ip):
             if ip not in data:
                 filewrite = file("/var/artillery/banlist.txt", "a")
 		ban_check = read_config("HONEYPOT_BAN").lower()
+		# if we are actually banning IP addresses
 		if ban_check == "on":
 	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-                filewrite.write(ip+"\n")
+                filewrite.write(ip + "\n")
                 filewrite.close()
 		# after write, sort the banlist
 		sort_banlist()
@@ -512,7 +513,9 @@ def format_ips(url):
               if not "//" in line:  
                   # if we don't have the IP yet
                   if not line in fileopen:
-                      filewrite.write(line + "\n")
+		      # make sure valid ipv4
+			if is_valid_ipv4(line.strip()):
+                              filewrite.write(line + "\n")
       # close the file
       filewrite.close()
 

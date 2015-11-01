@@ -3,6 +3,7 @@ version 1.5
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * disabled yaml config as this breaks configuration reading
+* added better handling and ipv4 checking for remote feeds
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 1.4.1
