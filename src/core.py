@@ -311,8 +311,8 @@ def intelligence_update():
 			if ban_check == "on":
 	                        time.sleep(1)
 
-                # wait 24 hours
-                time.sleep(86400)
+                # wait 1 hour
+                time.sleep(3600)
 
             except Exception: pass
 
