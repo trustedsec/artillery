@@ -517,7 +517,7 @@ def format_ips(url):
                   # if we don't have the IP yet
                   if not line in fileopen:
 		      # make sure valid ipv4
-			if is_valid_ipv4(line.strip()):
+		      if is_valid_ipv4(line.strip()):
                               filewrite.write(line + "\n")
       # close the file
       filewrite.close()
@@ -532,7 +532,7 @@ def pull_source_feeds():
 		time.sleep(7200) # sleep for 2 hours
 	
 def sort_banlist():
-	ips = file("/var/artillery/banlist.txt", "r").read()
+	ips = file("/var/artillery/banlist.txt", "r").readlines()
 	banner = """#
 #
 #
@@ -546,6 +546,12 @@ def sort_banlist():
 #
 #
 """
+	ip_filter = ""
+	for ip in ips:
+		if is_valid_ipv4(ip.strip()):
+			if ip != "0.0.0.0":
+				ip_filter = ip_filter + ip.rstrip() + "\n"
+	ips = ip_filter
 	ips = ips.replace(banner, "")
 	ips = ips.replace(" ", "")
 	ips = split(ips, '\n')
