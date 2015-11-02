@@ -5,6 +5,7 @@ version 1.5
 * disabled yaml config as this breaks configuration reading
 * added better handling and ipv4 checking for remote feeds
 * changed threat feed to pull every 1 hour instead of 24 hours
+* fixed sort issue and malformed IP addresses due to sort not checking properly
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 1.4.1
