@@ -11,7 +11,6 @@ def monitor_system(time_wait):
     # what files we need to monitor
     check_folders = read_config("MONITOR_FOLDERS")
     # split lines
-    exclude_counter = 0
     check_folders = check_folders.replace('"', "")
     check_folders = check_folders.replace("MONITOR_FOLDERS=", "")
     check_folders = check_folders.rstrip()
@@ -19,30 +18,19 @@ def monitor_system(time_wait):
     # cycle through tuple
     for directory in check_folders:
         time.sleep(0.1)
-        exclude_counter = 0
         # we need to check to see if the directory is there first, you never know
         if os.path.isdir(directory):
             # check to see if theres an include
             exclude_check = read_config("EXCLUDE")
             match = re.search(exclude_check, directory)
             # if we hit a match then we need to exclude
-            if match:
-                if exclude_check != "":
-                    exclude_counter = 1
-            # do a try block in case empty
-            # if we didn't trigger exclude
-            if exclude_counter == 0:
+	    if not directory in exclude_check:
                 # this will pull a list of files and associated folders
                 for path, subdirs, files in os.walk(directory):
                     for name in files:
-                        exclude_counter = 0
                         filename = os.path.join(path, name)
-                        # check for exclusion
-                        match = re.search(exclude_check, filename)
-                        if match:
-                            if exclude_check != "":
-                                exclude_counter = 1
-                        if exclude_counter == 0:
+			# check for sub directory exclude paths
+			if not filename in exclude_check:
                             # some system protected files may not show up, so we check here
                             if os.path.isfile(filename):
                                 try:
