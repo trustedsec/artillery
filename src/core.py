@@ -66,17 +66,17 @@ def ban(ip):
         if is_posix():
             fileopen = file("/var/artillery/banlist.txt", "r")
             data = fileopen.read()
-            if ip not in data:
-                filewrite = file("/var/artillery/banlist.txt", "a")
-                filewrite.write(ip + "\n")
-                filewrite.close()
 	    if not is_already_banned(ip):
 		ban_check = read_config("HONEYPOT_BAN").lower()
 		# if we are actually banning IP addresses
 		if ban_check == "on":
 	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-	    # after write, sort the banlist; Do the sort after the drop has been added to ensure they are blocked as fast as possible
-	    sort_banlist()
+	    # After the server is banned, add it to the banlist if it's not already in there
+            if ip not in data:
+                filewrite = file("/var/artillery/banlist.txt", "a")
+                filewrite.write(ip + "\n")
+                filewrite.close()
+	    	sort_banlist()
 
         # if running windows then route attacker to some bs address
         if is_windows():
