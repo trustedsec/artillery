@@ -64,14 +64,14 @@ def ban(ip):
       if is_valid_ipv4(ip.strip()):
         # if we are running nix variant then trigger ban through iptables
         if is_posix():
-            fileopen = file("/var/artillery/banlist.txt", "r")
-            data = fileopen.read()
 	    if not is_already_banned(ip):
 		ban_check = read_config("HONEYPOT_BAN").lower()
 		# if we are actually banning IP addresses
 		if ban_check == "on":
 	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
 	    # After the server is banned, add it to the banlist if it's not already in there
+            fileopen = file("/var/artillery/banlist.txt", "r")
+            data = fileopen.read()
             if ip not in data:
                 filewrite = file("/var/artillery/banlist.txt", "a")
                 filewrite.write(ip + "\n")
