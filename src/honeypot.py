@@ -71,7 +71,8 @@ def listen_server(port,bind_interface):
             server = SocketServer.ThreadingTCPServer(('', port), SocketListener)
         else:
             server = SocketServer.ThreadingTCPServer(('%s' % bind_interface, port), SocketListener)
-	subprocess.Popen("iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT" % port, shell=True).wait()
+	if honeypot_autoaccept:
+	    subprocess.Popen("iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT" % port, shell=True).wait()
         server.serve_forever()
     # if theres already something listening on this port
     except Exception:
