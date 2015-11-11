@@ -60,7 +60,7 @@ def is_config_enabled(param):
 def ban(ip):
     # ip check routine to see if its a valid IP address
     if not ip.startswith("#"):
-     if not ip.startswitH("0.0"):
+     if not ip.startswith("0.0"):
       if is_valid_ipv4(ip.strip()):
         # if we are running nix variant then trigger ban through iptables
         if is_posix():
