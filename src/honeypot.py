@@ -20,6 +20,7 @@ ports = read_config("PORTS")
 # check to see what IP we need to bind to
 bind_interface = read_config("BIND_INTERFACE")
 honeypot_ban = is_config_enabled("HONEYPOT_BAN")
+honeypot_autoaccept = is_config_enabled("HONEYPOT_AUTOACCEPT")
 
 # main socket server listener for responses
 class SocketListener((SocketServer.BaseRequestHandler)):
@@ -70,8 +71,9 @@ def listen_server(port,bind_interface):
             server = SocketServer.ThreadingTCPServer(('', port), SocketListener)
         else:
             server = SocketServer.ThreadingTCPServer(('%s' % bind_interface, port), SocketListener)
+	if honeypot_autoaccept:
+	    subprocess.Popen("iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT" % port, shell=True).wait()
         server.serve_forever()
-
     # if theres already something listening on this port
     except Exception:
 	# write a log if we are unable to bind to an interface

@@ -47,6 +47,14 @@ try:
     # port ranges to spawn
     port = read_config("PORTS")
 
+    # if we are running posix then lets create a new iptables chain
+    if is_posix():
+        time.sleep(2)
+        create_iptables_subset()
+        
+	# start anti_dos
+        import src.anti_dos
+
     # spawn honeypot
     import src.honeypot
 
@@ -66,14 +74,6 @@ try:
 
     # start the email handler
     import src.email_handler
-
-    # if we are running posix then lets create a new iptables chain
-    if is_posix():
-        time.sleep(2)
-        thread.start_new_thread(create_iptables_subset, ())
-
-        # start anti_dos
-        import src.anti_dos
 
     # check to see if we are using the intelligence feed
     if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
