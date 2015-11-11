@@ -68,19 +68,20 @@ def ban(ip):
             data = fileopen.read()
             if ip not in data:
                 filewrite = file("/var/artillery/banlist.txt", "a")
+                filewrite.write(ip + "\n")
+                filewrite.close()
+	    if not is_already_banned(ip):
 		ban_check = read_config("HONEYPOT_BAN").lower()
 		# if we are actually banning IP addresses
 		if ban_check == "on":
 	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-                filewrite.write(ip + "\n")
-                filewrite.close()
 		# after write, sort the banlist
 		sort_banlist()
 
         # if running windows then route attacker to some bs address
         if is_windows():
             subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
+	
 def update():
     if is_posix():
         if os.path.isdir("/var/artillery/.svn"):
@@ -201,9 +202,6 @@ def create_iptables_subset():
         subprocess.Popen("iptables -F ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         subprocess.Popen("iptables -I INPUT -j ARTILLERY", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-    #sync our iptables blocks with the existing ban file so we don't forget attackers
-    proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    iptablesbanlist = proc.stdout.readlines()
 
     if os.path.isfile(check_banlist_path()):
         banfile = file(check_banlist_path(), "r")
@@ -213,13 +211,20 @@ def create_iptables_subset():
         filewrite.close()
         banfile = file("banlist.txt", "r")
 
-
     # iterate through lines in ban file and ban them if not already banned
     for ip in banfile:
         if not ip.startswith("#"):
-            if ip not in iptablesbanlist:
+	    if not is_already_banned(ip):
 		ip = ip.strip()
                 ban(ip) 
+
+def is_already_banned(ip):
+    proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    iptablesbanlist = proc.stdout.readlines()
+    if ip in iptablesbanlist:
+	return True
+    else:
+        return False
 
 # valid if IP address is legit
 def is_valid_ip(ip):
@@ -473,6 +478,9 @@ def kill_artillery():
         print e
         pass
 
+def cleanup_artillery():
+    subprocess.Popen("iptables -D INPUT -j ARTILLERY", stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True))
+    subprocess.Popen("iptables -X ARTILLERY", stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True))
 
 # overwrite artillery banlist after certain time interval
 def refresh_log():
