@@ -59,7 +59,7 @@ def is_config_enabled(param):
 	    return config in ("on", "yes")
 
     except AttributeError:
-	return ""
+	return "off"
 
 def ban(ip):
     # ip check routine to see if its a valid IP address
