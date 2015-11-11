@@ -56,7 +56,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     self.request.close()
 
                     # if it isn't whitelisted and we are set to ban
-                    ban(self.client_address[0])
+                    ban(ip)
 
         except Exception, e:
             print "[!] Error detected. Printing: " + str(e)
