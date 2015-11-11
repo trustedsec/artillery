@@ -54,8 +54,12 @@ def read_config(param):
                 return line[1]
 
 def is_config_enabled(param):
-    config = read_config(param).lower()
-    return config in ("on", "yes")
+    try:
+	    config = read_config(param).lower()
+	    return config in ("on", "yes")
+
+    except AttributeError:
+	return ""
 
 def ban(ip):
     # ip check routine to see if its a valid IP address
