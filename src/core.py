@@ -479,8 +479,8 @@ def kill_artillery():
         pass
 
 def cleanup_artillery():
-    subprocess.Popen("iptables -D INPUT -j ARTILLERY", stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True))
-    subprocess.Popen("iptables -X ARTILLERY", stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True))
+    subprocess.Popen("iptables -D INPUT -j ARTILLERY", stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
+    subprocess.Popen("iptables -X ARTILLERY", stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
 
 # overwrite artillery banlist after certain time interval
 def refresh_log():
