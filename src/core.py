@@ -75,8 +75,8 @@ def ban(ip):
 		# if we are actually banning IP addresses
 		if ban_check == "on":
 	                subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-		# after write, sort the banlist
-		sort_banlist()
+	    # after write, sort the banlist; Do the sort after the drop has been added to ensure they are blocked as fast as possible
+	    sort_banlist()
 
         # if running windows then route attacker to some bs address
         if is_windows():
