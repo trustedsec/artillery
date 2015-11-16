@@ -92,9 +92,9 @@ def update():
             print "[!] Old installation detected that uses subversion. Fixing and moving to github."
             try:
                 shutil.rmtree("/var/artillery")
-                subprocess.Popen("git clone https://github.com/trustedsec/artillery", shell=True).wait()
+                subprocess.Popen("git clone https://github.com/binarydefense/artillery", shell=True).wait()
             except:
-                print "[!] Something failed. Please type 'git clone https://github.com/trustedsec/artillery /var/artillery' to fix!"
+                print "[!] Something failed. Please type 'git clone https://github.com/binarydefense/artillery /var/artillery' to fix!"
 
         subprocess.Popen("cd /var/artillery;git pull", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
