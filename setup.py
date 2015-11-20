@@ -15,13 +15,13 @@ Written by: Dave Kennedy (ReL1K)
 
 if os.path.isfile("/etc/init.d/artillery"):
     answer = raw_input("Artillery detected. Do you want to uninstall [y/n:] ")
-    if answer.lower() == "yes" or answer.lower() == "y":
+    if answer.lower() in ["yes", "y"]:
         answer = "uninstall"
 
 if not os.path.isfile("/etc/init.d/artillery"):
     answer = raw_input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
 
-if answer.lower() == "y" or answer.lower() == "yes":
+if answer.lower() in ["yes", "y"]:
     if is_posix():
         kill_artillery()
 
@@ -68,7 +68,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
 
     if is_posix():
         choice = raw_input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
-        if choice == "y" or choice == "yes":
+        if choice in ["y", "yes"]:
             print "[*] Checking out Artillery through github to /var/artillery"
             # if old files are there
             if os.path.isdir("/var/artillery/"):
@@ -90,7 +90,7 @@ if answer.lower() == "y" or answer.lower() == "yes":
                 subprocess.Popen("chown root:wheel /Library/LaunchDaemons/com.artillery.plist", shell=True).wait()
 
     choice = raw_input("Would you like to start Artillery now? [y/n]: ")
-    if choice == "yes" or choice == "y":
+    if choice in ["yes", "y"]:
         if is_posix():
             subprocess.Popen("/etc/init.d/artillery start", shell=True).wait()
 
