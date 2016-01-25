@@ -1,7 +1,7 @@
 #
 #
 # config module for configuration reading/writing/translating
-# 
+#
 # module is disabled for now as this breaks config reading
 
 import os
@@ -12,6 +12,7 @@ if platform.system() == "Windows":
 import yaml
 
 from src.core import *
+
 
 def get_config_path():
     path = ""
@@ -26,6 +27,7 @@ def get_config_path():
         if os.path.isfile(program_files + "\\Artillery\\config"):
             path = program_files + "\\Artillery\\config"
     return path
+
 
 def read_config(param):
     path = get_config_path()
@@ -43,6 +45,7 @@ def read_config(param):
 
     return ""
 
+
 def read_config_ini(path, param):
     fileopen = file(path, "r")
     for line in fileopen:
@@ -54,12 +57,14 @@ def read_config_ini(path, param):
                 line = line.split("=")
                 return line[1]
 
+
 def read_config_yaml(path, param):
     fileopen = open(path, "r")
     configTree = yaml.safe_load(fileopen)
     fileopen.close()
     if (configTree):
         return configTree.get(param, None)
+
 
 def is_config_enabled(param):
     config = read_config(param).lower()

@@ -21,7 +21,8 @@ if is_posix():
             # if we permit root logins trigger alert
             if match:
                 # trigger warning if match
-                warning = warning + "[!] Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\r\n\r"
+                warning = warning + \
+                    "[!] Issue identified: /etc/ssh/sshd_config allows RootLogin. An attacker can gain root access to the system if password is guessed. Recommendation: Change RootLogin yes to RootLogin no\n\r\n\r"
         match = re.search(r"Port 22\b", data)
         if match:
             if is_config_enabled("SSH_DEFAULT_PORT_CHECK"):
@@ -35,10 +36,10 @@ if is_posix():
         fileopen = file("/etc/vsftpd.conf", "r")
         data = fileopen.read()
         match = re.search("anonymous_enable=YES", data)
-        if match:	
+        if match:
             # trigger warning if match
-            warning = warning + "[!] Issue identified: /etc/vsftpd.conf allows Anonymous login. An attacker can gain a foothold to the system with absolutel zero effort. Recommendation: Change anonymous_enable yes to anonymous_enable no\n\r\n\r"
-
+            warning = warning + \
+                "[!] Issue identified: /etc/vsftpd.conf allows Anonymous login. An attacker can gain a foothold to the system with absolutel zero effort. Recommendation: Change anonymous_enable yes to anonymous_enable no\n\r\n\r"
 
     #
     # check /var/www permissions
@@ -60,7 +61,9 @@ if is_posix():
                         trigger_warning = 1
                     # if we trigger on vuln
                     if trigger_warning == 1:
-                        warning = warning + "Issue identified: %s permissions are not set to root. If an attacker compromises the system and is running under the Apache user account, could view these files. Recommendation: Change the permission of %s to root:root. Command: chown root:root %s\n\n" % (filename,filename,filename)
+                        warning = warning + \
+                            "Issue identified: %s permissions are not set to root. If an attacker compromises the system and is running under the Apache user account, could view these files. Recommendation: Change the permission of %s to root:root. Command: chown root:root %s\n\n" % (
+                                filename, filename, filename)
 
     #
     # if we had warnings then trigger alert

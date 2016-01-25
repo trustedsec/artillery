@@ -2,11 +2,14 @@
 #
 # monitor ssh and ban
 #
-import time,re, thread
+import time
+import re
+import thread
 from src.core import *
 
 monitor_frequency = int(read_config("MONITOR_FREQUENCY"))
 ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")
+
 
 def ssh_monitor(monitor_frequency):
     while 1:
@@ -58,7 +61,8 @@ def ssh_monitor(monitor_frequency):
                                 # reset SSH counter
                                 ssh_counter = 0
 
-                            # if counter is equal to 0 then we know that we need to ban
+                            # if counter is equal to 0 then we know that we
+                            # need to ban
                             if counter == 0:
                                 whitelist_match = is_whitelisted_ip(ipaddress)
                                 if whitelist_match == 0:
@@ -66,11 +70,13 @@ def ssh_monitor(monitor_frequency):
                                     alert = "Artillery has blocked (blacklisted) the following IP for SSH brute forcing violations: " + ipaddress
                                     warn_the_good_guys(subject, alert)
 
-                                    # do the actual ban, this is pulled from src.core
+                                    # do the actual ban, this is pulled from
+                                    # src.core
                                     ban(ipaddress)
                                     ssh_counter = 0
 
-                                    # wait one to make sure everything is caught up
+                                    # wait one to make sure everything is
+                                    # caught up
                                     time.sleep(1)
             # sleep for defined time
             time.sleep(monitor_frequency)
@@ -79,4 +85,4 @@ def ssh_monitor(monitor_frequency):
             print "[*] An error in ssh monitor occured. Printing it out here: " + str(e)
 
 if is_posix():
-    thread.start_new_thread(ssh_monitor,(monitor_frequency,))
+    thread.start_new_thread(ssh_monitor, (monitor_frequency,))

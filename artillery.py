@@ -8,7 +8,11 @@
 # Still a work in progress.
 #
 #####################################################################
-import time,sys,thread,os,subprocess
+import time
+import sys
+import thread
+import os
+import subprocess
 
 # check if its installed
 if not os.path.isfile("/var/artillery/artillery.py"):
@@ -21,11 +25,11 @@ from src.core import *
 
 # create the database directories if they aren't there
 if not os.path.isdir("/var/artillery/database/"):
-        os.makedirs("/var/artillery/database/")
+    os.makedirs("/var/artillery/database/")
 if not os.path.isfile("/var/artillery/database/temp.database"):
-        filewrite = file("/var/artillery/database/temp.database", "w")
-        filewrite.write("")
-        filewrite.close()
+    filewrite = file("/var/artillery/database/temp.database", "w")
+    filewrite.write("")
+    filewrite.close()
 
 # let the logfile know artillery has started successfully
 write_log("[*] %s: Artillery has started successfully." % (grab_time()))
@@ -51,7 +55,7 @@ try:
     if is_posix():
         time.sleep(2)
         create_iptables_subset()
-	# start anti_dos
+        # start anti_dos
         import src.anti_dos
 
     # spawn honeypot
@@ -78,12 +82,12 @@ try:
     if is_config_enabled("THREAT_SERVER"):
         thread.start_new_thread(threat_server, ())
 
-
     # recycle IP addresses if enabled
     if is_config_enabled("RECYCLE_IPS"):
         thread.start_new_thread(refresh_log, ())
 
-    # pull additional source feeds from external parties other than artillery - pulls every 2 hours or ATIF threat feeds
+    # pull additional source feeds from external parties other than artillery
+    # - pulls every 2 hours or ATIF threat feeds
     thread.start_new_thread(pull_source_feeds, ())
 
     # let the program to continue to run

@@ -6,7 +6,9 @@
 # added by e @ Nov 5th
 #############################
 
-import time,re, thread
+import time
+import re
+import thread
 from src.core import *
 
 send_email = read_config("ALERT_USER_EMAIL")
@@ -16,6 +18,8 @@ monitor_time = read_config("MONITOR_FREQUENCY")
 monitor_time = int(monitor_time)
 ftp_attempts = read_config("FTP_BRUTE_ATTEMPTS")
 # check for whitelist
+
+
 def ftp_monitor(monitor_time):
     while 1:
         # for debian base
@@ -24,7 +28,6 @@ def ftp_monitor(monitor_time):
         else:
             print "Has not found configuration file for ftp. Ftp monitor now stops."
             break
-
 
         if not os.path.isfile("/var/artillery/banlist.txt"):
             # create a blank file
@@ -60,33 +63,41 @@ def ftp_monitor(monitor_time):
                                 # reset FTP counter
                                 ftp_counter = 0
 
-                            # if counter is equal to 0 then we know that we need to ban
+                            # if counter is equal to 0 then we know that we
+                            # need to ban
                             if counter == 0:
                                 whitelist_match = whitelist(ipaddress)
                                 if whitelist_match == 0:
 
-                                    # if we have email alerting on we can send email messages
-                                    email_alerts = read_config("EMAIL_ALERTS").lower()
+                                    # if we have email alerting on we can send
+                                    # email messages
+                                    email_alerts = read_config(
+                                        "EMAIL_ALERTS").lower()
                                     # check email frequency
-                                    email_frequency = read_config("EMAIL_FREQUENCY").lower()
+                                    email_frequency = read_config(
+                                        "EMAIL_FREQUENCY").lower()
 
                                     if email_alerts == "on" and email_frequency == "off":
                                         mail(send_email,
-                                        "[!] Artillery has banned an FTP brute force. [!]",
-                                        "The following IP has been blocked: " + ipaddress)
+                                             "[!] Artillery has banned an FTP brute force. [!]",
+                                             "The following IP has been blocked: " + ipaddress)
 
                                     # check frequency is allowed
                                     if email_alerts == "on" and email_frequency == "on":
-                                        prep_email("Artillery has blocked (blacklisted) the following IP for FTP brute forcing violations: " + ipaddress + "\n")
+                                        prep_email(
+                                            "Artillery has blocked (blacklisted) the following IP for FTP brute forcing violations: " + ipaddress + "\n")
 
                                     # write out to log
-                                    write_log("Artillery has blocked (blacklisted) the following IP for FTP brute forcing violations: " + ipaddress)
+                                    write_log(
+                                        "Artillery has blocked (blacklisted) the following IP for FTP brute forcing violations: " + ipaddress)
 
-                                    # do the actual ban, this is pulled from src.core
+                                    # do the actual ban, this is pulled from
+                                    # src.core
                                     ban(ipaddress)
                                     ftp_counter = 0
 
-                                    # wait one to make sure everything is caught up
+                                    # wait one to make sure everything is
+                                    # caught up
                                     time.sleep(1)
             # sleep for defined time
             time.sleep(monitor_time)
@@ -96,4 +107,4 @@ def ftp_monitor(monitor_time):
 
 if is_posix():
     # start thread
-    thread.start_new_thread(ftp_monitor,(monitor_time,))
+    thread.start_new_thread(ftp_monitor, (monitor_time,))
