@@ -308,34 +308,6 @@ def printCIDR(attacker_ip):
     # return the trigger - 1 = whitelisted 0 = not found in whitelist
     return trigger
 
-def intelligence_update():
-    try:
-    # loop forever
-        while 1:
-            try:
-
-                threat_feed = read_config("THREAT_FEED")
-                threat_feed = threat_feed.split(",")
-                # allow multiple feeds if needed
-                for threats in threat_feed:
-                    banlist = urllib.urlopen('%s' % (threats))
-		    print "start"
-                    for line in banlist:
-                        line = line.rstrip()
-                        ban(line)
-                        # sleep a millisecond as to not spike CPU up if we are using ban
-			ban_check = read_config("HONEYPOT_BAN").lower()
-			if ban_check == "on":
-	                        time.sleep(1)
-                print "finish"
-                # wait 1 hour
-                time.sleep(3600)
-
-            except Exception: pass
-
-    except Exception, e:
-        print "Unable to fully load banlist, something went wrong: " + str(e)
-
 def threat_server():
     public_http = read_config("THREAT_LOCATION")
     if os.path.isdir(public_http):
