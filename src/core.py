@@ -63,8 +63,9 @@ def is_config_enabled(param):
 
 def ban(ip):
     # ip check routine to see if its a valid IP address
+    ip = ip.rstrip()
     if not ip.startswith("#"):
-     if not ip.startswith("0.0"):
+     if not ip.startswith("0."):
       if is_valid_ipv4(ip.strip()):
         # if we are running nix variant then trigger ban through iptables
         if is_posix():
@@ -524,13 +525,19 @@ def format_ips(url):
       # iterate through
       for line in f:
           line=line.rstrip()
+	  # we are using OTX reputation here
+	  if "ALL:" in line:
+		try:
+			line = line.split(" ")[1]
+		except: pass
           if not "#" in line:
               if not "//" in line:  
                   # if we don't have the IP yet
                   if not line in fileopen:
 		      # make sure valid ipv4
-		      if is_valid_ipv4(line.strip()):
-                              filewrite.write(line + "\n")
+		      if not line.startswith("0."):
+			      if is_valid_ipv4(line.strip()):
+                              	filewrite.write(line + "\n")
       # close the file
       filewrite.close()
 
@@ -538,7 +545,7 @@ def format_ips(url):
 def pull_source_feeds():
 	while 1:
 		# pull source feeds
-		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt']
+		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
 		for urls in url:
 			format_ips(urls)	
 		time.sleep(7200) # sleep for 2 hours
@@ -561,7 +568,7 @@ def sort_banlist():
 	ip_filter = ""
 	for ip in ips:
 		if is_valid_ipv4(ip.strip()):
-			if ip != "0.0.0.0":
+			if not ip.startswith("0."):
 				ip_filter = ip_filter + ip.rstrip() + "\n"
 	ips = ip_filter
 	ips = ips.replace(banner, "")
