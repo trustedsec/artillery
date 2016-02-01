@@ -510,14 +510,13 @@ def refresh_log():
 # format the ip addresses and check to ensure they aren't duplicates
 def format_ips(url):
   ips = ""
-  print "HERE"
   for urls in url:
 	  try:
 	      req = urllib2.Request(urls)      
 	      f = urllib2.urlopen(req).readlines()
-	      for ip in f:
-		ips = ips + ip
-              ips = ips + "\n"
+	      for line in f:
+			line = line.rstrip()
+			ips = ips + line + "\n"
 
 	  except urllib2.HTTPError, err:
 	      if err.code == '404':
@@ -528,14 +527,13 @@ def format_ips(url):
 	        # Name or service not found known, DNS unreachable, try again later!
 	        write_log("Received URL Error, Reason: {}".format(err.reason))
 	        return
-  
+
   try:
       fileopen = file("/var/artillery/banlist.txt", "r").read()
       # write the file
       filewrite = file("/var/artillery/banlist.txt", "a")
       # iterate through
-      for line in ips:
-	  print line
+      for line in ips.split("\n"):
           line=line.rstrip()
 	  # we are using OTX reputation here
 	  if "ALL:" in line:
@@ -553,7 +551,7 @@ def format_ips(url):
       # close the file
       filewrite.close()
   except Exception as err:
-	print str(err)
+	print "Error identified as :" + str(err) + " with line: " + str(line)
 	pass
 
 
