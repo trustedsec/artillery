@@ -51,7 +51,6 @@ try:
     if is_posix():
         time.sleep(2)
         create_iptables_subset()
-        
 	# start anti_dos
         import src.anti_dos
 
@@ -75,10 +74,6 @@ try:
     # start the email handler
     import src.email_handler
 
-    # check to see if we are using the intelligence feed
-    if is_config_enabled("THREAT_INTELLIGENCE_FEED"):
-        thread.start_new_thread(intelligence_update, ())
-
     # check to see if we are a threat server or not
     if is_config_enabled("THREAT_SERVER"):
         thread.start_new_thread(threat_server, ())
@@ -88,10 +83,8 @@ try:
     if is_config_enabled("RECYCLE_IPS"):
         thread.start_new_thread(refresh_log, ())
 
-
     # pull additional source feeds from external parties other than artillery - pulls every 2 hours
-    if is_config_enabled("SOURCE_FEEDS"):
-        thread.start_new_thread(pull_source_feeds, ())
+    thread.start_new_thread(pull_source_feeds, ())
 
     # let the program to continue to run
     while 1:

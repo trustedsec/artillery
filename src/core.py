@@ -218,7 +218,7 @@ def create_iptables_subset():
 
 
     # if we are banning
-    if read_config("HONEYPOT_BAN") == "on":
+    if read_config("HONEYPOT_BAN").lower() == "on":
 	    # iterate through lines in ban file and ban them if not already banned
 	    for ip in banfile:
 	        if not ip.startswith("#"):
@@ -319,6 +319,7 @@ def intelligence_update():
                 # allow multiple feeds if needed
                 for threats in threat_feed:
                     banlist = urllib.urlopen('%s' % (threats))
+		    print "start"
                     for line in banlist:
                         line = line.rstrip()
                         ban(line)
@@ -326,7 +327,7 @@ def intelligence_update():
 			ban_check = read_config("HONEYPOT_BAN").lower()
 			if ban_check == "on":
 	                        time.sleep(1)
-
+                print "finish"
                 # wait 1 hour
                 time.sleep(3600)
 
@@ -559,7 +560,17 @@ def format_ips(url):
 def pull_source_feeds():
 	while 1:
 		# pull source feeds
-		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
+		url = ""
+		# if we are using source feeds
+		if read_config("SOURCE_FEEDS").lower() == "on":
+			url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
+		# if we are using threati ntelligence feeds
+		if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
+			threat_feed = read_config("THREAT_FEED")
+			if threat_feed != "":
+				threat_feed = threat_feed.split(",")
+				for threats in threat_feed: url.append(threats)
+
 		format_ips(url)	
 		time.sleep(7200) # sleep for 2 hours
 	
