@@ -83,7 +83,7 @@ try:
     if is_config_enabled("RECYCLE_IPS"):
         thread.start_new_thread(refresh_log, ())
 
-    # pull additional source feeds from external parties other than artillery - pulls every 2 hours
+    # pull additional source feeds from external parties other than artillery - pulls every 2 hours or ATIF threat feeds
     thread.start_new_thread(pull_source_feeds, ())
 
     # let the program to continue to run

@@ -6,6 +6,8 @@ version 1.6
 * added OTX reputation IP lists to Artillery
 * sped up artillery boot time significantly when ban is turned off
 * sped up time for URL feeds and put them into one central function
+* greatly increased time for threat intelligence feed pulls and removed old intelligence update function and centralized into source feeds with appropriate checks
+* added sort IP after pulling in exteranl source feeds and ATIF
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 1.5.1
