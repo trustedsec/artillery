@@ -216,13 +216,16 @@ def create_iptables_subset():
         filewrite.close()
         banfile = file("banlist.txt", "r")
 
-    # iterate through lines in ban file and ban them if not already banned
-    for ip in banfile:
-        if not ip.startswith("#"):
-	    if not is_already_banned(ip):
-		ip = ip.strip()
-                ban(ip) 
 
+    # if we are banning
+    if read_config("HONEYPOT_BAN") == "on":
+	    # iterate through lines in ban file and ban them if not already banned
+	    for ip in banfile:
+	        if not ip.startswith("#"):
+		    if not is_already_banned(ip):
+			ip = ip.strip()
+	                ban(ip) 
+	
 def is_already_banned(ip):
     proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     iptablesbanlist = proc.stdout.readlines()
@@ -506,24 +509,33 @@ def refresh_log():
 
 # format the ip addresses and check to ensure they aren't duplicates
 def format_ips(url):
+  ips = ""
+  print "HERE"
+  for urls in url:
+	  try:
+	      req = urllib2.Request(urls)      
+	      f = urllib2.urlopen(req).readlines()
+	      for ip in f:
+		ips = ips + ip
+              ips = ips + "\n"
+
+	  except urllib2.HTTPError, err:
+	      if err.code == '404':
+	          # Error 404, page not found!
+	          write_log("HTTPError: Error 404, URL {} not found.".format(urls))
+	          return 
+	  except urllib2.URLError, err: 
+	        # Name or service not found known, DNS unreachable, try again later!
+	        write_log("Received URL Error, Reason: {}".format(err.reason))
+	        return
+  
   try:
-      req = urllib2.Request(url)      
-      f = urllib2.urlopen(req).readlines()
-  except urllib2.HTTPError, err:
-      if err.code == '404':
-          # Error 404, page not found!
-          write_log("HTTPError: Error 404, URL {} not found.".format(url))
-          return 
-  except urllib2.URLError, err: 
-        # Name or service not found known, DNS unreachable, try again later!
-        write_log("Received URL Error, Reason: {}".format(err.reason))
-        return
-  else:
       fileopen = file("/var/artillery/banlist.txt", "r").read()
       # write the file
       filewrite = file("/var/artillery/banlist.txt", "a")
       # iterate through
-      for line in f:
+      for line in ips:
+	  print line
           line=line.rstrip()
 	  # we are using OTX reputation here
 	  if "ALL:" in line:
@@ -540,14 +552,17 @@ def format_ips(url):
                               	filewrite.write(line + "\n")
       # close the file
       filewrite.close()
+  except Exception as err:
+	print str(err)
+	pass
+
 
 # update threat intelligence feed with other sources - special thanks for the feed list from here: http://www.deepimpact.io/blog/splunkandfreeopen-sourcethreatintelligencefeeds
 def pull_source_feeds():
 	while 1:
 		# pull source feeds
 		url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt','https://zeustracker.abuse.ch/blocklist.php?download=badips','https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist','http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
-		for urls in url:
-			format_ips(urls)	
+		format_ips(url)	
 		time.sleep(7200) # sleep for 2 hours
 	
 def sort_banlist():

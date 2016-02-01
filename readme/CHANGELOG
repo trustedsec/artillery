@@ -1,4 +1,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.6
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed issue where 0.x.x.x could show up on banlist
+* added OTX reputation IP lists to Artillery
+* sped up artillery boot time significantly when ban is turned off
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.5.1
 ~~~~~~~~~~~~~~~~~~~~~~
 
