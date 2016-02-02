@@ -3,6 +3,7 @@ version 1.7
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * converstion to Python3 and adding support for python3
+* misc fixes for backwards compatibility for python2/3
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 1.6.1

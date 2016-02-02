@@ -563,8 +563,12 @@ def format_ips(url):
             f = urlopen(urls).readlines()
             for line in f:
                 line = line.rstrip()
-                line = line.decode("ascii")
-                ips = ips + line + "\n"
+                # stupid conversion from py2 to py3 smh
+                try:
+                    ips = ips + line + "\n"
+                except:
+                    line = line.decode("ascii")
+                    ips = ips + line + "\n"
 
         except Exception as err:
             if err == '404':

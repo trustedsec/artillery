@@ -78,11 +78,13 @@ def monitor_system(time_wait):
     # hash the original database
     if os.path.isfile("/var/artillery/database/integrity.database"):
         database_file = open("/var/artillery/database/integrity.database", "r")
-        database_content = database_file.read().encode('utf-8')
+        try: database_content = database_file.read().encode('utf-8')
+        except: database_content = database_file.read()
         if os.path.isfile("/var/artillery/database/temp.database"):
             temp_database_file = open(
                 "/var/artillery/database/temp.database", "r")
-            temp_hash = temp_database_file.read().encode('utf-8')
+            try: temp_hash = temp_database_file.read().encode('utf-8')
+            except: temp_hash = temp_database_file.read()
 
             # hash the databases then compare
             database_hash = hashlib.sha512()
