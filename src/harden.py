@@ -26,8 +26,21 @@ if is_posix():
         match = re.search(r"Port 22\b", data)
         if match:
             if is_config_enabled("SSH_DEFAULT_PORT_CHECK"):
-                # trigger warning is match
+                # trigger warning if match
                 warning = warning + "[!] Issue identified: /etc/ssh/sshd_config. SSH is running on the default port 22. An attacker commonly scans for these type of ports. Recommendation: Change the port to something high that doesn't get picked up by typical port scanners.\n\r\n\r"
+
+        # add SSH detection for password auth
+        match = re.search("PasswordAuthentication yes", data)
+        # if password authentication is used
+        if match:
+            warning = warning + \
+                "[!] Issue identified: Password authentication enabled. An attacker may be able to brute force weak passwords.\n\r\n\r"
+            match = re.search("Protocol 1|Protocol 2,1", data)
+        #
+        if match:
+            # triggered
+            warning = warning + \
+                "[!] Issue identified: SSH Protocol 1 enabled which is potentially vulnerable to MiTM attacks. https://www.kb.cert.org/vuls/id/684820\n\r\n\r"
 
     #
     # check ftp config
