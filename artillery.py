@@ -1,13 +1,13 @@
 #!/usr/bin/python
-#####################################################################
+################################################################################
 #
-#  Artillery v1.0
+#  Artillery - An active honeypotting tool and threat intelligence feed
 #
-# Written by Dave Kennedy (ReL1K)
+# Written by Dave Kennedy (ReL1K) @HackingDave
 #
-# Still a work in progress.
+# A Binary Defense Project (https://www.binarydefense.com) @Binary_Defense
 #
-#####################################################################
+################################################################################
 import time
 import sys
 import thread
