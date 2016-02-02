@@ -10,13 +10,15 @@
 ################################################################################
 import time
 import sys
-import thread
+# needed for backwards compatibility of python2 vs 3 - need to convert to threading eventually
+try: import thread
+except ImportError: import _thread as thread
 import os
 import subprocess
 
 # check if its installed
 if not os.path.isfile("/var/artillery/artillery.py"):
-    print "[*] Artillery is not installed, running setup.py.."
+    print("[*] Artillery is not installed, running setup.py..")
     subprocess.Popen("python setup.py", shell=True).wait()
     sys.exit()
 
@@ -27,14 +29,14 @@ from src.core import *
 if not os.path.isdir("/var/artillery/database/"):
     os.makedirs("/var/artillery/database/")
 if not os.path.isfile("/var/artillery/database/temp.database"):
-    filewrite = file("/var/artillery/database/temp.database", "w")
+    filewrite = open("/var/artillery/database/temp.database", "w")
     filewrite.write("")
     filewrite.close()
 
 # let the logfile know artillery has started successfully
 write_log("[*] %s: Artillery has started successfully." % (grab_time()))
 if is_config_enabled("CONSOLE_LOGGING"):
-    print "[*] %s: Artillery has started successfully.\n[*] Console logging enabled.\n" % (grab_time())
+    print("[*] %s: Artillery has started successfully.\n[*] Console logging enabled.\n" % (grab_time()))
 
 # prep everything for artillery first run
 check_banlist_path()
@@ -95,16 +97,16 @@ try:
         try:
             time.sleep(100000)
         except KeyboardInterrupt:
-            print "\n[!] Exiting Artillery... hack the gibson.\n"
+            print("\n[!] Exiting Artillery... hack the gibson.\n")
             sys.exit()
 
-except sys.excepthook, e:
-    print "Excepthook exception: " + format(e)
-    pass
+#except sys.excepthook as e:
+#    print("Excepthook exception: " + format(e))
+#    pass
 
 except KeyboardInterrupt:
     sys.exit()
 
-except Exception, e:
-    print "General exception: " + format(e)
+except Exception as e:
+    print("General exception: " + format(e))
     sys.exit()

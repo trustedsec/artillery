@@ -6,7 +6,9 @@
 #
 import shutil
 import time
-import thread
+# needed for backwards compatibility of python2 vs 3 - need to convert to threading eventually
+try: import thread
+except ImportError: import _thread as thread
 from src.core import *
 
 # check how long to send the email

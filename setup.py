@@ -10,11 +10,11 @@ import shutil
 from src.core import *
 import sys
 
-print '''
+print('''
 Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security tool used to protect your nix systems.
 
 Written by: Dave Kennedy (ReL1K)
-'''
+''')
 
 if os.path.isfile("/etc/init.d/artillery"):
     answer = raw_input("Artillery detected. Do you want to uninstall [y/n:] ")
@@ -22,14 +22,13 @@ if os.path.isfile("/etc/init.d/artillery"):
         answer = "uninstall"
 
 if not os.path.isfile("/etc/init.d/artillery"):
-    answer = raw_input(
-        "Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
+    answer = raw_input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
 
 if answer.lower() in ["yes", "y"]:
     if is_posix():
         kill_artillery()
 
-        print "[*] Beginning installation. This should only take a moment."
+        print("[*] Beginning installation. This should only take a moment.")
 
         # if directories aren't there then create them
         if not os.path.isdir("/var/artillery/logs"):
@@ -40,7 +39,7 @@ if answer.lower() in ["yes", "y"]:
             os.makedirs("/var/artillery/src/program_junk/")
 
         # install to rc.local
-        print "[*] Adding artillery into startup through init scripts.."
+        print("[*] Adding artillery into startup through init scripts..")
         if os.path.isdir("/etc/init.d"):
             if not os.path.isfile("/etc/init.d/artillery"):
                 fileopen = file("src/startup_artillery", "r")
@@ -48,7 +47,7 @@ if answer.lower() in ["yes", "y"]:
                 filewrite = file("/etc/init.d/artillery", "w")
                 filewrite.write(config)
                 filewrite.close()
-                print "[*] Triggering update-rc.d on artillery to automatic start..."
+                print("[*] Triggering update-rc.d on artillery to automatic start...")
                 subprocess.Popen(
                     "chmod +x /etc/init.d/artillery", shell=True).wait()
                 subprocess.Popen(
@@ -73,18 +72,17 @@ if answer.lower() in ["yes", "y"]:
         shutil.copytree(install_path, program_files + "\\Artillery\\")
 
     if is_posix():
-        choice = raw_input(
-            "Do you want to keep Artillery updated? (requires internet) [y/n]: ")
+        choice = raw_input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
         if choice in ["y", "yes"]:
-            print "[*] Checking out Artillery through github to /var/artillery"
+            print("[*] Checking out Artillery through github to /var/artillery")
             # if old files are there
             if os.path.isdir("/var/artillery/"):
                 shutil.rmtree('/var/artillery')
             subprocess.Popen(
                 "git clone https://github.com/binarydefense/artillery /var/artillery/", shell=True).wait()
-            print "[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'"
+            print("[*] Finished. If you want to update Artillery go to /var/artillery and type 'git pull'")
         else:
-            print "[*] Copying setup files over..."
+            print("[*] Copying setup files over...")
             subprocess.Popen("cp -rf * /var/artillery/", shell=True).wait()
 
         # if os is Mac Os X than create a .plist daemon - changes added by
@@ -92,11 +90,11 @@ if answer.lower() in ["yes", "y"]:
         if os.path.isdir("/Library/LaunchDaemons"):
             # check if file is already in place
             if not os.path.isfile("/Library/LaunchDaemons/com.artillery.plist"):
-                print "[*] Creating com.artillery.plist in your Daemons directory"
+                print("[*] Creating com.artillery.plist in your Daemons directory")
                 filewrite = file(
                     "/Library/LaunchDaemons/com.artillery.plist", "w")
                 filewrite.write('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n<key>Disabled</key>\n<false/>\n<key>ProgramArguments</key>\n<array>\n<string>/usr/bin/python</string>\n<string>/var/artillery/artillery.py</string>\n</array>\n<key>KeepAlive</key>\n<true/>\n<key>RunAtLoad</key>\n<true/>\n<key>Label</key>\n<string>com.artillery</string>\n<key>Debug</key>\n<true/>\n</dict>\n</plist>')
-                print "[*] Adding right permissions"
+                print("[*] Adding right permissions")
                 subprocess.Popen(
                     "chown root:wheel /Library/LaunchDaemons/com.artillery.plist", shell=True).wait()
 
@@ -106,7 +104,7 @@ if answer.lower() in ["yes", "y"]:
             subprocess.Popen("/etc/init.d/artillery start", shell=True).wait()
 
     if is_posix():
-        print "[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking.."
+        print("[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking..")
 
 if answer == "uninstall":
     if is_posix():
@@ -114,4 +112,4 @@ if answer == "uninstall":
         subprocess.Popen("rm -rf /var/artillery", shell=True)
         subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
         kill_artillery()
-        print "[*] Artillery has been uninstalled. Manually kill the process if it is still running."
+        print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.")

@@ -8,7 +8,7 @@
 
 import time
 import re
-import thread
+import _thread
 from src.core import *
 
 send_email = read_config("ALERT_USER_EMAIL")
@@ -26,7 +26,7 @@ def ftp_monitor(monitor_time):
         if os.path.isfile("/var/log/vsftpd.log"):
             fileopen1 = file("/var/log/auth.log", "r")
         else:
-            print "Has not found configuration file for ftp. Ftp monitor now stops."
+            print("Has not found configuration file for ftp. Ftp monitor now stops.")
             break
 
         if not os.path.isfile("/var/artillery/banlist.txt"):
@@ -102,8 +102,8 @@ def ftp_monitor(monitor_time):
             # sleep for defined time
             time.sleep(monitor_time)
 
-        except Exception, e:
-            print "[*] An error in ftp monitor occured. Printing it out here: " + str(e)
+        except Exception as e:
+            print("[*] An error in ftp monitor occured. Printing it out here: " + str(e))
 
 if is_posix():
     # start thread

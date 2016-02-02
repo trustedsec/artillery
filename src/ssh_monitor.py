@@ -4,7 +4,9 @@
 #
 import time
 import re
-import thread
+# needed for backwards compatibility of python2 vs 3 - need to convert to threading eventually
+try: import thread
+except ImportError: import _thread as thread
 from src.core import *
 
 monitor_frequency = int(read_config("MONITOR_FREQUENCY"))
@@ -15,23 +17,23 @@ def ssh_monitor(monitor_frequency):
     while 1:
         # for debian base
         if os.path.isfile("/var/log/auth.log"):
-            fileopen1 = file("/var/log/auth.log", "r")
+            fileopen1 = open("/var/log/auth.log", "r")
 
             # for OS X
             if os.path.isfile("/var/log/secure.log"):
-                fileopen1 = file("/var/log/secure.log", "r")
+                fileopen1 = open("/var/log/secure.log", "r")
 
         # for centOS
         if os.path.isfile("/var/log/secure"):
-            fileopen1 = file("/var/log/secure", "r")
+            fileopen1 = open("/var/log/secure", "r")
 
         # for Debian
         if os.path.isfile("/var/log/faillog"):
-            fileopen1 = file("/var/log/faillog", "r")
+            fileopen1 = open("/var/log/faillog", "r")
 
         if not os.path.isfile("/var/artillery/banlist.txt"):
             # create a blank file
-            filewrite = file("/var/artillery/banlist.txt", "w")
+            filewrite = open("/var/artillery/banlist.txt", "w")
             filewrite.write("")
             filewrite.close()
 
@@ -41,7 +43,7 @@ def ssh_monitor(monitor_frequency):
             counter = 0
             for line in fileopen1:
                 counter = 0
-                fileopen2 = file("/var/artillery/banlist.txt", "r")
+                fileopen2 = open("/var/artillery/banlist.txt", "r")
                 line = line.rstrip()
                 # search for bad ssh
                 match = re.search("Failed password for", line)
@@ -81,8 +83,8 @@ def ssh_monitor(monitor_frequency):
             # sleep for defined time
             time.sleep(monitor_frequency)
 
-        except Exception, e:
-            print "[*] An error in ssh monitor occured. Printing it out here: " + str(e)
+        except Exception as e:
+            print("[*] An error in ssh monitor occured. Printing it out here: " + str(e))
 
 if is_posix():
     thread.start_new_thread(ssh_monitor, (monitor_frequency,))

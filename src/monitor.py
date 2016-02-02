@@ -7,7 +7,9 @@ import re
 import hashlib
 import time
 import subprocess
-import thread
+# needed for backwards compatibility of python2 vs 3 - need to convert to threading eventually
+try: import thread
+except ImportError: import _thread as thread
 import datetime
 import shutil
 from src.core import *
@@ -44,7 +46,7 @@ def monitor_system(time_wait):
                             # we check here
                             if os.path.isfile(filename):
                                 try:
-                                    fileopen = file(filename, "rb")
+                                    fileopen = open(filename, "rb")
                                     data = fileopen.read()
 
                                 except:
@@ -61,7 +63,7 @@ def monitor_system(time_wait):
                                 total_compare = total_compare + compare
 
     # write out temp database
-    temp_database_file = file("/var/artillery/database/temp.database", "w")
+    temp_database_file = open("/var/artillery/database/temp.database", "w")
     temp_database_file.write(total_compare)
     temp_database_file.close()
 
@@ -69,18 +71,18 @@ def monitor_system(time_wait):
     # create a database then compare
     if not os.path.isfile("/var/artillery/database/integrity.database"):
         # prep the integrity database to be written for first time
-        database_file = file("/var/artillery/database/integrity.database", "w")
+        database_file = open("/var/artillery/database/integrity.database", "w")
         database_file.write(total_compare)
         database_file.close()
 
     # hash the original database
     if os.path.isfile("/var/artillery/database/integrity.database"):
-        database_file = file("/var/artillery/database/integrity.database", "r")
-        database_content = database_file.read()
+        database_file = open("/var/artillery/database/integrity.database", "r")
+        database_content = database_file.read().encode('utf-8')
         if os.path.isfile("/var/artillery/database/temp.database"):
-            temp_database_file = file(
+            temp_database_file = open(
                 "/var/artillery/database/temp.database", "r")
-            temp_hash = temp_database_file.read()
+            temp_hash = temp_database_file.read().encode('utf-8')
 
             # hash the databases then compare
             database_hash = hashlib.sha512()

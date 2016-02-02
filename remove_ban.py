@@ -17,7 +17,7 @@ try:
         filewrite.write(data)
         filewrite.close()
 
-        print "Listing all iptables looking for a match... if there is a massive amount of blocked IP's this could take a few minutes.."
+        print("Listing all iptables looking for a match... if there is a massive amount of blocked IP's this could take a few minutes..")
         proc = subprocess.Popen("iptables -L ARTILLERY -n -v --line-numbers | grep %s" % (
             ipaddress), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
@@ -28,16 +28,16 @@ try:
                 # this is the rule number
                 line = line.split(" ")
                 line = line[0]
-                print line
+                print(line)
                 # delete it
                 subprocess.Popen("iptables -D ARTILLERY %s" % (line),
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
 
     # if not valid then flag
     else:
-        print "[!] Not a valid IP Address. Exiting."
+        print("[!] Not a valid IP Address. Exiting.")
         sys.exit()
 
 except IndexError:
-    print "Description: Simple removal of IP address from banned sites."
-    print "[!] Usage: remove_ban.py <ip_address_to_ban>"
+    print("Description: Simple removal of IP address from banned sites.")
+    print("[!] Usage: remove_ban.py <ip_address_to_ban>")

@@ -3,13 +3,16 @@
 # this is the honeypot stuff
 #
 #
-import thread
+# needed for backwards compatibility of python2 vs 3 - need to convert to threading eventually
+try: import thread
+except ImportError: import _thread as thread
 import socket
 import sys
 import re
 import subprocess
 import time
-import SocketServer
+try: import SocketServer
+except ImportError: import socketserver as SocketServer
 import os
 import random
 import datetime
@@ -65,8 +68,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     # if it isn't whitelisted and we are set to ban
                     ban(ip)
 
-        except Exception, e:
-            print "[!] Error detected. Printing: " + str(e)
+        except Exception as e:
+            print("[!] Error detected. Printing: " + str(e))
             pass
 
 # here we define a basic server
