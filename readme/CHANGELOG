@@ -3,6 +3,7 @@ version 1.6.1
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * put everything into pep8 format
+* added password auth check thanks to benichmt1 git pull request
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 1.6
