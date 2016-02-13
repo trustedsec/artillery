@@ -8,7 +8,8 @@
 
 import time
 import re
-import _thread
+try: import thread
+except ImportError: import _thread as thread
 from src.core import *
 
 send_email = read_config("ALERT_USER_EMAIL")
