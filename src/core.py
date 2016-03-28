@@ -368,7 +368,7 @@ def threat_server():
         while 1:
             subprocess.Popen("cp /var/artillery/banlist.txt %s" %
                              (public_http), shell=True).wait()
-            time.sleep(800)
+            time.sleep(300)
 
 # send the message then if its local or remote
 
