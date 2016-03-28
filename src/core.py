@@ -419,6 +419,7 @@ def syslog(message):
     # if we don't want to use local syslog and just write to file in
     # logs/alerts.log
     if type == "file":
+	if not os.path.isdir("/var/artillery/logs"): os.makedirs("/var/artillery/logs")
         if not os.path.isfile("/var/artillery/logs/alerts.log"):
             filewrite = open("/var/artillery/logs/alerts.log", "w")
             filewrite.write("***** Artillery Alerts Log *****\n")
