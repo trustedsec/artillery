@@ -4,11 +4,12 @@
 #
 #
 import smtplib
-from email import *
-#from email.MIMEMultipart import MIMEMultipart
-#from email.MIMEBase import MIMEBase
-#from email.MIMEText import MIMEText
-#from email import Encoders
+try:
+    from email.MIMEMultipart import MIMEMultipart
+    from email.MIMEBase import MIMEBase
+    from email.MIMEText import MIMEText
+    from email import Encoders
+except IndexError: from email import *
 import os
 import re
 import subprocess
