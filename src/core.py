@@ -618,9 +618,11 @@ def pull_source_feeds():
         counter = 0
         # if we are using source feeds
         if read_config("SOURCE_FEEDS").lower() == "on":
-            url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt', 'https://zeustracker.abuse.ch/blocklist.php?download=badips',
-                   'https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist', 'http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
-            counter = 1
+            if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
+                url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt', 'https://zeustracker.abuse.ch/blocklist.php?download=badips',
+                       'https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist', 'http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
+                counter = 1
+
         # if we are using threati ntelligence feeds
         if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
             threat_feed = read_config("THREAT_FEED")
@@ -630,6 +632,7 @@ def pull_source_feeds():
                     url.append(threats)
 
             counter = 1
+
         # if we used source feeds or ATIF
         if counter == 1:
             format_ips(url)
