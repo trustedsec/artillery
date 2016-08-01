@@ -9,7 +9,7 @@ import signal
 from src.core import *
 
 proc = subprocess.Popen(
-    "ps -A x | grep artiller[y]", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    "ps -A x | grep artiller[y].py", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 # kill running instance of artillery
 kill_artillery()
 
