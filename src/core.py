@@ -391,8 +391,6 @@ def threat_server():
 def syslog(message):
     type = read_config("SYSLOG_TYPE").lower()
 
-    print "YO"
-    print message
     # if we are sending remote syslog
     if type == "remote":
 
@@ -427,7 +425,6 @@ def syslog(message):
 
     # if we are sending local syslog messages
     if type == "local":
-        print "YOLO"
         my_logger = logging.getLogger('Artillery')
         my_logger.setLevel(logging.DEBUG)
         handler = logging.handlers.SysLogHandler(address='/dev/log')
