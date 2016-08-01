@@ -10,6 +10,9 @@ import shutil
 from src.core import *
 import sys
 
+try: input = raw_input
+except NameError: pass
+
 print('''
 Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security tool used to protect your nix systems.
 
@@ -17,12 +20,12 @@ Written by: Dave Kennedy (ReL1K)
 ''')
 
 if os.path.isfile("/etc/init.d/artillery"):
-    answer = raw_input("Artillery detected. Do you want to uninstall [y/n:] ")
+    answer = input("Artillery detected. Do you want to uninstall [y/n:] ")
     if answer.lower() in ["yes", "y"]:
         answer = "uninstall"
 
 if not os.path.isfile("/etc/init.d/artillery"):
-    answer = raw_input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
+    answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
 
 if answer.lower() in ["yes", "y"]:
     if is_posix():
@@ -72,7 +75,7 @@ if answer.lower() in ["yes", "y"]:
         shutil.copytree(install_path, program_files + "\\Artillery\\")
 
     if is_posix():
-        choice = raw_input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
+        choice = input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
         if choice in ["y", "yes"]:
             print("[*] Checking out Artillery through github to /var/artillery")
             # if old files are there
@@ -98,7 +101,7 @@ if answer.lower() in ["yes", "y"]:
                 subprocess.Popen(
                     "chown root:wheel /Library/LaunchDaemons/com.artillery.plist", shell=True).wait()
 
-    choice = raw_input("Would you like to start Artillery now? [y/n]: ")
+    choice = input("Would you like to start Artillery now? [y/n]: ")
     if choice in ["yes", "y"]:
         if is_posix():
             subprocess.Popen("/etc/init.d/artillery start", shell=True).wait()
