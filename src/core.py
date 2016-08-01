@@ -3,13 +3,16 @@
 # core module for reusable / central code
 #
 #
+#python2to3
 import smtplib
 try:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEBase import MIMEBase
     from email.MIMEText import MIMEText
     from email import Encoders
-except IndexError: from email import *
+except ImportError:
+    from email import *
+
 import os
 import re
 import subprocess
@@ -31,7 +34,7 @@ import logging.handlers
 import datetime
 import signal
 from string import *
-#from string import split, join
+# from string import split, join
 import socket
 
 # grab the current time
@@ -112,13 +115,15 @@ def ban(ip):
 def update():
     if is_posix():
         if os.path.isdir("/var/artillery/.svn"):
-            print("[!] Old installation detected that uses subversion. Fixing and moving to github.")
+            print(
+                "[!] Old installation detected that uses subversion. Fixing and moving to github.")
             try:
                 shutil.rmtree("/var/artillery")
                 subprocess.Popen(
                     "git clone https://github.com/binarydefense/artillery", shell=True).wait()
             except:
-                print("[!] Something failed. Please type 'git clone https://github.com/binarydefense/artillery /var/artillery' to fix!")
+                print(
+                    "[!] Something failed. Please type 'git clone https://github.com/binarydefense/artillery /var/artillery' to fix!")
 
         subprocess.Popen("cd /var/artillery;git pull",
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -195,7 +200,8 @@ def check_banlist_path():
         if path == "":
             if os.path.isdir("/var/artillery"):
                 filewrite = open("/var/artillery/banlist.txt", "w")
-                filewrite.write("#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
+                filewrite.write(
+                    "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
                 path = "/var/artillery/banlist.txt"
 
@@ -209,7 +215,8 @@ def check_banlist_path():
                 path = program_files + "\\Artillery"
                 filewrite = open(
                     program_files + "\\Artillery\\banlist.txt", "w")
-                filewrite.write("#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
+                filewrite.write(
+                    "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
     return path
 
@@ -242,11 +249,11 @@ def create_iptables_subset():
         ban_check = read_config("HONEYPOT_BAN").lower()
         if ban_check == "on":
             subprocess.Popen("iptables -N ARTILLERY",
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -F ARTILLERY",
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -I INPUT -j ARTILLERY",
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
     if os.path.isfile(check_banlist_path()):
         banfile = open(check_banlist_path(), "r")
@@ -272,13 +279,14 @@ def is_already_banned(ip):
     if ban_check == "on":
 
         proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers",
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         iptablesbanlist = proc.stdout.readlines()
         if ip in iptablesbanlist:
             return True
         else:
             return False
-    else: return False
+    else:
+        return False
 
 # valid if IP address is legit
 
@@ -383,6 +391,8 @@ def threat_server():
 def syslog(message):
     type = read_config("SYSLOG_TYPE").lower()
 
+    print "YO"
+    print message
     # if we are sending remote syslog
     if type == "remote":
 
@@ -400,7 +410,8 @@ def syslog(message):
             'warning': 4, 'notice': 5, 'info': 6, 'debug': 7
         }
 
-        def syslog_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
+        def syslog_send(
+            message, level=LEVEL['notice'], facility=FACILITY['daemon'],
                         host='localhost', port=514):
 
             # Send syslog UDP packet to given host and port.
@@ -416,6 +427,7 @@ def syslog(message):
 
     # if we are sending local syslog messages
     if type == "local":
+        print "YOLO"
         my_logger = logging.getLogger('Artillery')
         my_logger.setLevel(logging.DEBUG)
         handler = logging.handlers.SysLogHandler(address='/dev/log')
@@ -426,15 +438,16 @@ def syslog(message):
     # if we don't want to use local syslog and just write to file in
     # logs/alerts.log
     if type == "file":
-	if not os.path.isdir("/var/artillery/logs"): os.makedirs("/var/artillery/logs")
-        if not os.path.isfile("/var/artillery/logs/alerts.log"):
-            filewrite = open("/var/artillery/logs/alerts.log", "w")
-            filewrite.write("***** Artillery Alerts Log *****\n")
-            filewrite.close()
-        filewrite = open("/var/artillery/logs/alerts.log", "a")
-        filewrite.write(message + "\n")
-        filewrite.close()
+        if not os.path.isdir("/var/artillery/logs"):
+            os.makedirs("/var/artillery/logs")
+            if not os.path.isfile("/var/artillery/logs/alerts.log"):
+                filewrite = open("/var/artillery/logs/alerts.log", "w")
+                filewrite.write("***** Artillery Alerts Log *****\n")
+                filewrite.close()
 
+            filewrite = open("/var/artillery/logs/alerts.log", "a")
+            filewrite.write(message + "\n")
+            filewrite.close()
 
 def write_log(alert):
     if is_posix():
@@ -470,10 +483,14 @@ def warn_the_good_guys(subject, alert):
     write_log(alert)
 
 # send the actual email
+
+
 def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
 # mail function preping to send
+
+
 def mail(to, subject, text):
     try:
 
@@ -508,7 +525,6 @@ def mail(to, subject, text):
         write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (
             grab_time()))
         write_log("[!] Printing error: " + str(err))
-        print str(err)
 
 # kill running instances of artillery
 
@@ -521,10 +537,10 @@ def kill_artillery():
         pid = [int(x.strip()) for line in pid.split('\n')
                for x in line.split(" ") if int(x.isdigit())]
         # try:
-        #pid = int(pid[0])
+        # pid = int(pid[0])
         # except:
         # depends on OS on integer
-        #pid = int(pid[2])
+        # pid = int(pid[2])
         for i in pid:
             write_log("[!] %s: Killing the old Artillery process..." %
                       (grab_time()))
@@ -541,11 +557,13 @@ def cleanup_artillery():
     if ban_check == "on":
 
         subprocess.Popen("iptables -D INPUT -j ARTILLERY",
-                          stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
+                         stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
         subprocess.Popen("iptables -X ARTILLERY",
-                          stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
+                         stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
 
 # overwrite artillery banlist after certain time interval
+
+
 def refresh_log():
     while 1:
         interval = read_config("ARTILLERY_REFRESH=")
@@ -582,7 +600,8 @@ def format_ips(url):
         except Exception as err:
             if err == '404':
                 # Error 404, page not found!
-                write_log("HTTPError: Error 404, URL {} not found.".format(urls))
+                write_log(
+                    "HTTPError: Error 404, URL {} not found.".format(urls))
 
             else:
                 write_log("Received URL Error, Reason: {}".format(err))
@@ -627,7 +646,8 @@ def pull_source_feeds():
         # if we are using source feeds
         if read_config("SOURCE_FEEDS").lower() == "on":
             if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
-                url = ['http://rules.emergingthreats.net/blockrules/compromised-ips.txt', 'https://zeustracker.abuse.ch/blocklist.php?download=badips',
+                url = [
+                    'http://rules.emergingthreats.net/blockrules/compromised-ips.txt', 'https://zeustracker.abuse.ch/blocklist.php?download=badips',
                        'https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist', 'http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
                 counter = 1
 
