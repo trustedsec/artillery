@@ -238,12 +238,14 @@ def is_windows():
 
 def create_iptables_subset():
     if is_posix():
-        subprocess.Popen("iptables -N ARTILLERY",
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        subprocess.Popen("iptables -F ARTILLERY",
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        subprocess.Popen("iptables -I INPUT -j ARTILLERY",
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        ban_check = read_config("HONEYPOT_BAN").lower()
+        if ban_check == "on":
+            subprocess.Popen("iptables -N ARTILLERY",
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            subprocess.Popen("iptables -F ARTILLERY",
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            subprocess.Popen("iptables -I INPUT -j ARTILLERY",
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
     if os.path.isfile(check_banlist_path()):
         banfile = open(check_banlist_path(), "r")
@@ -265,13 +267,17 @@ def create_iptables_subset():
 
 
 def is_already_banned(ip):
-    proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers",
+    ban_check = read_config("HONEYPOT_BAN").lower()
+    if ban_check == "on":
+
+        proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers",
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    iptablesbanlist = proc.stdout.readlines()
-    if ip in iptablesbanlist:
-        return True
-    else:
-        return False
+        iptablesbanlist = proc.stdout.readlines()
+        if ip in iptablesbanlist:
+            return True
+        else:
+            return False
+    else: return False
 
 # valid if IP address is legit
 
@@ -463,14 +469,10 @@ def warn_the_good_guys(subject, alert):
     write_log(alert)
 
 # send the actual email
-
-
 def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
 # mail function preping to send
-
-
 def mail(to, subject, text):
     try:
 
@@ -491,7 +493,7 @@ def mail(to, subject, text):
         mailServer.ehlo()
         # if we aren't using open relays
         if user != "":
-                # tls support?
+            # tls support?
             mailServer.starttls()
             # some servers require ehlo again
             mailServer.ehlo()
@@ -501,9 +503,11 @@ def mail(to, subject, text):
         mailServer.sendmail(smtp_from, to, msg.as_string())
         mailServer.close()
 
-    except:
+    except Exception as err:
         write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (
             grab_time()))
+        write_log("[!] Printing error: " + str(err))
+        print str(err)
 
 # kill running instances of artillery
 
@@ -532,10 +536,13 @@ def kill_artillery():
 
 
 def cleanup_artillery():
-    subprocess.Popen("iptables -D INPUT -j ARTILLERY",
-                     stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
-    subprocess.Popen("iptables -X ARTILLERY",
-                     stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
+    ban_check = read_config("HONEYPOT_BAN").lower()
+    if ban_check == "on":
+
+        subprocess.Popen("iptables -D INPUT -j ARTILLERY",
+                          stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
+        subprocess.Popen("iptables -X ARTILLERY",
+                          stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
 
 # overwrite artillery banlist after certain time interval
 def refresh_log():
