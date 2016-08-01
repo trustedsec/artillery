@@ -1,4 +1,13 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 1.8
+~~~~~~~~~~~~~~~~~~~~~~
+
+* fixed setup.py for backwards compatiblity for python2/3
+* fixed issue that would cause restart_artillery to kill itself and not restart
+* fixed an issue that would cause ssh to pull more logs then needed and not to ssh banning
+* fixed an issue that would cause intelligence to still download if source feeds were on
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.7
 ~~~~~~~~~~~~~~~~~~~~~~
 
