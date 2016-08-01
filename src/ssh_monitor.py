@@ -14,22 +14,30 @@ ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")
 
 
 def ssh_monitor(monitor_frequency):
+    counter = 0
     while 1:
         # for debian base
         if os.path.isfile("/var/log/auth.log"):
             fileopen1 = open("/var/log/auth.log", "r")
+            counter = 1
 
             # for OS X
             if os.path.isfile("/var/log/secure.log"):
-                fileopen1 = open("/var/log/secure.log", "r")
+                if counter == 0:
+                    fileopen1 = open("/var/log/secure.log", "r")
+                    counter = 1
 
         # for centOS
         if os.path.isfile("/var/log/secure"):
-            fileopen1 = open("/var/log/secure", "r")
+            if counter == 0:
+                fileopen1 = open("/var/log/secure", "r")
+                counter = 1
 
         # for Debian
         if os.path.isfile("/var/log/faillog"):
-            fileopen1 = open("/var/log/faillog", "r")
+            if counter == 0:
+                fileopen1 = open("/var/log/faillog", "r")
+                counter = 1
 
         if not os.path.isfile("/var/artillery/banlist.txt"):
             # create a blank file
