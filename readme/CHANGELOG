@@ -9,6 +9,7 @@ version 1.8
 * turned anti-dos to off by default
 * fixed iptables trying to start when honeypot_ban was off
 * fixed email from not loading modules properly due to python2to3 compatibility
+* fixed syslog offloading
 
 ~~~~~~~~~~~~~~~~~~~~~~
 version 1.7
