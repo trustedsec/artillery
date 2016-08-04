@@ -45,9 +45,9 @@ if answer.lower() in ["yes", "y"]:
         print("[*] Adding artillery into startup through init scripts..")
         if os.path.isdir("/etc/init.d"):
             if not os.path.isfile("/etc/init.d/artillery"):
-                fileopen = file("src/startup_artillery", "r")
+                fileopen = open("src/startup_artillery", "r")
                 config = fileopen.read()
-                filewrite = file("/etc/init.d/artillery", "w")
+                filewrite = open("/etc/init.d/artillery", "w")
                 filewrite.write(config)
                 filewrite.close()
                 print("[*] Triggering update-rc.d on artillery to automatic start...")
@@ -58,11 +58,11 @@ if answer.lower() in ["yes", "y"]:
 
             # remove old method if installed previously
             if os.path.isfile("/etc/init.d/rc.local"):
-                fileopen = file("/etc/init.d/rc.local", "r")
+                fileopen = open("/etc/init.d/rc.local", "r")
                 data = fileopen.read()
                 data = data.replace(
                     "sudo python /var/artillery/artillery.py &", "")
-                filewrite = file("/etc/init.d/rc.local", "w")
+                filewrite = open("/etc/init.d/rc.local", "w")
                 filewrite.write(data)
                 filewrite.close()
 
@@ -94,7 +94,7 @@ if answer.lower() in ["yes", "y"]:
             # check if file is already in place
             if not os.path.isfile("/Library/LaunchDaemons/com.artillery.plist"):
                 print("[*] Creating com.artillery.plist in your Daemons directory")
-                filewrite = file(
+                filewrite = open(
                     "/Library/LaunchDaemons/com.artillery.plist", "w")
                 filewrite.write('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n<key>Disabled</key>\n<false/>\n<key>ProgramArguments</key>\n<array>\n<string>/usr/bin/python</string>\n<string>/var/artillery/artillery.py</string>\n</array>\n<key>KeepAlive</key>\n<true/>\n<key>RunAtLoad</key>\n<true/>\n<key>Label</key>\n<string>com.artillery</string>\n<key>Debug</key>\n<true/>\n</dict>\n</plist>')
                 print("[*] Adding right permissions")
