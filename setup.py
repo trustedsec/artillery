@@ -9,6 +9,7 @@ import os
 import shutil
 from src.core import *
 import sys
+import errno
 
 try: input = raw_input
 except NameError: pass
@@ -18,6 +19,19 @@ Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, an
 
 Written by: Dave Kennedy (ReL1K)
 ''')
+
+#check for permissions
+try:
+    if os.path.isdir("/var/artillery_check_root"):
+        os.rmdir('/var/artillery_check_root')
+    else:
+        os.mkdir('/var/artillery_check_root')
+except OSError as e:
+    if (e.errno == errno.EACCES or e.errno == errno.EPERM):
+        print "You must be root to run this script!\r\n"
+    sys.exit(1)
+if os.path.isdir("/var/artillery_check_root"):
+    os.rmdir('/var/artillery_check_root')
 
 if os.path.isfile("/etc/init.d/artillery"):
     answer = input("Artillery detected. Do you want to uninstall [y/n:] ")
