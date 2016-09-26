@@ -437,14 +437,13 @@ def syslog(message):
     if type == "file":
         if not os.path.isdir("/var/artillery/logs"):
             os.makedirs("/var/artillery/logs")
-            if not os.path.isfile("/var/artillery/logs/alerts.log"):
-                filewrite = open("/var/artillery/logs/alerts.log", "w")
-                filewrite.write("***** Artillery Alerts Log *****\n")
-                filewrite.close()
-
-            filewrite = open("/var/artillery/logs/alerts.log", "a")
-            filewrite.write(message + "\n")
+        if not os.path.isfile("/var/artillery/logs/alerts.log"):
+            filewrite = open("/var/artillery/logs/alerts.log", "w")
+            filewrite.write("***** Artillery Alerts Log *****\n")
             filewrite.close()
+        filewrite = open("/var/artillery/logs/alerts.log", "a")
+        filewrite.write(message + "\n")
+        filewrite.close()
 
 def write_log(alert):
     if is_posix():
