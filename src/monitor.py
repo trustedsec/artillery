@@ -109,7 +109,7 @@ def monitor_system(time_wait):
                 else:
                     subject = "[!] Artillery has detected a change. [!]"
                     output_file = "********************************** The following changes were detected at %s **********************************\n" % (
-                        datetime.datetime.now()) + output_file + "\n********************************** End of changes. **********************************\n\n"
+                        str(datetime.datetime.now())) + str(output_file) + "\n********************************** End of changes. **********************************\n\n"
                     warn_the_good_guys(subject, output_file)
 
     # put the new database as old
