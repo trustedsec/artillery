@@ -28,7 +28,7 @@ try:
         os.mkdir('/var/artillery_check_root')
 except OSError as e:
     if (e.errno == errno.EACCES or e.errno == errno.EPERM):
-        print "You must be root to run this script!\r\n"
+        print ("You must be root to run this script!\r\n")
     sys.exit(1)
 if os.path.isdir("/var/artillery_check_root"):
     os.rmdir('/var/artillery_check_root')
