@@ -33,6 +33,9 @@ For those technical folks you can find all of the code in the following structur
 - Linux
 - Windows
 
+On windows to install. Download files to location of your choice.
+open a cmd prompt as admin and browse to directory that files are located. To run type "python setup.py". Artillery wil be installed in "Program Files (x86). After setup you have option to launch program. included is a batch file to launch once it is installed it is located in install directory.This must be launched as admin.Console logging must be enabled in config.
+
 
 Project Artillery - A project by Binary Defense Systems (https://www.binarydefense.com).
 

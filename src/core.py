@@ -52,8 +52,9 @@ def get_config_path():
             path = "/var/artillery/config"
         if os.path.isfile("config"):
             path = "config"
+    #changed path to be more consistant across windows versions
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if os.path.isfile(program_files + "\\Artillery\\config"):
             path = program_files + "\\Artillery\\config"
     return path
@@ -105,12 +106,22 @@ def ban(ip):
                         filewrite.write(ip + "\n")
                         filewrite.close()
                         sort_banlist()
-
-                # if running windows then route attacker to some bs address
+                        
+                # if running windows then route attacker to some bs address.
                 if is_windows():
-                    subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (
-                        ip), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
+                    subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip),
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                    fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r")
+                    data = fileopen.read()
+                    if ip not in data:
+                        filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
+                        filewrite.write(ip + "\n")
+                        filewrite.close()
+                        #sort_banlist()
+                        #removed  until sort_banlist is modified.Was causing artillery to overwrite entire file with nothing.
+                        #when some one connected. Now it works as expected and appends address to file although you might get 
+                        #doubles 
+                        
 
 def update():
     if is_posix():
@@ -204,9 +215,9 @@ def check_banlist_path():
                     "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
                 path = "/var/artillery/banlist.txt"
-
+    #changed path to be more consistant across windows versions 
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if os.path.isfile(program_files + "\\Artillery\\banlist.txt"):
             # grab the path
             path = program_files + "\\Artillery\\banlist.txt"
@@ -229,7 +240,7 @@ def prep_email(alert):
         filewrite = open(
             "/var/artillery/src/program_junk/email_alerts.log", "w")
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         filewrite = open(
             program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
     filewrite.write(alert)
@@ -437,20 +448,21 @@ def syslog(message):
     if type == "file":
         if not os.path.isdir("/var/artillery/logs"):
             os.makedirs("/var/artillery/logs")
-        if not os.path.isfile("/var/artillery/logs/alerts.log"):
-            filewrite = open("/var/artillery/logs/alerts.log", "w")
-            filewrite.write("***** Artillery Alerts Log *****\n")
+            if not os.path.isfile("/var/artillery/logs/alerts.log"):
+                filewrite = open("/var/artillery/logs/alerts.log", "w")
+                filewrite.write("***** Artillery Alerts Log *****\n")
+                filewrite.close()
+
+            filewrite = open("/var/artillery/logs/alerts.log", "a")
+            filewrite.write(message + "\n")
             filewrite.close()
-        filewrite = open("/var/artillery/logs/alerts.log", "a")
-        filewrite.write(message + "\n")
-        filewrite.close()
 
 def write_log(alert):
     if is_posix():
         syslog(alert)
-
+    #changed path to be more consistant across windows versions
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if not os.path.isdir(program_files + "\\Artillery\\logs"):
             os.makedirs(program_files + "\\Artillery\\logs")
         if not os.path.isfile(program_files + "\\Artillery\\logs\\alerts.log"):

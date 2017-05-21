@@ -19,28 +19,37 @@ Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, an
 
 Written by: Dave Kennedy (ReL1K)
 ''')
-
-#check for permissions
-try:
+# install/uninstall routine for windows. Will work on admin check for now run as admin
+if 'win32' in sys.platform:
+    if not os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py"):  
+        answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
+    else:
+        if os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py"):
+            answer = input("Artillery detected. Do you want to uninstall [y/n:] ")
+        if answer.lower() in ["yes", "y"]:
+            answer = "uninstall"
+#added linux2 for kali rolling 2017 went in continous loop if not added. 
+#consolidated routine for nix* variants to take up less space.included root check
+if ('linux' or 'linux2' or 'darwin') in sys.platform:
+    try:
+        if os.path.isdir("/var/artillery_check_root"):
+            os.rmdir('/var/artillery_check_root')
+        else:
+            os.mkdir('/var/artillery_check_root')
+    except OSError as e:
+        if (e.errno == errno.EACCES or e.errno == errno.EPERM):
+            print ("You must be root to run this script!\r\n")
+        sys.exit(1)
     if os.path.isdir("/var/artillery_check_root"):
         os.rmdir('/var/artillery_check_root')
+    if not os.path.isfile("/etc/init.d/artillery"):
+        answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
     else:
-        os.mkdir('/var/artillery_check_root')
-except OSError as e:
-    if (e.errno == errno.EACCES or e.errno == errno.EPERM):
-        print ("You must be root to run this script!\r\n")
-    sys.exit(1)
-if os.path.isdir("/var/artillery_check_root"):
-    os.rmdir('/var/artillery_check_root')
-
-if os.path.isfile("/etc/init.d/artillery"):
-    answer = input("Artillery detected. Do you want to uninstall [y/n:] ")
-    if answer.lower() in ["yes", "y"]:
-        answer = "uninstall"
-
-if not os.path.isfile("/etc/init.d/artillery"):
-    answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
-
+        if os.path.isfile("/etc/init.d/artillery"):
+            answer = input("Artillery detected. Do you want to uninstall [y/n:] ")
+        if answer.lower() in ["yes", "y"]:
+            answer = "uninstall"
+ 
 if answer.lower() in ["yes", "y"]:
     if is_posix():
         kill_artillery()
@@ -79,14 +88,15 @@ if answer.lower() in ["yes", "y"]:
                 filewrite = open("/etc/init.d/rc.local", "w")
                 filewrite.write(data)
                 filewrite.close()
-
+    #Changed order of cmds. was giving error about file already exists.
+    #also updated location to be the same accross all versions of Windows
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
+        install_path = os.getcwd()
+        shutil.copytree(install_path, program_files + "\\Artillery\\")
         os.makedirs(program_files + "\\Artillery\\logs")
         os.makedirs(program_files + "\\Artillery\\database")
         os.makedirs(program_files + "\\Artillery\\src\\program_junk")
-        install_path = os.getcwd()
-        shutil.copytree(install_path, program_files + "\\Artillery\\")
 
     if is_posix():
         choice = input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
@@ -119,9 +129,12 @@ if answer.lower() in ["yes", "y"]:
     if choice in ["yes", "y"]:
         if is_posix():
             subprocess.Popen("/etc/init.d/artillery start", shell=True).wait()
+            print("[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking")
+        #added to start after install.launches in seperate window
+        if is_windows():
+            os.system('start cmd /K artillery_start.bat')
+            print("[*] Installation complete. Edit C:\Program Files(x86)\Artillery\config in order to config artillery to your liking..")
 
-    if is_posix():
-        print("[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking..")
 
 if answer == "uninstall":
     if is_posix():
@@ -130,3 +143,7 @@ if answer == "uninstall":
         subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
         kill_artillery()
         print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.")
+    #Delete routine to remove artillery on windows
+    if is_windows():
+        subprocess.call(['cmd', '/c', 'rmdir', '/S', '/Q', 'C:\\Program Files (x86)\\Artillery'])
+        print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.") 

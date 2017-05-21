@@ -16,27 +16,46 @@ except ImportError: import _thread as thread
 import os
 import subprocess
 
-# check if its installed
-if not os.path.isfile("/var/artillery/artillery.py"):
-    print("[*] Artillery is not installed, running setup.py..")
-    subprocess.Popen("python setup.py", shell=True).wait()
-    sys.exit()
+#        
+# Tested on win 7/8/10 also on kali rolling. Could be cleaner. just starting out
+if 'win32' in sys.platform:                                                 
+    if not os.path.isfile("C:\Program Files (x86)\\Artillery\\artillery.py"):  
+        print("[*] Artillery is not installed, running setup.py..")
+        subprocess.Popen("python setup.py", shell=True).wait()
+# consolidated nix* variants 
+if ('linux' or 'linux2' or 'darwin') in sys.platform:
+    if not os.path.isfile("/var/artillery/artillery.py"):
+        print("[*] Artillery is not installed, running setup.py..")
+        subprocess.Popen("python setup.py", shell=True).wait()
+
 
 from src.core import *
 # from src.config import * # yaml breaks config reading - disabling
 
+
 # create the database directories if they aren't there
-if not os.path.isdir("/var/artillery/database/"):
-    os.makedirs("/var/artillery/database/")
-if not os.path.isfile("/var/artillery/database/temp.database"):
-    filewrite = open("/var/artillery/database/temp.database", "w")
-    filewrite.write("")
-    filewrite.close()
+if 'win32' in sys.platform:
+    #removed below.These folders are created in setup.py
+    #if not os.path.isdir("C:\\Program Files (x86)\\Artillery\\database"):
+        #os.mkdir("C:\\Program Files (x86)\\Artillery\\database")
+    if not os.path.isfile("C:\\Program Files (x86)\\Artillery\\database\\temp.database"):
+        filewrite = open("C:\\Program Files (x86)\\Artillery\database\\temp.database", "w")
+        filewrite.write("")
+        filewrite.close()
+    #consolidated nix* variants
+    elif ('linux' or 'linux2' or 'darwin') in sys.platform:
+        if not os.path.isdir("/var/artillery/database/"):
+            os.mkdirs("/var/artillery/database/")
+        if not os.path.isfile("/var/artillery/database/temp.database"):
+            filewrite = open("/var/artillery/database/temp.database", "w")
+            filewrite.write("")
+            filewrite.close()
+
 
 # let the logfile know artillery has started successfully
 write_log("[*] %s: Artillery has started successfully." % (grab_time()))
 if is_config_enabled("CONSOLE_LOGGING"):
-    print("[*] %s: Artillery has started successfully.\n[*] Console logging enabled.\n" % (grab_time()))
+    print("[*] %s: Artillery has started successfully.\n[*] If on Windows Ctrl+C to exit. \n[*] Console logging enabled.\n" % (grab_time()))
 
 # prep everything for artillery first run
 check_banlist_path()
