@@ -706,10 +706,7 @@ def sort_banlist():
         tempips = [socket.inet_aton(ip) for ip in ips]
         tempips.sort()
         tempips.reverse()
-        if is_windows:
-            filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "w")
-        if is_posix:
-            filewrite = open("/var/artillery/banlist.txt", "w")
+        filewrite = open("/var/artillery/banlist.txt", "w")
         ips2 = [socket.inet_ntoa(ip) for ip in tempips]
         ips_parsed = ""
         for ips in ips2:
