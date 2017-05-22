@@ -36,6 +36,8 @@ import signal
 from string import *
 # from string import split, join
 import socket
+# imported sys library for some reason win 10 didn't like the is_posix or is_windows Variables in the Sort_banlist Function
+import sys 
 
 # grab the current time
 
@@ -117,11 +119,7 @@ def ban(ip):
                         filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
                         filewrite.write(ip + "\n")
                         filewrite.close()
-                        #sort_banlist()
-                        #removed  until sort_banlist is modified.Was causing artillery to overwrite entire file with nothing.
-                        #when some one connected. Now it works as expected and appends address to file although you might get 
-                        #doubles 
-                        
+                        sort_banlist()
 
 def update():
     if is_posix():
@@ -675,11 +673,15 @@ def pull_source_feeds():
             sort_banlist()
         time.sleep(7200)  # sleep for 2 hours
 
-
+# win 10 didn't like the is_posix or is_windows Variables in this function.
 def sort_banlist():
-    if is_posix:# added to prevent error on windows
+    if 'win32' in sys.platform:
+        ips = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "r").readlines()
+    if ('linux' or 'linux2' or 'darwin') in sys.platform:# added to prevent error on windows
         ips = open("/var/artillery/banlist.txt", "r").readlines()
-        banner = """#
+        
+        
+    banner = """#
 #
 #
 # Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed
@@ -692,25 +694,28 @@ def sort_banlist():
 #
 #
 """
-        ip_filter = ""
-        for ip in ips:
-            if is_valid_ipv4(ip.strip()):
-                if not ip.startswith("0."):
-                    ip_filter = ip_filter + ip.rstrip() + "\n"
-        ips = ip_filter
-        ips = ips.replace(banner, "")
-        ips = ips.replace(" ", "")
-        ips = ips.split("\n")
-        ips = [_f for _f in ips if _f]
-        ips = list(filter(str.strip, ips))
-        tempips = [socket.inet_aton(ip) for ip in ips]
-        tempips.sort()
-        tempips.reverse()
+    ip_filter = ""
+    for ip in ips:
+        if is_valid_ipv4(ip.strip()):
+            if not ip.startswith("0."):
+                ip_filter = ip_filter + ip.rstrip() + "\n"
+    ips = ip_filter
+    ips = ips.replace(banner, "")
+    ips = ips.replace(" ", "")
+    ips = ips.split("\n")
+    ips = [_f for _f in ips if _f]
+    ips = list(filter(str.strip, ips))
+    tempips = [socket.inet_aton(ip) for ip in ips]
+    tempips.sort()
+    tempips.reverse()
+    if 'win32' in sys.platform:
+        filewrite = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "w")
+    if ('linux' or 'linux' or 'darwin') in sys.platform:    
         filewrite = open("/var/artillery/banlist.txt", "w")
-        ips2 = [socket.inet_ntoa(ip) for ip in tempips]
-        ips_parsed = ""
-        for ips in ips2:
-            if not ips.startswith("0."):
-                ips_parsed = ips + "\n" + ips_parsed
-        filewrite.write(banner + "\n" + ips_parsed)
-        filewrite.close()
+    ips2 = [socket.inet_ntoa(ip) for ip in tempips]
+    ips_parsed = ""
+    for ips in ips2:
+        if not ips.startswith("0."):
+            ips_parsed = ips + "\n" + ips_parsed
+    filewrite.write(banner + "\n" + ips_parsed)
+    filewrite.close()
