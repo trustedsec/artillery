@@ -10,27 +10,34 @@ import shutil
 from src.core import *
 import sys
 import errno
-
+from src.pyuac import * # UAC Check Script found it here.https://gist.github.com/Preston-Landers/267391562bc96959eb41 all credit goes to him.
 try: input = raw_input
 except NameError: pass
 
-print('''
+
+# install/uninstall routine for windows. added Admin check
+#reordered so they only get a prompt before proceeding
+if is_windows():
+    if not isUserAdmin():
+        runAsAdmin()# will try to relaunch script as admin will prompt for user\pass and open in seperate window
+    if isUserAdmin():
+        print('''
 Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security tool used to protect your nix systems.
 
 Written by: Dave Kennedy (ReL1K)
 ''')
-# install/uninstall routine for windows. Will work on admin check for now run as admin
-if 'win32' in sys.platform:
+
     if not os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py"):  
         answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
     else:
         if os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py"):
+            print("[*] If you just installed on windows you can say no to this prompt.\n[*] Another window will open with artillery.\n[*] If you would like to uninstall hit y then enter")
             answer = input("Artillery detected. Do you want to uninstall [y/n:] ")
         if answer.lower() in ["yes", "y"]:
             answer = "uninstall"
-#added linux2 for kali rolling 2017 went in continous loop if not added. 
+ 
 #consolidated routine for nix* variants to take up less space.included root check
-if ('linux' or 'linux2' or 'darwin') in sys.platform:
+if is_posix(): 
     try:
         if os.path.isdir("/var/artillery_check_root"):
             os.rmdir('/var/artillery_check_root')
@@ -40,6 +47,11 @@ if ('linux' or 'linux2' or 'darwin') in sys.platform:
         if (e.errno == errno.EACCES or e.errno == errno.EPERM):
             print ("You must be root to run this script!\r\n")
         sys.exit(1)
+    print('''
+Welcome to the Artillery installer. Artillery is a honeypot, file monitoring, and overall security tool used to protect your nix systems.
+
+Written by: Dave Kennedy (ReL1K)
+''')
     if os.path.isdir("/var/artillery_check_root"):
         os.rmdir('/var/artillery_check_root')
     if not os.path.isfile("/etc/init.d/artillery"):
@@ -98,6 +110,7 @@ if answer.lower() in ["yes", "y"]:
         os.makedirs(program_files + "\\Artillery\\database")
         os.makedirs(program_files + "\\Artillery\\src\\program_junk")
 
+
     if is_posix():
         choice = input("Do you want to keep Artillery updated? (requires internet) [y/n]: ")
         if choice in ["y", "yes"]:
@@ -132,8 +145,7 @@ if answer.lower() in ["yes", "y"]:
             print("[*] Installation complete. Edit /var/artillery/config in order to config artillery to your liking")
         #added to start after install.launches in seperate window
         if is_windows():
-            os.system('start cmd /K artillery_start.bat')
-            print("[*] Installation complete. Edit C:\Program Files(x86)\Artillery\config in order to config artillery to your liking..")
+            os.system("start cmd /K artillery_start.bat")
 
 
 if answer == "uninstall":
@@ -143,7 +155,11 @@ if answer == "uninstall":
         subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
         kill_artillery()
         print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.")
-    #Delete routine to remove artillery on windows
+    #Delete routine to remove artillery on windows.added uac check 
     if is_windows():
-        subprocess.call(['cmd', '/c', 'rmdir', '/S', '/Q', 'C:\\Program Files (x86)\\Artillery'])
-        print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.") 
+        if not isUserAdmin():
+            runAsAdmin()
+        if isUserAdmin():
+            print("Running as Admin continuing...")
+            subprocess.call(['cmd', '/c', 'rmdir', '/S', '/Q', 'C:\\Program Files (x86)\\Artillery'])
+            print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.") 

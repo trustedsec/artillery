@@ -35,9 +35,7 @@ import datetime
 import signal
 from string import *
 # from string import split, join
-import socket
-# imported sys library for some reason win 10 didn't like the is_posix or is_windows Variables in the Sort_banlist Function
-import sys 
+import socket 
 
 # grab the current time
 
@@ -613,10 +611,18 @@ def format_ips(url):
                 write_log("Received URL Error, Reason: {}".format(err))
                 return
 
-    try:
-        fileopen = open("/var/artillery/banlist.txt", "r").read()
-        # write the file
-        filewrite = open("/var/artillery/banlist.txt", "a")
+    try: 
+        if is_windows():
+            #added this for the banlist windows 7 successfully pulls banlist with python 2.7.
+            #windows 8/10 with python 3.6 fail with 403 Forbidden error. has to do with format_ips 
+            #function above. python 3.6 urlopen sends the wrong headers 
+            fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r").read()
+            # write the file
+            filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
+        if is_posix():
+            fileopen = open("/var/artillery/banlist.txt", "r").read()
+            # write the file
+            filewrite = open("/var/artillery/banlist.txt", "a")
         # iterate through
         for line in ips.split("\n"):
             line = line.rstrip()
@@ -673,11 +679,11 @@ def pull_source_feeds():
             sort_banlist()
         time.sleep(7200)  # sleep for 2 hours
 
-# win 10 didn't like the is_posix or is_windows Variables in this function.
+#re ordered this section to included windows
 def sort_banlist():
-    if 'win32' in sys.platform:
+    if is_windows():
         ips = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "r").readlines()
-    if ('linux' or 'linux2' or 'darwin') in sys.platform:# added to prevent error on windows
+    if is_posix():
         ips = open("/var/artillery/banlist.txt", "r").readlines()
         
         
@@ -708,9 +714,9 @@ def sort_banlist():
     tempips = [socket.inet_aton(ip) for ip in ips]
     tempips.sort()
     tempips.reverse()
-    if 'win32' in sys.platform:
+    if is_windows():
         filewrite = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "w")
-    if ('linux' or 'linux' or 'darwin') in sys.platform:    
+    if is_posix():    
         filewrite = open("/var/artillery/banlist.txt", "w")
     ips2 = [socket.inet_ntoa(ip) for ip in tempips]
     ips_parsed = ""

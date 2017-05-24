@@ -15,7 +15,7 @@ try: import thread
 except ImportError: import _thread as thread
 import os
 import subprocess
-
+from src.pyuac import * # added so that it prompts when launching from batch file
 #        
 # Tested on win 7/8/10 also on kali rolling. Could be cleaner. just starting out
 if 'win32' in sys.platform:                                                 
@@ -34,7 +34,7 @@ from src.core import *
 
 
 # create the database directories if they aren't there
-if 'win32' in sys.platform:
+if is_windows():
     #removed below.These folders are created in setup.py
     #if not os.path.isdir("C:\\Program Files (x86)\\Artillery\\database"):
         #os.mkdir("C:\\Program Files (x86)\\Artillery\\database")
@@ -43,20 +43,24 @@ if 'win32' in sys.platform:
         filewrite.write("")
         filewrite.close()
     #consolidated nix* variants
-    elif ('linux' or 'linux2' or 'darwin') in sys.platform:
+    elif is_posix():
         if not os.path.isdir("/var/artillery/database/"):
             os.mkdirs("/var/artillery/database/")
         if not os.path.isfile("/var/artillery/database/temp.database"):
             filewrite = open("/var/artillery/database/temp.database", "w")
             filewrite.write("")
             filewrite.close()
+if not isUserAdmin():#put this here. would not work right if put anywhere else
+    # this is for launching script as admin from batchfile.will prompt for user\pass and open in seperate window when you double click batchfile
+    runAsAdmin()
+if isUserAdmin():
+    # let the logfile know artillery has started successfully
+    write_log("[*] %s: Artillery has started successfully." % (grab_time()))
 
 
-# let the logfile know artillery has started successfully
-write_log("[*] %s: Artillery has started successfully." % (grab_time()))
 if is_config_enabled("CONSOLE_LOGGING"):
     print("[*] %s: Artillery has started successfully.\n[*] If on Windows Ctrl+C to exit. \n[*] Console logging enabled.\n" % (grab_time()))
-
+    
 # prep everything for artillery first run
 check_banlist_path()
 
