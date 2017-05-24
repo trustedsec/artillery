@@ -114,6 +114,14 @@ try:
     # pull additional source feeds from external parties other than artillery
     # - pulls every 2 hours or ATIF threat feeds
     thread.start_new_thread(pull_source_feeds, ())
+    #added to create pid file service would fail to start on kali 2017
+    if is_posix():
+        if not os.path.isfile("/var/run/artillery.pid"):
+            pid = str(os.getpid())
+            f = open('/var/run/artillery.pid', 'w')
+            f.write(pid)
+            f.close()
+
 
     # let the program to continue to run
     while 1:

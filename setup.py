@@ -90,6 +90,16 @@ if answer.lower() in ["yes", "y"]:
                     "chmod +x /etc/init.d/artillery", shell=True).wait()
                 subprocess.Popen(
                     "update-rc.d artillery defaults", shell=True).wait()
+                #added service file creation for systemd on kali2 rolling
+            if not os.path.isfile("/lib/systemd/system/artillery.service"):
+                fileopen = open("src/artillery_service", 'r')
+                service = fileopen.read()
+                filewrite = open("/lib/systemd/system/artillery.service", "w")
+                filewrite.write(service)
+                filewrite.close()
+                #register service to start through systemctl
+                subprocess.Popen(
+                    "systemctl enable /lib/systemd/system/artillery.service", shell=True).wait()
 
             # remove old method if installed previously
             if os.path.isfile("/etc/init.d/rc.local"):
@@ -147,14 +157,27 @@ if answer.lower() in ["yes", "y"]:
         if is_windows():
             os.system("start cmd /K artillery_start.bat")
 
-
+#added root check to uninstall for linux
 if answer == "uninstall":
-    if is_posix():
-        os.remove("/etc/init.d/artillery")
-        subprocess.Popen("rm -rf /var/artillery", shell=True)
-        subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
-        kill_artillery()
-        print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.")
+    if is_posix(): 
+        try:
+            if os.path.isdir("/var/artillery_check_root"):
+                os.mkdir('/var/artillery_check_root')			
+            else:
+                os.rmdir('/var/artillery_check_root')
+
+        except OSError as e:
+            if (e.errno == errno.EACCES or e.errno == errno.EPERM):
+                print ("You must be root to run this script!\r\n")
+            sys.exit(1)
+        else:
+            os.remove("/etc/init.d/artillery")
+            subprocess.Popen("rm -rf /var/artillery", shell=True)
+            subprocess.Popen("rm -rf /etc/init.d/artillery", shell=True)
+            #added to remove service files on kali2
+            subprocess.Popen("rm /lib/systemd/system/artillery.service", shell=True)
+            kill_artillery()
+            print("[*] Artillery has been uninstalled. Manually kill the process if it is still running.")
     #Delete routine to remove artillery on windows.added uac check 
     if is_windows():
         if not isUserAdmin():
