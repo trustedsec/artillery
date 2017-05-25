@@ -134,7 +134,7 @@ def update():
 
         subprocess.Popen("cd /var/artillery;git pull",
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
+    
 
 def is_whitelisted_ip(ip):
     # set base counter
@@ -725,3 +725,11 @@ def sort_banlist():
             ips_parsed = ips + "\n" + ips_parsed
     filewrite.write(banner + "\n" + ips_parsed)
     filewrite.close()
+#removed turns out the issue was windows carriage returns in the init script i had.
+#note to self never open linux service files on windows.doh
+# this was just a place holder artillery.py code
+#def writePidFile():
+#	pid = str(os.getpid())
+#	f = open('/var/run/artillery.pid', 'w')
+#	f.write(pid)
+#	f.close()

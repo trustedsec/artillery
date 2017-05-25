@@ -1,4 +1,17 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 2.0
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added windows 7/8/10 install/uninstall support
+* Reorganized linux install/uninstall routine
+* added uac check(windows) 
+* added root check(linux)
+
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 1.8
 ~~~~~~~~~~~~~~~~~~~~~~
 
