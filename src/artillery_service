@@ -1,0 +1,9 @@
+[Unit]
+Description=Artillery Service
+
+[Service]
+ExecStart=/usr/bin/python /var/artillery/artillery.py start
+ExecStop=/usr/bin/pyton /var/artillery/artillery.py stop
+
+[Install]
+WantedBy=multi-user.target

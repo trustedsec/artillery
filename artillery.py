@@ -15,29 +15,53 @@ try: import thread
 except ImportError: import _thread as thread
 import os
 import subprocess
+from src.pyuac import * # added so that it prompts when launching from batch file
+#        
+# Tested on win 7/8/10 also on kali rolling. Could be cleaner. just starting out
+# is this section even needed this routine is now in setup will play with removing it if i can.
+if 'win32' in sys.platform:                                                 
+    if not os.path.isfile("C:\Program Files (x86)\\Artillery\\artillery.py"):  
+        print("[*] Artillery is not installed, running setup.py..")
+        subprocess.Popen("python setup.py", shell=True).wait()
+# consolidated nix* variants 
+if ('linux' or 'linux2' or 'darwin') in sys.platform:
+    if not os.path.isfile("/var/artillery/artillery.py"):
+        print("[*] Artillery is not installed, running setup.py..")
+        subprocess.Popen("python setup.py", shell=True).wait()
 
-# check if its installed
-if not os.path.isfile("/var/artillery/artillery.py"):
-    print("[*] Artillery is not installed, running setup.py..")
-    subprocess.Popen("python setup.py", shell=True).wait()
-    sys.exit()
 
 from src.core import *
 # from src.config import * # yaml breaks config reading - disabling
 
+
 # create the database directories if they aren't there
-if not os.path.isdir("/var/artillery/database/"):
-    os.makedirs("/var/artillery/database/")
-if not os.path.isfile("/var/artillery/database/temp.database"):
-    filewrite = open("/var/artillery/database/temp.database", "w")
-    filewrite.write("")
-    filewrite.close()
+if is_windows():
+    #removed below.These folders are created in setup.py
+    #if not os.path.isdir("C:\\Program Files (x86)\\Artillery\\database"):
+        #os.mkdir("C:\\Program Files (x86)\\Artillery\\database")
+    if not os.path.isfile("C:\\Program Files (x86)\\Artillery\\database\\temp.database"):
+        filewrite = open("C:\\Program Files (x86)\\Artillery\database\\temp.database", "w")
+        filewrite.write("")
+        filewrite.close()
+    #consolidated nix* variants
+    elif is_posix():
+        if not os.path.isdir("/var/artillery/database/"):
+            os.mkdirs("/var/artillery/database/")
+        if not os.path.isfile("/var/artillery/database/temp.database"):
+            filewrite = open("/var/artillery/database/temp.database", "w")
+            filewrite.write("")
+            filewrite.close()
+if not isUserAdmin():#put this here. would not work right if put anywhere else. if i move this to the top windows gets all stupid?. i'll work on it. it only tries to write 1 file
+    # this is for launching script as admin from batchfile.will prompt for user\pass and open in seperate window when you double click batchfile
+    runAsAdmin()
+if isUserAdmin():
+    # let the logfile know artillery has started successfully
+    write_log("[*] %s: Artillery has started successfully." % (grab_time()))
 
-# let the logfile know artillery has started successfully
-write_log("[*] %s: Artillery has started successfully." % (grab_time()))
+
 if is_config_enabled("CONSOLE_LOGGING"):
-    print("[*] %s: Artillery has started successfully.\n[*] Console logging enabled.\n" % (grab_time()))
-
+    print("[*] %s: Artillery has started successfully.\n[*] If on Windows Ctrl+C to exit. \n[*] Console logging enabled.\n" % (grab_time()))
+    
 # prep everything for artillery first run
 check_banlist_path()
 
@@ -91,6 +115,16 @@ try:
     # pull additional source feeds from external parties other than artillery
     # - pulls every 2 hours or ATIF threat feeds
     thread.start_new_thread(pull_source_feeds, ())
+    #removed turns out the issue was windows carriage returns in the init script i had.
+    #note to self never edit linux service files on windows.doh
+    #added to create pid file service would fail to start on kali 2017
+    #if is_posix():
+    #    if not os.path.isfile("/var/run/artillery.pid"):
+    #        pid = str(os.getpid())
+    #        f = open('/var/run/artillery.pid', 'w')
+    #        f.write(pid)
+    #        f.close()
+
 
     # let the program to continue to run
     while 1:

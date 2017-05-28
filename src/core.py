@@ -35,7 +35,7 @@ import datetime
 import signal
 from string import *
 # from string import split, join
-import socket
+import socket 
 
 # grab the current time
 
@@ -52,8 +52,9 @@ def get_config_path():
             path = "/var/artillery/config"
         if os.path.isfile("config"):
             path = "config"
+    #changed path to be more consistant across windows versions
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if os.path.isfile(program_files + "\\Artillery\\config"):
             path = program_files + "\\Artillery\\config"
     return path
@@ -105,12 +106,18 @@ def ban(ip):
                         filewrite.write(ip + "\n")
                         filewrite.close()
                         sort_banlist()
-
-                # if running windows then route attacker to some bs address
+                        
+                # if running windows then route attacker to some bs address.
                 if is_windows():
-                    subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (
-                        ip), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
+                    subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip),
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                    fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r")
+                    data = fileopen.read()
+                    if ip not in data:
+                        filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
+                        filewrite.write(ip + "\n")
+                        filewrite.close()
+                        sort_banlist()
 
 def update():
     if is_posix():
@@ -127,7 +134,7 @@ def update():
 
         subprocess.Popen("cd /var/artillery;git pull",
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
+    
 
 def is_whitelisted_ip(ip):
     # set base counter
@@ -204,9 +211,9 @@ def check_banlist_path():
                     "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
                 path = "/var/artillery/banlist.txt"
-
+    #changed path to be more consistant across windows versions 
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if os.path.isfile(program_files + "\\Artillery\\banlist.txt"):
             # grab the path
             path = program_files + "\\Artillery\\banlist.txt"
@@ -229,7 +236,7 @@ def prep_email(alert):
         filewrite = open(
             "/var/artillery/src/program_junk/email_alerts.log", "w")
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         filewrite = open(
             program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
     filewrite.write(alert)
@@ -437,20 +444,21 @@ def syslog(message):
     if type == "file":
         if not os.path.isdir("/var/artillery/logs"):
             os.makedirs("/var/artillery/logs")
-        if not os.path.isfile("/var/artillery/logs/alerts.log"):
-            filewrite = open("/var/artillery/logs/alerts.log", "w")
-            filewrite.write("***** Artillery Alerts Log *****\n")
+            if not os.path.isfile("/var/artillery/logs/alerts.log"):
+                filewrite = open("/var/artillery/logs/alerts.log", "w")
+                filewrite.write("***** Artillery Alerts Log *****\n")
+                filewrite.close()
+
+            filewrite = open("/var/artillery/logs/alerts.log", "a")
+            filewrite.write(message + "\n")
             filewrite.close()
-        filewrite = open("/var/artillery/logs/alerts.log", "a")
-        filewrite.write(message + "\n")
-        filewrite.close()
 
 def write_log(alert):
     if is_posix():
         syslog(alert)
-
+    #changed path to be more consistant across windows versions
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if not os.path.isdir(program_files + "\\Artillery\\logs"):
             os.makedirs(program_files + "\\Artillery\\logs")
         if not os.path.isfile(program_files + "\\Artillery\\logs\\alerts.log"):
@@ -603,10 +611,18 @@ def format_ips(url):
                 write_log("Received URL Error, Reason: {}".format(err))
                 return
 
-    try:
-        fileopen = open("/var/artillery/banlist.txt", "r").read()
-        # write the file
-        filewrite = open("/var/artillery/banlist.txt", "a")
+    try: 
+        if is_windows():
+            #added this for the banlist windows 7 successfully pulls banlist with python 2.7.
+            #windows 8/10 with python 3.6 fail with 403 Forbidden error. has to do with format_ips 
+            #function above. python 3.6 urlopen sends the wrong headers 
+            fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r").read()
+            # write the file
+            filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
+        if is_posix():
+            fileopen = open("/var/artillery/banlist.txt", "r").read()
+            # write the file
+            filewrite = open("/var/artillery/banlist.txt", "a")
         # iterate through
         for line in ips.split("\n"):
             line = line.rstrip()
@@ -663,9 +679,14 @@ def pull_source_feeds():
             sort_banlist()
         time.sleep(7200)  # sleep for 2 hours
 
-
+#re ordered this section to included windows
 def sort_banlist():
-    ips = open("/var/artillery/banlist.txt", "r").readlines()
+    if is_windows():
+        ips = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "r").readlines()
+    if is_posix():
+        ips = open("/var/artillery/banlist.txt", "r").readlines()
+        
+        
     banner = """#
 #
 #
@@ -693,7 +714,10 @@ def sort_banlist():
     tempips = [socket.inet_aton(ip) for ip in ips]
     tempips.sort()
     tempips.reverse()
-    filewrite = open("/var/artillery/banlist.txt", "w")
+    if is_windows():
+        filewrite = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "w")
+    if is_posix():    
+        filewrite = open("/var/artillery/banlist.txt", "w")
     ips2 = [socket.inet_ntoa(ip) for ip in tempips]
     ips_parsed = ""
     for ips in ips2:
@@ -701,3 +725,11 @@ def sort_banlist():
             ips_parsed = ips + "\n" + ips_parsed
     filewrite.write(banner + "\n" + ips_parsed)
     filewrite.close()
+#removed turns out the issue was windows carriage returns in the init script i had.
+#note to self never open linux service files on windows.doh
+# this was just a place holder artillery.py code
+#def writePidFile():
+#	pid = str(os.getpid())
+#	f = open('/var/run/artillery.pid', 'w')
+#	f.write(pid)
+#	f.close()
