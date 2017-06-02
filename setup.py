@@ -15,7 +15,6 @@ from src.pyuac import * # UAC Check Script found it here.https://gist.github.com
 try: input = raw_input
 except NameError: pass
 
-
 # Check to see if we are admin
 if is_windows():
     if not isUserAdmin():
@@ -176,6 +175,7 @@ if answer.lower() in ["yes", "y"]:
             #launch from install dir
             os.system("start cmd /K launch.bat")
             #cleanup cache folder
+            time.sleep(2)
             os.system("start cmd /K del_cache.bat")
 
 
@@ -202,13 +202,12 @@ if answer == "uninstall":
     if is_windows():
         if not isUserAdmin():
             runAsAdmin()
-            #sys.exit(1)
         if isUserAdmin():
             #remove program files
-            subprocess.call(['cmd', '/c', 'rmdir', '/S', '/Q', 'C:\\Program Files (x86)\\Artillery'])
+            subprocess.call(['cmd', '/C', 'rmdir', '/S', '/Q', 'C:\\Program Files (x86)\\Artillery'])
             #del uninstall cache
             os.chdir("src\windows")
             os.system("start cmd /K del_cache.bat")
             #just so they can see this message slleep a sec
             print("[*] Artillery has been uninstalled.\n[*] Manually kill the process if it is still running.")
-            time.sleep(5)
+            time.sleep(3)

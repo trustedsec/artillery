@@ -2,9 +2,10 @@
 
 ::right away.you can safely remove for other versions@echo OFF
 ::echo %cd%
-@echo ON
+@echo OFF
 echo Copying banlist over......
 copy banlist.txt "C:\Program Files (x86)\Artillery"
 exit
 exit
 exit
+
