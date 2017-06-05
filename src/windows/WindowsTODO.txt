@@ -1,0 +1,4 @@
+Just a note to upstream devs. I am in the process of building an event dll for windows. Still in testing phase. just trying to figure out how to process the alerts and info recieved. when complete i will publish to my repo as well as all src.
+any questions please contact me through my git page.  
+
+									RH
