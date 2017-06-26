@@ -35,15 +35,6 @@ For those technical folks you can find all of the code in the following structur
 
 On windows to install pywin32 is needed.Install version that matches the version of python installed ex: 32/64 bit. Download files to location of your choice.open a cmd prompt browse to directory that files are located. To run type "python setup.py". You will be prompted for credentials if you are not an admin.  Artillery wil be installed in "Program Files (x86). After setup you have option to launch program. included is a batch file to launch once it is installed it is located in install directory.Console logging must be enabled in config. 
 
-
-
-# Message from https://github.com/russhaun
-#5\25\17
-#To all those that give a F#$%:
-		Just so you are warned i plan on heavily commenting ay changes I make and why I made a particular change it helps me to remember where i am in the build. You might see random ideas if you like them message me if not. do what you will. If you have an idea message me. Delete what you dont want.I realise some of my methods mightnot be the best and i will make mistakes. I might break s#$% if i do sorry. If you have a better\cleaner way please tell me .I am just starting so any constructive critisism is welcome. If your a d@#$% with your comments i will just ignore you. My only goal is to make this better for all that use it. Eventually i will add a TODo for windows/linux ideas and will place in there. I have a few already Powershell backend maybe? idk we'll see.If you actually read this thankyou for your time
-
-
-
 Project Artillery - A project by Binary Defense Systems (https://www.binarydefense.com).
 
 Binary Defense Systems (BDS) is a sister company of TrustedSec, LLC
