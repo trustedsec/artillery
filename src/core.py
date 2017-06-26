@@ -35,9 +35,9 @@ import datetime
 import signal
 from string import *
 # from string import split, join
-import socket 
-
+import socket
 # grab the current time
+from src.windows.events import HoneyPotEvent #check events.py for reasoning.
 
 
 def grab_time():
@@ -106,9 +106,12 @@ def ban(ip):
                         filewrite.write(ip + "\n")
                         filewrite.close()
                         sort_banlist()
-                        
+
                 # if running windows then route attacker to some bs address.
                 if is_windows():
+                    #lets try and write an event log
+                    HoneyPotEvent()
+                    #now lets block em or mess with em route somewhere else?
                     subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip),
                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                     fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r")
@@ -134,7 +137,7 @@ def update():
 
         subprocess.Popen("cd /var/artillery;git pull",
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    
+
 
 def is_whitelisted_ip(ip):
     # set base counter
@@ -211,7 +214,7 @@ def check_banlist_path():
                     "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
                 path = "/var/artillery/banlist.txt"
-    #changed path to be more consistant across windows versions 
+    #changed path to be more consistant across windows versions
     if is_windows():
         program_files = os.environ["PROGRAMFILES(X86)"]
         if os.path.isfile(program_files + "\\Artillery\\banlist.txt"):
@@ -453,6 +456,7 @@ def syslog(message):
             filewrite.write(message + "\n")
             filewrite.close()
 
+
 def write_log(alert):
     if is_posix():
         syslog(alert)
@@ -611,11 +615,11 @@ def format_ips(url):
                 write_log("Received URL Error, Reason: {}".format(err))
                 return
 
-    try: 
+    try:
         if is_windows():
             #added this for the banlist windows 7 successfully pulls banlist with python 2.7.
-            #windows 8/10 with python 3.6 fail with 403 Forbidden error. has to do with format_ips 
-            #function above. python 3.6 urlopen sends the wrong headers 
+            #windows 8/10 with python 3.6 fail with 403 Forbidden error. has to do with format_ips
+            #function above. python 3.6 urlopen sends the wrong headers
             fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r").read()
             # write the file
             filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
@@ -685,8 +689,8 @@ def sort_banlist():
         ips = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "r").readlines()
     if is_posix():
         ips = open("/var/artillery/banlist.txt", "r").readlines()
-        
-        
+
+
     banner = """#
 #
 #
@@ -716,7 +720,7 @@ def sort_banlist():
     tempips.reverse()
     if is_windows():
         filewrite = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "w")
-    if is_posix():    
+    if is_posix():
         filewrite = open("/var/artillery/banlist.txt", "w")
     ips2 = [socket.inet_ntoa(ip) for ip in tempips]
     ips_parsed = ""
@@ -729,7 +733,7 @@ def sort_banlist():
 #note to self never open linux service files on windows.doh
 # this was just a place holder artillery.py code
 #def writePidFile():
-#	pid = str(os.getpid())
-#	f = open('/var/run/artillery.pid', 'w')
-#	f.write(pid)
-#	f.close()
+#   pid = str(os.getpid())
+#   f = open('/var/run/artillery.pid', 'w')
+#   f.write(pid)
+#   f.close()
