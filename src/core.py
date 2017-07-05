@@ -37,7 +37,7 @@ from string import *
 # from string import split, join
 import socket
 # grab the current time
-from src.windows.events import HoneyPotEvent #check events.py for reasoning.
+from src.events import HoneyPotEvent #check events.py for reasoning.
 
 
 def grab_time():

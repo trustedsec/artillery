@@ -19,7 +19,7 @@ from src.pyuac import * # added so that it prompts when launching from batch fil
 #not the best way but for now something will go into eventlog.
 #for people with subscriptions in there environment like myself.
 #Could not get nteventhandler to fire an event. check events.py
-from src.windows.events import ArtilleryStartEvent
+from src.events import ArtilleryStartEvent
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 if 'win32' in sys.platform:
