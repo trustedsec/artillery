@@ -16,10 +16,6 @@ except ImportError: import _thread as thread
 import os
 import subprocess
 from src.pyuac import * # added so that it prompts when launching from batch file
-#not the best way but for now something will go into eventlog.
-#for people with subscriptions in there environment like myself.
-#Could not get nteventhandler to fire an event. check events.py
-from src.windows.events import ArtilleryStartEvent
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 if 'win32' in sys.platform:
@@ -36,8 +32,6 @@ if ('linux' or 'linux2' or 'darwin') in sys.platform:
 from src.core import *
 # from src.config import * # yaml breaks config reading - disabling
 
-
-# create the database directories if they aren't there
 if is_windows():#this is for launching script as admin from batchfile.
     if not isUserAdmin():# will prompt for user\pass and open in seperate window when you double click batchfile
         runAsAdmin()
@@ -45,6 +39,11 @@ if is_windows():#this is for launching script as admin from batchfile.
     #if not os.path.isdir("C:\\Program Files (x86)\\Artillery\\database"):
         #os.mkdir("C:\\Program Files (x86)\\Artillery\\database")
     if isUserAdmin():
+        #moved for issue #39 BinaryDefense to only import on windows. seemed like best place
+        #not the best way but for now something will go into eventlog.
+        #for people with subscriptions in there environment like myself.
+        #will work on better way
+        from src.events import ArtilleryStartEvent
         # let the local(txt))logfile know artillery has started successfully
         write_log("[*] %s: Artillery has started successfully." % (grab_time()))
         # write to windows log to let know artillery has started

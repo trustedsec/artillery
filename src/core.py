@@ -37,7 +37,7 @@ from string import *
 # from string import split, join
 import socket
 # grab the current time
-from src.windows.events import HoneyPotEvent #check events.py for reasoning.
+
 
 
 def grab_time():
@@ -253,6 +253,9 @@ def is_posix():
 def is_windows():
     return os.name == "nt"
 
+#moved for issue #39 BinaryDefense. changed to only import on windows but it is not defined until above
+if is_windows():
+    from .events import HoneyPotEvent #check events.py for reasoning.
 
 def create_iptables_subset():
     if is_posix():
