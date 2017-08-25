@@ -67,7 +67,7 @@ if is_posix():
         sys.exit(1)
     else:
         if not os.path.isdir("/var/artillery/database/"):
-            os.mkdirs("/var/artillery/database/")
+            os.makedirs("/var/artillery/database/")
         if not os.path.isfile("/var/artillery/database/temp.database"):
             filewrite = open("/var/artillery/database/temp.database", "w")
             filewrite.write("")
