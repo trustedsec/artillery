@@ -21,13 +21,16 @@ from src.pyuac import * # added so that it prompts when launching from batch fil
 if 'win32' in sys.platform:
     if not os.path.isfile("C:\Program Files (x86)\\Artillery\\artillery.py"):
         print("[*] Artillery is not installed, running setup.py..")
-        subprocess.Popen("python setup.py", shell=True).wait()
+        import setup
+#        subprocess.Popen("python setup.py", shell=True).wait()
+
 # consolidated nix* variants
 if ('linux' or 'linux2' or 'darwin') in sys.platform:
     if not os.path.isfile("/var/artillery/artillery.py"):
         print("[*] Artillery is not installed, running setup.py..")
-        subprocess.Popen("python setup.py", shell=True).wait()
-
+        import setup
+#        subprocess.Popen("python setup.py", shell=True).wait()
+#        sys.exit()
 
 from src.core import *
 # from src.config import * # yaml breaks config reading - disabling

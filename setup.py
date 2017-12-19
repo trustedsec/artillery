@@ -66,7 +66,7 @@ Written by: Dave Kennedy (ReL1K)
 
 if answer.lower() in ["yes", "y"]:
     if is_posix():
-        kill_artillery()
+        #kill_artillery()
 
         print("[*] Beginning installation. This should only take a moment.")
 
@@ -95,21 +95,6 @@ if answer.lower() in ["yes", "y"]:
                     "chmod +x /etc/init.d/artillery", shell=True).wait()
                 subprocess.Popen(
                     "update-rc.d artillery defaults", shell=True).wait()
-                #removed turns out the issue was windows carriage returns in the init script i had.
-                #note to self never open linux service files on windows.doh
-                #while this did work the problem was self inflicted. I was doing it wrong
-                #will work on moving to systemd? have partial setup working
-                #missing something though
-                #added service file creation for systemd on kali2 rolling
-            #if not os.path.isfile("/lib/systemd/system/artillery.service"):
-                #fileopen = open("src/artillery_service", 'r')
-                #service = fileopen.read()
-                #filewrite = open("/lib/systemd/system/artillery.service", "w")
-                #filewrite.write(service)
-                #filewrite.close()
-                #register service to start through systemctl
-                #subprocess.Popen(
-                    #"systemctl enable /lib/systemd/system/artillery.service", shell=True).wait()
 
             # remove old method if installed previously
             if os.path.isfile("/etc/init.d/rc.local"):
