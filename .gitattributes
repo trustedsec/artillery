@@ -1,0 +1,17 @@
+#just some stuff to normalize line endings
+* text
+*.py text
+*.sh text
+*.bat text
+
+#this is for the eventual event message dll file. that is currently in progress
+*.dll binary
+
+
+#put this here because it will run on both platfoms. commented out for now
+#*.ps1 text
+#*.psm1 text
+
+
+#I grabbed all info from here. feel free to add/remove if incorrect for your env.
+#https://help.github.com/articles/dealing-with-line-endings/
