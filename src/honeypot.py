@@ -79,10 +79,10 @@ def listen_server(port, bind_interface):
     try:
         port = int(port)
         if bind_interface == "":
-            server = SocketServer.ThreadingTCPServer(
+            server = SocketServer.ThreadingUDPServer(
                 ('', port), SocketListener)
         else:
-            server = SocketServer.ThreadingTCPServer(
+            server = SocketServer.ThreadingUDPServer(
                 ('%s' % bind_interface, port), SocketListener)
         if honeypot_autoaccept:
             ban_check = read_config("HONEYPOT_BAN").lower()
