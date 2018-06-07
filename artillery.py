@@ -93,7 +93,8 @@ try:
         from src.monitor import *
 
     # port ranges to spawn
-    port = read_config("PORTS")
+    tcpport = read_config("TCPPORTS")
+    udpport = read_config("UDPPORTS")
 
     # if we are running posix then lets create a new iptables chain
     if is_posix():
