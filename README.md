@@ -14,7 +14,7 @@ Be sure to edit the ```/var/artillery/config``` to turn on mail delivery, brute 
 
 ### Bugs and enhancements
 
-For bug reports or enhancements, please open an issue here https://github.com/trustedsec/artillery/issues
+For bug reports or enhancements, please open an issue here https://github.com/BinaryDefense/artillery/issues
 
 ### Project structure
 
