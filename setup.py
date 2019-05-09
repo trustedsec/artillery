@@ -47,6 +47,8 @@ Written by: Dave Kennedy (ReL1K)
         if os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py") and interactive:
             #print("[*] [*] If you would like to uninstall hit y then enter")
             answer = input("[*] Artillery detected. Do you want to uninstall [y/n:] ")
+        else:
+            answer = 'y'
         #put this here to create loop
         if (answer.lower() in ["yes", "y"]) or not interactive:
             answer = "uninstall"
