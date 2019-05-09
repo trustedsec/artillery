@@ -78,6 +78,8 @@ Written by: Dave Kennedy (ReL1K)
     else:
         if os.path.isfile("/etc/init.d/artillery") and interactive:
             answer = input("[*] Artillery detected. Do you want to uninstall [y/n:] ")
+        else:
+            answer = 'y'
         #put this here to create loop
         if (answer.lower() in ["yes", "y"]) or not interactive:
             answer = "uninstall"
