@@ -78,8 +78,8 @@ if answer.lower() in ["yes", "y"]:
             os.makedirs("/var/artillery_check_root")
         if not os.path.isdir("/var/artillery/database"):
             os.makedirs("/var/artillery/database")
-        if not os.path.isdir("/var/artillery/src/program_junk/"):
-            os.makedirs("/var/artillery/src/program_junk/")
+        if not os.path.isdir("/var/artillery/src/program_junk"):
+            os.makedirs("/var/artillery/src/program_junk")
 
         # install to rc.local
         print("[*] Adding artillery into startup through init scripts..")
