@@ -481,12 +481,12 @@ def write_log(alert):
 
 def warn_the_good_guys(subject, alert):
     email_alerts = is_config_enabled("EMAIL_ALERTS")
-    email_frequency = is_config_enabled("EMAIL_FREQUENCY")
+    email_timer = is_config_enabled("EMAIL_TIMER")
 
-    if email_alerts and not email_frequency:
+    if email_alerts and not email_timer:
         send_mail(subject, alert)
 
-    if email_alerts and email_frequency:
+    if email_alerts and email_timer:
         prep_email(alert + "\n")
 
     if is_config_enabled("CONSOLE_LOGGING"):
