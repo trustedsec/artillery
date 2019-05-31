@@ -4,6 +4,8 @@
 #
 #
 #python2to3
+import string
+import random
 import smtplib
 try:
     from email.MIMEMultipart import MIMEMultipart
@@ -501,7 +503,8 @@ def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
 # mail function preping to send
-
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 def mail(to, subject, text):
     try:
@@ -515,6 +518,7 @@ def mail(to, subject, text):
         msg = MIMEMultipart()
         msg['From'] = smtp_from
         msg['To'] = to
+        msg['Message-Id'] = "<" + id_generator(20) + "." + smtp_from + ">"
         msg['Subject'] = subject
         msg.attach(MIMEText(text))
         # prep the smtp server
