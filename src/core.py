@@ -661,7 +661,7 @@ def format_ips(url):
 def pull_source_feeds():
     while 1:
                 # pull source feeds
-        url = ""
+        url = []
         counter = 0
         # if we are using source feeds
         if read_config("SOURCE_FEEDS").lower() == "on":
