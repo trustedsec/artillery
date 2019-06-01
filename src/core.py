@@ -239,11 +239,11 @@ def prep_email(alert):
     if is_posix():
         # write the file out to program_junk
         filewrite = open(
-            "/var/artillery/src/program_junk/email_alerts.log", "w")
+            "/var/artillery/src/program_junk/email_alerts.log", "a")
     if is_windows():
         program_files = os.environ["PROGRAMFILES(X86)"]
         filewrite = open(
-            program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
+            program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "a")
     filewrite.write(alert)
     filewrite.close()
 
