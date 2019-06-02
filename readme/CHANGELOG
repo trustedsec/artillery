@@ -1,9 +1,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~
-version 2.1.1          3//2019
+version 2.1.1          6/2/2019
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added dates to changelog to reflect how often updates are applied. 
   Please Note this only applies to git history. svn history is unavailible
+# added silent install option
 * readme updates for windows install locations and also src file updates
 * removed basically entire copy of full readme as duplicate txt
 * added udp server to honeypot
