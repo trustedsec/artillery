@@ -12,6 +12,7 @@ try:
     from email.MIMEBase import MIMEBase
     from email.MIMEText import MIMEText
     from email import Encoders
+    from email.utils import formatdate
 except ImportError:
     from email import *
 
@@ -527,6 +528,7 @@ def mail(to, subject, text):
         msg = MIMEMultipart()
         msg['From'] = smtp_from
         msg['To'] = to
+        msg['Date'] = formatdate(localtime=True)
         msg['Message-Id'] = "<" + id_generator(20) + "." + smtp_from + ">"
         msg['Subject'] = subject
         msg.attach(MIMEText(text))
