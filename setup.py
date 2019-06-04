@@ -11,9 +11,19 @@ import shutil
 from src.core import *
 import sys
 import errno
+import argparse
 from src.pyuac import * # UAC Check Script found it here.https://gist.github.com/Preston-Landers/267391562bc96959eb41 all credit goes to him.
 try: input = raw_input
 except NameError: pass
+
+# Argument parse. Aimed to provide automatic deployment options
+interactive = True # Flag to select interactive install, typically prompting user to answer [y/n]
+parser = argparse.ArgumentParser(description='-y, optional non interactive install/uninstall with automatic \'yes\' selection. It must roon with root/admin privileges')
+parser.add_argument("-y", action='store_true')
+args = parser.parse_args()
+if args.y: # Check if non-interactive install argument is provided using an apt parameter style, -y
+    print("Running in non interactive mode with automatic \'yes\' selection")
+    interactive = False;
 
 # Check to see if we are admin
 if is_windows():
@@ -28,14 +38,19 @@ Written by: Dave Kennedy (ReL1K)
 ''')
 #create loop for install/uninstall not perfect but works saves answer for next step
     if not os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py"):
-        answer = input("[*] Do you want to install Artillery [y/n]: ")
+        if interactive:
+            answer = input("[*] Do you want to install Artillery [y/n]: ")
+        else:
+            answer = 'y'
     #if above is false it must be installed so ask to uninstall
     else:
-        if os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py"):
+        if os.path.isfile("C:\\Program Files (x86)\\Artillery\\artillery.py") and interactive:
             #print("[*] [*] If you would like to uninstall hit y then enter")
             answer = input("[*] Artillery detected. Do you want to uninstall [y/n:] ")
+        else:
+            answer = 'y'
         #put this here to create loop
-        if answer.lower() in ["yes", "y"]:
+        if (answer.lower() in ["yes", "y"]) or not interactive:
             answer = "uninstall"
 
 # Check to see if we are root
@@ -55,13 +70,18 @@ Written by: Dave Kennedy (ReL1K)
 ''')
 #if we are root create loop for install/uninstall not perfect but works saves answer for next step
     if not os.path.isfile("/etc/init.d/artillery"):
-        answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
+        if interactive:
+            answer = input("Do you want to install Artillery and have it automatically run when you restart [y/n]: ")
+        else:
+            answer = 'y'
     #if above is true it must be installed so ask to uninstall
     else:
-        if os.path.isfile("/etc/init.d/artillery"):
+        if os.path.isfile("/etc/init.d/artillery") and interactive:
             answer = input("[*] Artillery detected. Do you want to uninstall [y/n:] ")
+        else:
+            answer = 'y'
         #put this here to create loop
-        if answer.lower() in ["yes", "y"]:
+        if (answer.lower() in ["yes", "y"]) or not interactive:
             answer = "uninstall"
 
 if answer.lower() in ["yes", "y"]:
@@ -78,8 +98,8 @@ if answer.lower() in ["yes", "y"]:
             os.makedirs("/var/artillery_check_root")
         if not os.path.isdir("/var/artillery/database"):
             os.makedirs("/var/artillery/database")
-        if not os.path.isdir("/var/artillery/src/program_junk/"):
-            os.makedirs("/var/artillery/src/program_junk/")
+        if not os.path.isdir("/var/artillery/src/program_junk"):
+            os.makedirs("/var/artillery/src/program_junk")
 
         # install to rc.local
         print("[*] Adding artillery into startup through init scripts..")
@@ -117,7 +137,10 @@ if answer.lower() in ["yes", "y"]:
 
 
     if is_posix():
-        choice = input("[*] Do you want to keep Artillery updated? (requires internet) [y/n]: ")
+        if interactive:
+            choice = input("[*] Do you want to keep Artillery updated? (requires internet) [y/n]: ")
+        else:
+            choice = 'y'
         if choice in ["y", "yes"]:
             print("[*] Checking out Artillery through github to /var/artillery")
             # if old files are there
@@ -143,7 +166,11 @@ if answer.lower() in ["yes", "y"]:
                 subprocess.Popen(
                     "chown root:wheel /Library/LaunchDaemons/com.artillery.plist", shell=True).wait()
 
-    choice = input("[*] Would you like to start Artillery now? [y/n]: ")
+    
+    if interactive:
+        choice = input("[*] Would you like to start Artillery now? [y/n]: ")
+    else:
+        choice = 'y'
     if choice in ["yes", "y"]:
         if is_posix():
             # this cmd is what they were refering to as "no longer supported"? from update-rc.d on install.

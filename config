@@ -52,7 +52,7 @@ SMTP_PASSWORD=""
 ALERT_USER_EMAIL="user@whatever.com"
 #
 # FOR SMTP ONLY HERE, THIS IS THE MAILTO
-SMTP_FROM="Artillery Incident"
+SMTP_FROM="Artillery_Incident"
 #
 # SMTP ADDRESS FOR SENDING EMAILS, DEFAULT IS GMAIL
 SMTP_ADDRESS="smtp.gmail.com"

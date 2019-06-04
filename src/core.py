@@ -4,12 +4,15 @@
 #
 #
 #python2to3
+import string
+import random
 import smtplib
 try:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEBase import MIMEBase
     from email.MIMEText import MIMEText
     from email import Encoders
+    from email.utils import formatdate
 except ImportError:
     from email import *
 
@@ -17,6 +20,9 @@ import os
 import re
 import subprocess
 import urllib
+import socket
+import struct
+
 
 # for python 2 vs 3 compatibility
 try:
@@ -139,21 +145,27 @@ def update():
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 
+def addressInNetwork(ip, net):
+   ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
+   netstr, bits = net.split('/')
+   netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
+   mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+   return (ipaddr & mask) == (netaddr & mask)
+
 def is_whitelisted_ip(ip):
-    # set base counter
-    counter = 0
     # grab ips
     ipaddr = str(ip)
     whitelist = read_config("WHITELIST_IP")
-    match = re.search(ip, whitelist)
-    if match:
-        # if we return one, the ip has already beeb banned
-        counter = 1
-    # else we'll check cidr notiation
-    else:
-        counter = printCIDR(ip)
-
-    return counter
+    whitelist = whitelist.split(',')
+    for site in whitelist:
+        if site.find("/") < 0:
+            if site.find(ipaddr) >= 0:
+                return True
+            else:
+                continue
+        if addressInNetwork(ipaddr, site):
+            return True
+    return False
 
 # validate that its an actual ip address versus something else stupid
 
@@ -237,11 +249,11 @@ def prep_email(alert):
     if is_posix():
         # write the file out to program_junk
         filewrite = open(
-            "/var/artillery/src/program_junk/email_alerts.log", "w")
+            "/var/artillery/src/program_junk/email_alerts.log", "a")
     if is_windows():
         program_files = os.environ["PROGRAMFILES(X86)"]
         filewrite = open(
-            program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "w")
+            program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "a")
     filewrite.write(alert)
     filewrite.close()
 
@@ -481,12 +493,12 @@ def write_log(alert):
 
 def warn_the_good_guys(subject, alert):
     email_alerts = is_config_enabled("EMAIL_ALERTS")
-    email_frequency = is_config_enabled("EMAIL_FREQUENCY")
+    email_timer = is_config_enabled("EMAIL_TIMER")
 
-    if email_alerts and not email_frequency:
+    if email_alerts and not email_timer:
         send_mail(subject, alert)
 
-    if email_alerts and email_frequency:
+    if email_alerts and email_timer:
         prep_email(alert + "\n")
 
     if is_config_enabled("CONSOLE_LOGGING"):
@@ -501,7 +513,8 @@ def send_mail(subject, text):
     mail(read_config("ALERT_USER_EMAIL"), subject, text)
 
 # mail function preping to send
-
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 def mail(to, subject, text):
     try:
@@ -515,6 +528,8 @@ def mail(to, subject, text):
         msg = MIMEMultipart()
         msg['From'] = smtp_from
         msg['To'] = to
+        msg['Date'] = formatdate(localtime=True)
+        msg['Message-Id'] = "<" + id_generator(20) + "." + smtp_from + ">"
         msg['Subject'] = subject
         msg.attach(MIMEText(text))
         # prep the smtp server
@@ -661,7 +676,7 @@ def format_ips(url):
 def pull_source_feeds():
     while 1:
                 # pull source feeds
-        url = ""
+        url = []
         counter = 0
         # if we are using source feeds
         if read_config("SOURCE_FEEDS").lower() == "on":
