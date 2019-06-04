@@ -1,5 +1,23 @@
 ~~~~~~~~~~~~~~~~~~~~~~
-version 2.0
+version 2.1.1          6/2/2019
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added dates to changelog to reflect how often updates are applied. 
+  Please Note this only applies to git history. svn history is unavailible
+# added silent install option
+* readme updates for windows install locations and also src file updates
+* removed basically entire copy of full readme as duplicate txt
+* added udp server to honeypot
+* updates to core files
+* added events for windows eventlog
+* fixed issue where on py 2.7 all files were being deleted
+* fixed issue when running artillery directly
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~
+version 2.0            10/4/2018
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added windows 7/8/10 install/uninstall support
@@ -12,7 +30,7 @@ version 2.0
 
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.8
+version 1.8            12/19/2017
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed setup.py for backwards compatiblity for python2/3
@@ -25,7 +43,7 @@ version 1.8
 * fixed syslog offloading
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.7
+version 1.7            2/2/2016
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * converstion to Python3 and adding support for python3
@@ -33,14 +51,14 @@ version 1.7
 * added fix for 0.x.x.x subnets sitll being added under sort
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.6.1
+version 1.6.1          2/2/2016
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * put everything into pep8 format
 * added password auth check thanks to benichmt1 git pull request
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.6
+version 1.6            2/1/2016
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed issue where 0.x.x.x could show up on banlist
@@ -52,13 +70,13 @@ version 1.6
 * cleaned up old codebase
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.5.1
+version 1.5.1          11/11/2015
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed old git repo to new git repo at binarydefense
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.5
+version 1.5            11/1/2015
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * disabled yaml config as this breaks configuration reading
@@ -67,7 +85,7 @@ version 1.5
 * fixed sort issue and malformed IP addresses due to sort not checking properly
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.4.1
+version 1.4.1          12/11/2015
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added a new function for sorting IP addresses when adding to the banlist, when an IP address is added, it will sort the text file banlist after an append action
@@ -75,7 +93,7 @@ version 1.4.1
 * fixed an issue when honeypot ban was specified to no, it would not populate the banlist even if it banned or not
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.4
+version 1.4            2/10/2015
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added the ability to remove old records after a certain interval - this will overwrite the banlist and start from scratch based on certain time intervals - options are available under the config files
@@ -85,7 +103,7 @@ version 1.4
 * added a check to turn on intelligence feed and also turn off ban if it is selected in the options this will allow you to pull intelligence feeds, check IP adddresses, and add to banlist, but not actively ban
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.3.1
+version 1.3.1          12/31/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added ability to change syslog port in the artillery config - if you are using a non-standard syslog port (defaults to 514)
@@ -94,7 +112,7 @@ version 1.3.1
 * fixed a bug where from and to would not be properly sent from send mail function
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.3
+version 1.3            11/11/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added new function for grabbing date and time
@@ -110,39 +128,39 @@ version 1.3
 * fixed a bug when using FILE as a designator that would cause an exception for alert not being defined (should have been assigned as variable)
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.2
+version 1.2            11/10/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * switched company to Binary Defense Systems (BDS)
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.1
+version 1.1            10/17/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed loop issue when "local" was specified for syslog
 * added "file" as config option for saving to local files
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.0.3
+version 1.0.3          3/29/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * removed a newline when honeypot puts an alert out
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.0.2
+version 1.0.2          2/24/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * quick fix to add a check for database file, if its not there it'll create it
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.0.1
+version 1.0.1          2/20/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * changed time delay if intelligence feed is turned to ON
 * turned intelligence feed to OFF by default in the config
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 1.0
+version 1.0            2/14/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added auto detection if artillery wasn't installed to kick off the setup.py script
@@ -150,7 +168,7 @@ version 1.0
 * fixed an issue that would cause email_handler to throw an exceptions for mail() taking two arguments, needed to be changed to send_mail
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.9
+version 0.9            1/25/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * removed smtp and merged into core
@@ -158,39 +176,39 @@ version 0.9
 * fixed a bug that would cause valid_ip() to throw an error due to library mismatch
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.8.1
+version 0.8.1          1/25/2014
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added a better init.d script for startup, now supports stop/start. Will need to run setup.py in order to get the new file, or copy src/startup_artillery to /etc/init.d/artillery
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.8
+version 0.8            12/30/2013     
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * large amounts of refactoring and recoding (thanks to plentz)
 * added ftp brute force detection (thanks johns3ej)
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.7.4
+version 0.7.4          10/18/2013     
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed issue with HONEYPOT_BAN being yes on occasions and ON on others.
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.7.3
+version 0.7.3          6/18/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed a bug that caused a 100% cpu spike on SSH monitoring
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.7.2
+version 0.7.2          6/11/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added detection for monitor_ssh in /var/log/faillog on debian
 * added better error handling within artillery.py in event of control-c or exceptions
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.7.1
+version 0.7.1          5/21/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * allowed open mail relays for when artillery is deployed internally, will use connection to connect to SMTP servers without creds
@@ -206,7 +224,7 @@ version 0.7.1
 * added the start and restart via syslog, will not let you know via syslog when artillery is being restarted
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.7
+version 0.7            2/17/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * changed everything over to github versus subversion
@@ -216,33 +234,33 @@ version 0.7
 * Bug fix for setup file would cause makedirs error, should be fixed
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.6.7
+version 0.6.7          2/2/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * if monitoring is turned off, it will not import the module
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.6.6
+version 0.6.6          1/24/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * fixed a typo that would cause artillery not to start in some cases
 * added folder create for src/program_junk and databases/ during installation of artillery
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.6.5
+version 0.6.5          1/20/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * added new config option to disable root checks
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.6.4
+version 0.6.4          1/14/2013
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * Added the ability to detect what ports are being blocked via artillery honeypot (thanks spoonman)
 * Changed README to README.txt to fix an OSX bug
 
 ~~~~~~~~~~~~~~~~~~~~~~
-version 0.6.3
+version 0.6.3          12/31/2012
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * Move over to github
