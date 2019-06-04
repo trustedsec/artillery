@@ -19,6 +19,9 @@ import os
 import re
 import subprocess
 import urllib
+import socket
+import struct
+
 
 # for python 2 vs 3 compatibility
 try:
@@ -141,21 +144,27 @@ def update():
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 
+def addressInNetwork(ip, net):
+   ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
+   netstr, bits = net.split('/')
+   netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
+   mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+   return (ipaddr & mask) == (netaddr & mask)
+
 def is_whitelisted_ip(ip):
-    # set base counter
-    counter = 0
     # grab ips
     ipaddr = str(ip)
     whitelist = read_config("WHITELIST_IP")
-    match = re.search(ip, whitelist)
-    if match:
-        # if we return one, the ip has already beeb banned
-        counter = 1
-    # else we'll check cidr notiation
-    else:
-        counter = printCIDR(ip)
-
-    return counter
+    whitelist = whitelist.split(',')
+    for site in whitelist:
+        if site.find("/") < 0:
+            if site.find(ipaddr) >= 0:
+                return True
+            else:
+                continue
+        if addressInNetwork(ipaddr, site):
+            return True
+    return False
 
 # validate that its an actual ip address versus something else stupid
 
