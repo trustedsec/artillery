@@ -47,9 +47,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
             self.request.send(fake_string)
             ip = self.client_address[0]
             if is_valid_ipv4(ip):
-                check_whitelist = is_whitelisted_ip(ip)
                 # ban the mofos
-                if check_whitelist == 0:
+                if not is_whitelisted_ip(ip):
                     now = str(datetime.datetime.today())
                     port = self.server.server_address[1]
                     subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (
