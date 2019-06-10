@@ -124,6 +124,11 @@ ROOT_CHECK="ON"
 # Specify SYSLOG TYPE to be local, file or remote. LOCAL will pipe to syslog, REMOTE will pipe to remote SYSLOG, and file will send to alerts.log in local artillery directory
 SYSLOG_TYPE="LOCAL"
 #
+# LOG MESSAGES (IMPORTANT: Everything except the %s are optional.  e.g. a minimal message would be "%s %s %s" which would be
+# the time, the ipaddress, and the port number
+LOG_MESSAGE_ALERT="%s [!] Artillery has detected an attack from IP address: %s for a connection on a honeypot port: %s"
+LOG_MESSAGE_BAN="%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s"
+#
 # IF YOU SPECIFY SYSLOG TYPE TO REMOTE, SPECIFY A REMOTE SYSLOG SERVER TO SEND ALERTS TO
 SYSLOG_REMOTE_HOST="192.168.0.1"
 #
