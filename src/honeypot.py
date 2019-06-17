@@ -25,6 +25,8 @@ udpports = read_config("UDPPORTS")
 bind_interface = read_config("BIND_INTERFACE")
 honeypot_ban = is_config_enabled("HONEYPOT_BAN")
 honeypot_autoaccept = is_config_enabled("HONEYPOT_AUTOACCEPT")
+log_message_ban = read_config("LOG_MESSAGE_BAN")
+log_message_alert = read_config("LOG_MESSAGE_ALERT")
 
 # main socket server listener for responses
 
@@ -55,10 +57,10 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                         now, ip)
                     alert = ""
                     if honeypot_ban:
-                        alert = "%s [!] Artillery has blocked (and blacklisted) the IP Address: %s for connecting to a honeypot restricted port: %s" % (
+                        alert = log_message_ban % (
                             now, ip, port)
                     else:
-                        alert = "%s [!] Artillery has detected an attack from IP address: %s for a connection on a honeypot port: %s" % (
+                        alert = log_message_alert % (
                             now, ip, port)
                     warn_the_good_guys(subject, alert)
 
