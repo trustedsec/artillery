@@ -255,6 +255,9 @@ def check_banlist_path():
 
 def prep_email(alert):
     if is_posix():
+        # check if folder program_junk exists
+        if not os.path.isdir("/var/artillery/src/program_junk"):
+          os.mkdir("/var/artillery/src/program_junk")
         # write the file out to program_junk
         filewrite = open(
             "/var/artillery/src/program_junk/email_alerts.log", "a")
