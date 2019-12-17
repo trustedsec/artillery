@@ -42,9 +42,9 @@ import signal
 from string import *
 # from string import split, join
 import socket
+import traceback
+
 # grab the current time
-
-
 
 def grab_time():
     ts = time.time()
@@ -77,6 +77,15 @@ def read_config(param):
                 line = line.replace('"', "")
                 line = line.split("=")
                 return line[1]
+    return ""
+
+
+def convert_to_classc(param):
+   ipparts = param.split('.')
+   classc = ""
+   if len(ipparts) == 4:
+       classc = ipparts[0]+"."+ipparts[1]+"."+ipparts[2]+".0/24"
+   return classc
 
 
 def is_config_enabled(param):
@@ -101,6 +110,9 @@ def ban(ip):
                         ban_check = read_config("HONEYPOT_BAN").lower()
                         # if we are actually banning IP addresses
                         if ban_check == "on":
+                            ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+                            if ban_classc == "on":
+                                ip = convert_to_classc(ip)
                             subprocess.Popen(
                                 "iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
                     # After the server is banned, add it to the banlist if it's
@@ -110,6 +122,7 @@ def ban(ip):
                     if ip not in data:
                         filewrite = open("/var/artillery/banlist.txt", "a")
                         filewrite.write(ip + "\n")
+                        #print("Added %s to file" % ip)
                         filewrite.close()
                         sort_banlist()
 
@@ -171,6 +184,10 @@ def is_whitelisted_ip(ip):
 
 
 def is_valid_ipv4(ip):
+    # if IP is cidr, strip net
+    if "/" in ip:
+       ipparts = ip.split("/")
+       ip = ipparts[0]
     if not ip.startswith("#"):
         pattern = re.compile(r"""
     ^
@@ -247,6 +264,9 @@ def check_banlist_path():
 
 def prep_email(alert):
     if is_posix():
+        # check if folder program_junk exists
+        if not os.path.isdir("/var/artillery/src/program_junk"):
+          os.mkdir("/var/artillery/src/program_junk")
         # write the file out to program_junk
         filewrite = open(
             "/var/artillery/src/program_junk/email_alerts.log", "a")
@@ -306,6 +326,9 @@ def is_already_banned(ip):
         proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers",
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         iptablesbanlist = proc.stdout.readlines()
+        ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+        if ban_classc == "on":
+           ip = convert_to_classc(ip)
         if ip in iptablesbanlist:
             return True
         else:
@@ -549,9 +572,11 @@ def mail(to, subject, text):
         mailServer.close()
 
     except Exception as err:
-        write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (
-            grab_time()))
+        write_log("[!] %s: Error, Artillery was unable to log into the mail server %s:%d" % (
+            grab_time(), smtp_address, smtp_port))
+        emsg = traceback.format_exc()
         write_log("[!] Printing error: " + str(err))
+        write_log("[!] %s" % emsg)
 
 # kill running instances of artillery
 
@@ -726,7 +751,7 @@ def sort_banlist():
     ip_filter = ""
     for ip in ips:
         if is_valid_ipv4(ip.strip()):
-            if not ip.startswith("0."):
+            if not ip.startswith("0.") and not ip == "":
                 ip_filter = ip_filter + ip.rstrip() + "\n"
     ips = ip_filter
     ips = ips.replace(banner, "")
@@ -734,7 +759,7 @@ def sort_banlist():
     ips = ips.split("\n")
     ips = [_f for _f in ips if _f]
     ips = list(filter(str.strip, ips))
-    tempips = [socket.inet_aton(ip) for ip in ips]
+    tempips = [socket.inet_aton(ip.split("/")[0]) for ip in ips]
     tempips.sort()
     tempips.reverse()
     if is_windows():
@@ -745,6 +770,8 @@ def sort_banlist():
     ips_parsed = ""
     for ips in ips2:
         if not ips.startswith("0."):
+            if ips.endswith(".0"):
+               ips += "/24"
             ips_parsed = ips + "\n" + ips_parsed
     filewrite.write(banner + "\n" + ips_parsed)
     filewrite.close()
