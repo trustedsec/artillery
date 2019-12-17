@@ -757,7 +757,7 @@ def sort_banlist():
     ips = ips.split("\n")
     ips = [_f for _f in ips if _f]
     ips = list(filter(str.strip, ips))
-    tempips = [socket.inet_aton(ip) for ip in ips]
+    tempips = [socket.inet_aton(ip.split("/")[0]) for ip in ips]
     tempips.sort()
     tempips.reverse()
     if is_windows():
@@ -768,6 +768,8 @@ def sort_banlist():
     ips_parsed = ""
     for ips in ips2:
         if not ips.startswith("0."):
+            if ips.endswith(".0"):
+               ips += "/24"
             ips_parsed = ips + "\n" + ips_parsed
     filewrite.write(banner + "\n" + ips_parsed)
     filewrite.close()
