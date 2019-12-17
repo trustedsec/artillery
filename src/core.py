@@ -77,7 +77,12 @@ def read_config(param):
                 line = line.replace('"', "")
                 line = line.split("=")
                 return line[1]
+    return ""
 
+
+def convert_to_classc(param):
+   ipparts = param.split('.')
+   return ipparts[0]+"."+ipparts[1]+"."+ipparts[2]+".0/24"
 
 def is_config_enabled(param):
     try:
@@ -101,6 +106,9 @@ def ban(ip):
                         ban_check = read_config("HONEYPOT_BAN").lower()
                         # if we are actually banning IP addresses
                         if ban_check == "on":
+                            ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+                            if ban_classc == "on":
+                                ip = convert_to_classc(ip)
                             subprocess.Popen(
                                 "iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
                     # After the server is banned, add it to the banlist if it's
