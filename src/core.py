@@ -572,8 +572,8 @@ def mail(to, subject, text):
         mailServer.close()
 
     except Exception as err:
-        write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (
-            grab_time()))
+        write_log("[!] %s: Error, Artillery was unable to log into the mail server %s:%d" % (
+            grab_time(), smtp_address, smtp_port))
         emsg = traceback.format_exc()
         write_log("[!] Printing error: " + str(err))
         write_log("[!] %s" % emsg)
