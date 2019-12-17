@@ -42,9 +42,9 @@ import signal
 from string import *
 # from string import split, join
 import socket
+import traceback
+
 # grab the current time
-
-
 
 def grab_time():
     ts = time.time()
@@ -574,7 +574,9 @@ def mail(to, subject, text):
     except Exception as err:
         write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (
             grab_time()))
+        emsg = traceback.format_exc()
         write_log("[!] Printing error: " + str(err))
+        write_log("[!] %s" % emsg)
 
 # kill running instances of artillery
 
