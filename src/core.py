@@ -82,7 +82,11 @@ def read_config(param):
 
 def convert_to_classc(param):
    ipparts = param.split('.')
-   return ipparts[0]+"."+ipparts[1]+"."+ipparts[2]+".0/24"
+   classc = ""
+   if len(ipparts) == 4:
+       classc = ipparts[0]+"."+ipparts[1]+"."+ipparts[2]+".0/24"
+   return classc
+
 
 def is_config_enabled(param):
     try:
@@ -118,6 +122,7 @@ def ban(ip):
                     if ip not in data:
                         filewrite = open("/var/artillery/banlist.txt", "a")
                         filewrite.write(ip + "\n")
+                        print("Added %s to file" % ip)
                         filewrite.close()
                         sort_banlist()
 
@@ -179,6 +184,10 @@ def is_whitelisted_ip(ip):
 
 
 def is_valid_ipv4(ip):
+    # if IP is cidr, strip net
+    if "/" in ip:
+       ipparts = ip.split("/")
+       ip = ipparts[0]
     if not ip.startswith("#"):
         pattern = re.compile(r"""
     ^
@@ -317,6 +326,9 @@ def is_already_banned(ip):
         proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers",
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         iptablesbanlist = proc.stdout.readlines()
+        ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+        if ban_classc == "on":
+           ip = convert_to_classc(ip)
         if ip in iptablesbanlist:
             return True
         else:
