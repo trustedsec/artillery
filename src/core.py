@@ -122,7 +122,7 @@ def ban(ip):
                     if ip not in data:
                         filewrite = open("/var/artillery/banlist.txt", "a")
                         filewrite.write(ip + "\n")
-                        print("Added %s to file" % ip)
+                        #print("Added %s to file" % ip)
                         filewrite.close()
                         sort_banlist()
 
@@ -749,7 +749,7 @@ def sort_banlist():
     ip_filter = ""
     for ip in ips:
         if is_valid_ipv4(ip.strip()):
-            if not ip.startswith("0."):
+            if not ip.startswith("0.") and not ip == "":
                 ip_filter = ip_filter + ip.rstrip() + "\n"
     ips = ip_filter
     ips = ips.replace(banner, "")
