@@ -17,6 +17,7 @@ import os
 import random
 import datetime
 from src.core import *
+import traceback
 
 # port ranges to spawn pulled from config
 tcpports = read_config("TCPPORTS")
@@ -71,7 +72,10 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     ban(ip)
 
         except Exception as e:
+            emsg = traceback.format_exc()
             print("[!] Error detected. Printing: " + str(e))
+            print(emsg)
+            print("")
             pass
 
 # here we define a basic server
