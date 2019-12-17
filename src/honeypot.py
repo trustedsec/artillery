@@ -104,8 +104,9 @@ def listentcp_server(tcpport, bind_interface):
         pass
 
 def listenudp_server(udpport, bind_interface):
-    try:
-        port = int(udpport)
+   if not udpport == "": 
+      port = int(udpport)
+      try:
         if bind_interface == "":
             server = SocketServer.ThreadingUDPServer(
                 ('', port), SocketListener)
@@ -118,8 +119,8 @@ def listenudp_server(udpport, bind_interface):
                 subprocess.Popen(
                     "iptables -A ARTILLERY -p udp --dport %s  -j ACCEPT" % port, shell=True).wait()
         server.serve_forever()
-    # if theres already something listening on this port
-    except Exception:
+      # if theres already something listening on this port
+      except Exception:
         # write a log if we are unable to bind to an interface
         write_log("[!] %s: Artillery was unable to bind to UDP port: %s. This could be to an active port in use." % (
             grab_time(), port))
