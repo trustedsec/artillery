@@ -95,7 +95,7 @@ def listentcp_server(tcpport, bind_interface):
             ban_check = read_config("HONEYPOT_BAN").lower()
             if ban_check == "on":
                 subprocess.Popen(
-                    "iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT" % port, shell=True).wait()
+                    "iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT -w 3" % port, shell=True).wait()
                 write_log("[*] Artillery - Created iptables rule to accept incoming traffic to tcp %s" % port)
         server.serve_forever()
     # if theres already something listening on this port
@@ -119,7 +119,7 @@ def listenudp_server(udpport, bind_interface):
             ban_check = read_config("HONEYPOT_BAN").lower()
             if ban_check == "on":
                 subprocess.Popen(
-                    "iptables -A ARTILLERY -p udp --dport %s  -j ACCEPT" % port, shell=True).wait()
+                    "iptables -A ARTILLERY -p udp --dport %s  -j ACCEPT -w 3" % port, shell=True).wait()
                 write_log("[*] Artillery - Created iptables rule to accept incoming traffic to udp %s" % port)
         server.serve_forever()
       # if theres already something listening on this port

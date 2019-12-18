@@ -349,8 +349,8 @@ def create_iptables_subset():
           ips_to_block = ','.join(iplist)
           massloadcmd = "iptables -I ARTILLERY -s %s -j DROP -w 3" % ips_to_block
           subprocess.Popen(massloadcmd, shell=True).wait()
-          write_log("[*] Artillery - %d of %d - added %d IP entries to iptables chain." % (listindex, len(iplists), len(iplist)))
           total_added += len(iplist)
+          write_log("[*] Artillery - %d/%d - Already added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
           if logindex >= logthreshold:
               print("    %d/%d : Update: Already added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
               logindex = 0
