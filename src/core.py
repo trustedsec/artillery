@@ -301,7 +301,7 @@ def create_iptables_subset():
             subprocess.Popen("iptables -N ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -F ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
             subprocess.Popen("iptables -I INPUT -j ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
