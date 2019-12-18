@@ -103,6 +103,8 @@ def listentcp_server(tcpport, bind_interface):
         # write a log if we are unable to bind to an interface
         write_log("[!] %s: Artillery was unable to bind to TCP port: %s. This could be to an active port in use." % (
             grab_time(), port))
+        errormsg = socket.gethostname() + " | %s | Artillery error - unable to bind to TCP port %s" % (grab_time(), port)
+        send_mail(errormsg, errormsg)
         pass
 
 def listenudp_server(udpport, bind_interface):
@@ -127,6 +129,8 @@ def listenudp_server(udpport, bind_interface):
         # write a log if we are unable to bind to an interface
         write_log("[!] %s: Artillery was unable to bind to UDP port: %s. This could be to an active port in use." % (
             grab_time(), port))
+        errormsg = socket.gethostname() + " | %s | Artillery error - unable to bind to UDP port %s" % (grab_time(), port)
+        send_mail(errormsg, errormsg)
         pass
 
 # check to see which ports we are using and ban if ports are touched
