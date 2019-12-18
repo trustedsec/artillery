@@ -319,7 +319,8 @@ def create_iptables_subset():
             # banned
         for ip in banfile:
             if not ip.startswith("#") and not ip.replace(" ","") == "":
-                if not is_already_banned(ip):
+                 #no need to check if IP has been banned already
+                 #if not is_already_banned(ip):
                     ip = ip.strip()
                     if is_posix():
                        if not ip.startswith("0."):
@@ -328,16 +329,33 @@ def create_iptables_subset():
                     if is_windows():
                        ban(ip)
     if len(banlist) > 0:
-       write_log("[*] Artillery - Mass loading %d entries from banlist" % len(banlist))
-       nr_of_lists = int(len(banlist) / 50) + 1
-       iplists = get_sublists(banlist, nr_of_lists)
+       # convert banlist into unique list
+       set_banlist = set(banlist)
+       unique_banlist = (list(set_banlist))
+       entries_at_once = 750
+       total_nr = len(unique_banlist)
+       write_log("[*] Artillery - Mass loading %d entries from banlist" % total_nr)
+       print("    Found %d unique entries in banlist" % total_nr) 
+       nr_of_lists = int(len(unique_banlist) / entries_at_once) + 1
+       iplists = get_sublists(unique_banlist, nr_of_lists)
        listindex = 1
+       logindex = 1
+       logthreshold = 25
+       if len(iplists) > 1000:
+           logthreshold = 100
+       total_added = 0
        for iplist in iplists: 
           ips_to_block = ','.join(iplist)
-          massloadcmd = "iptables -I ARTILLERY -s %s -j DROP" % ips_to_block
+          massloadcmd = "iptables -I ARTILLERY -s %s -j DROP -w 3" % ips_to_block
           subprocess.Popen(massloadcmd, shell=True).wait()
           write_log("[*] Artillery - %d of %d - added %d IP entries to iptables chain." % (listindex, len(iplists), len(iplist)))
+          total_added += len(iplist)
+          if logindex >= logthreshold:
+              print("    %d/%d : Update: Already added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
+              logindex = 0
           listindex +=1
+          logindex += 1
+       print("    %d/%d : Done: Added %d/%d entries to iptables chain, thank you for waiting." % (listindex, len(iplists), total_added, total_nr))
 
 
 def get_sublists(original_list, number_of_sub_list_wanted):
@@ -667,6 +685,7 @@ def format_ips(url):
     ips = ""
     for urls in url:
         try:
+            write_log("[*] Artillery - grabbing feed from %s" % str(urls))
             urls = str(urls)
             f = urlopen(urls).readlines()
             for line in f:
@@ -740,7 +759,7 @@ def pull_source_feeds():
                        'https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist', 'http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
                 counter = 1
 
-        # if we are using threati ntelligence feeds
+        # if we are using threat intelligence feeds
         if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
             threat_feed = read_config("THREAT_FEED")
             if threat_feed != "":

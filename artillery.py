@@ -125,7 +125,7 @@ try:
     import src.monitor
 
     # check hardening
-    print("[*] Check system hardening")
+    print("[*] Check system hardening.")
     import src.harden
 
     # start the email handler
