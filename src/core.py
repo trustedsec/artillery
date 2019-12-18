@@ -50,6 +50,8 @@ def grab_time():
     ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+def gethostname():
+    return socket.gethostname()
 
 def get_config_path():
     path = ""
@@ -565,7 +567,7 @@ def write_log(alert):
 def warn_the_good_guys(subject, alert):
     email_alerts = is_config_enabled("EMAIL_ALERTS")
     email_timer = is_config_enabled("EMAIL_TIMER")
-
+    subject = gethostname() + " | " + subject
     if email_alerts and not email_timer:
         send_mail(subject, alert)
 
