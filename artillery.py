@@ -99,40 +99,52 @@ try:
     # if we are running posix then lets create a new iptables chain
     if is_posix():
         time.sleep(2)
+        print("[*] Creating iptables entries, hold on.")
         create_iptables_subset()
+        print("[*] iptables entries created.")
+        print("[*] Starting anti DoS.")
         # start anti_dos
         import src.anti_dos
 
     # spawn honeypot
+    print("[*] Launching honeypot.") 
     import src.honeypot
 
     # spawn ssh monitor
     if is_config_enabled("SSH_BRUTE_MONITOR"):
+        print("[*] Launching SSH Bruteforce monitor.")
         import src.ssh_monitor
 
     # spawn ftp monitor
     if is_config_enabled("FTP_BRUTE_MONITOR"):
+        print("[*] Launching FTP Bruteforce monitor.")
         import src.ftp_monitor
 
     # start monitor engine
+    print("[*] Launching monitor engines.")
     import src.monitor
 
     # check hardening
+    print("[*] Check system hardening.")
     import src.harden
 
     # start the email handler
+    print("[*] Launching email handler.")
     import src.email_handler
 
     # check to see if we are a threat server or not
     if is_config_enabled("THREAT_SERVER"):
+        print("[*] Launching threat server thread.")
         thread.start_new_thread(threat_server, ())
 
     # recycle IP addresses if enabled
     if is_config_enabled("RECYCLE_IPS"):
+        print("[*] Recycle IP addresses.")
         thread.start_new_thread(refresh_log, ())
 
     # pull additional source feeds from external parties other than artillery
     # - pulls every 2 hours or ATIF threat feeds
+    print("[*] Launch thread to get source feeds, if needed.")
     thread.start_new_thread(pull_source_feeds, ())
     #removed turns out the issue was windows carriage returns in the init script i had.
     #note to self never edit linux service files on windows.doh
@@ -146,6 +158,7 @@ try:
 
 
     # let the program to continue to run
+    print("[*] All set.")
     while 1:
         try:
             time.sleep(100000)

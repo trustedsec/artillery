@@ -50,6 +50,8 @@ def grab_time():
     ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+def gethostname():
+    return socket.gethostname()
 
 def get_config_path():
     path = ""
@@ -293,10 +295,15 @@ def create_iptables_subset():
     if is_posix():
         ban_check = read_config("HONEYPOT_BAN").lower()
         if ban_check == "on":
+            # remove previous entry if it already exists
+            subprocess.Popen("iptables -D INPUT -j ARTILLERY",
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            # create new chain
+            write_log("[*] Artillery - Flushing iptables chain, creating a new one")
             subprocess.Popen("iptables -N ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -F ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
             subprocess.Popen("iptables -I INPUT -j ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
@@ -309,14 +316,57 @@ def create_iptables_subset():
         banfile = open("banlist.txt", "r")
 
     # if we are banning
+    banlist = []
     if read_config("HONEYPOT_BAN").lower() == "on":
             # iterate through lines in ban file and ban them if not already
             # banned
         for ip in banfile:
-            if not ip.startswith("#"):
-                if not is_already_banned(ip):
+            if not ip.startswith("#") and not ip.replace(" ","") == "":
+                 #no need to check if IP has been banned already, chain is empty and list will be converted to unique set anyway
+                 #if not is_already_banned(ip):
                     ip = ip.strip()
-                    ban(ip)
+                    if is_posix():
+                       if not ip.startswith("0."):
+                          if is_valid_ipv4(ip.strip()):
+                              banlist.append(ip)
+                    if is_windows():
+                       ban(ip)
+    if len(banlist) > 0:
+       # convert banlist into unique list
+       set_banlist = set(banlist)
+       unique_banlist = (list(set_banlist))
+       entries_at_once = 750
+       total_nr = len(unique_banlist)
+       write_log("[*] Artillery - Mass loading %d entries from banlist" % total_nr)
+       print("    Found %d unique entries in banlist" % total_nr) 
+       nr_of_lists = int(len(unique_banlist) / entries_at_once) + 1
+       iplists = get_sublists(unique_banlist, nr_of_lists)
+       listindex = 1
+       logindex = 1
+       logthreshold = 25
+       if len(iplists) > 1000:
+           logthreshold = 100
+       total_added = 0
+       for iplist in iplists: 
+          ips_to_block = ','.join(iplist)
+          massloadcmd = "iptables -I ARTILLERY -s %s -j DROP -w 3" % ips_to_block
+          subprocess.Popen(massloadcmd, shell=True).wait()
+          total_added += len(iplist)
+          write_log("[*] Artillery - %d/%d - Already added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
+          if logindex >= logthreshold:
+              print("    %d/%d : Update: Already added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
+              logindex = 0
+          listindex +=1
+          logindex += 1
+       print("    %d/%d : Done: Added %d/%d entries to iptables chain, thank you for waiting." % (listindex-1, len(iplists), total_added, total_nr))
+
+
+def get_sublists(original_list, number_of_sub_list_wanted):
+    sublists = list()
+    for sub_list_count in range(number_of_sub_list_wanted): 
+        sublists.append(original_list[sub_list_count::number_of_sub_list_wanted])
+    return sublists
+
 
 
 def is_already_banned(ip):
@@ -517,7 +567,7 @@ def write_log(alert):
 def warn_the_good_guys(subject, alert):
     email_alerts = is_config_enabled("EMAIL_ALERTS")
     email_timer = is_config_enabled("EMAIL_TIMER")
-
+    subject = gethostname() + " | " + subject
     if email_alerts and not email_timer:
         send_mail(subject, alert)
 
@@ -638,6 +688,7 @@ def format_ips(url):
     ips = ""
     for urls in url:
         try:
+            write_log("[*] Artillery - grabbing feed from %s" % str(urls))
             urls = str(urls)
             f = urlopen(urls).readlines()
             for line in f:
@@ -711,7 +762,7 @@ def pull_source_feeds():
                        'https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist', 'http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
                 counter = 1
 
-        # if we are using threati ntelligence feeds
+        # if we are using threat intelligence feeds
         if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
             threat_feed = read_config("THREAT_FEED")
             if threat_feed != "":
