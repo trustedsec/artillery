@@ -297,6 +297,7 @@ def create_iptables_subset():
             subprocess.Popen("iptables -D INPUT -j ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             # create new chain
+            write_log("[*] Artillery - Flushing iptables chain, creating a new one")
             subprocess.Popen("iptables -N ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -F ARTILLERY",
@@ -319,7 +320,7 @@ def create_iptables_subset():
             # banned
         for ip in banfile:
             if not ip.startswith("#") and not ip.replace(" ","") == "":
-                 #no need to check if IP has been banned already
+                 #no need to check if IP has been banned already, chain is empty and list will be converted to unique set anyway
                  #if not is_already_banned(ip):
                     ip = ip.strip()
                     if is_posix():
@@ -355,7 +356,7 @@ def create_iptables_subset():
               logindex = 0
           listindex +=1
           logindex += 1
-       print("    %d/%d : Done: Added %d/%d entries to iptables chain, thank you for waiting." % (listindex, len(iplists), total_added, total_nr))
+       print("    %d/%d : Done: Added %d/%d entries to iptables chain, thank you for waiting." % (listindex-1, len(iplists), total_added, total_nr))
 
 
 def get_sublists(original_list, number_of_sub_list_wanted):
