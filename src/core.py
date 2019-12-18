@@ -293,6 +293,10 @@ def create_iptables_subset():
     if is_posix():
         ban_check = read_config("HONEYPOT_BAN").lower()
         if ban_check == "on":
+            # remove previous entry if it already exists
+            subprocess.Popen("iptables -D INPUT -j ARTILLERY",
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            # create new chain
             subprocess.Popen("iptables -N ARTILLERY",
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             subprocess.Popen("iptables -F ARTILLERY",
@@ -309,14 +313,39 @@ def create_iptables_subset():
         banfile = open("banlist.txt", "r")
 
     # if we are banning
+    banlist = []
     if read_config("HONEYPOT_BAN").lower() == "on":
             # iterate through lines in ban file and ban them if not already
             # banned
         for ip in banfile:
-            if not ip.startswith("#"):
+            if not ip.startswith("#") and not ip.replace(" ","") == "":
                 if not is_already_banned(ip):
                     ip = ip.strip()
-                    ban(ip)
+                    if is_posix():
+                       if not ip.startswith("0."):
+                          if is_valid_ipv4(ip.strip()):
+                              banlist.append(ip)
+                    if is_windows():
+                       ban(ip)
+    if len(banlist) > 0:
+       write_log("[*] Artillery - Mass loading %d entries from banlist" % len(banlist))
+       nr_of_lists = int(len(banlist) / 50) + 1
+       iplists = get_sublists(banlist, nr_of_lists)
+       listindex = 1
+       for iplist in iplists: 
+          ips_to_block = ','.join(iplist)
+          massloadcmd = "iptables -I ARTILLERY -s %s -j DROP" % ips_to_block
+          subprocess.Popen(massloadcmd, shell=True).wait()
+          write_log("[*] Artillery - %d of %d - added %d IP entries to iptables chain." % (listindex, len(iplists), len(iplist)))
+          listindex +=1
+
+
+def get_sublists(original_list, number_of_sub_list_wanted):
+    sublists = list()
+    for sub_list_count in range(number_of_sub_list_wanted): 
+        sublists.append(original_list[sub_list_count::number_of_sub_list_wanted])
+    return sublists
+
 
 
 def is_already_banned(ip):

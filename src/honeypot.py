@@ -82,8 +82,9 @@ class SocketListener((SocketServer.BaseRequestHandler)):
 
 
 def listentcp_server(tcpport, bind_interface):
+  if not tcpport == "":
+    port = int(tcpport)
     try:
-        port = int(tcpport)
         if bind_interface == "":
             server = SocketServer.ThreadingTCPServer(
                 ('', port), SocketListener)
