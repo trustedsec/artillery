@@ -162,6 +162,7 @@ try:
 
     # let the program to continue to run
     print("[*] All set.")
+    write_log("%s [*] Artillery is up and running" % grab_time())
     while 1:
         try:
             time.sleep(100000)
