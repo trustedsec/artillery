@@ -16,6 +16,9 @@ except ImportError: import _thread as thread
 import os
 import subprocess
 from src.pyuac import * # added so that it prompts when launching from batch file
+
+import traceback
+
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 if 'win32' in sys.platform:
@@ -174,5 +177,8 @@ except KeyboardInterrupt:
     sys.exit()
 
 except Exception as e:
-    print("General exception: " + format(e))
+    emsg = traceback.format_exc()
+    print("General exception: " + format(e) + "\n" + emsg)
+    write_log("%s [!] Error launching Artillery\n%s" % (grab_time(),emsg))
+
     sys.exit()

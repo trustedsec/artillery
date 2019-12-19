@@ -352,9 +352,9 @@ def create_iptables_subset():
           massloadcmd = "iptables -I ARTILLERY -s %s -j DROP -w 3" % ips_to_block
           subprocess.Popen(massloadcmd, shell=True).wait()
           total_added += len(iplist)
-          write_log("[*] Artillery - %d/%d - Already added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
+          write_log("[*] Artillery - %d/%d - Added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
           if logindex >= logthreshold:
-              print("    %d/%d : Update: Already added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
+              print("    %d/%d : Update: Added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
               logindex = 0
           listindex +=1
           logindex += 1
@@ -618,6 +618,7 @@ def mail(to, subject, text):
             mailServer.login(user, pwd)
 
         # send the mail
+        write_log("%s Artillery - Sending email to %s: %s" % (grab_time(), to, subject))
         mailServer.sendmail(smtp_from, to, msg.as_string())
         mailServer.close()
 
