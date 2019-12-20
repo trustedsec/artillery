@@ -1,4 +1,15 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 2.2            12/20/2019
+~~~~~~~~~~~~~~~~~~~~~~
+
+* added HONEYPOT_BAN_LOG_PREFIX which is a config option that allows you to specify tags for banned IP addresses (pr corelanc0d3r)
+* allow for full class C cidr notation to block subnet ranges of an IP that it begins to ban instead of just one (pr corelanc0d3r)
+* performance increase on loading in iptables for banlist (pr corelanc0d3r)
+* Send warning message when Artillery is unable to bind to a tcp or udp port (pr corelanc0d3r)
+* better logging and error handling around startup and fails to start (pr corelanc0d3r)
+
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 2.1.1          6/2/2019
 ~~~~~~~~~~~~~~~~~~~~~~
 
