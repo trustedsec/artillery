@@ -354,9 +354,9 @@ def create_iptables_subset():
           ips_to_block = ','.join(iplist)
           massloadcmd = "iptables -I ARTILLERY -s %s -j DROP -w 3" % ips_to_block
           subprocess.Popen(massloadcmd, shell=True).wait()
-          iptables_prefix = read_config("HONEYPOT_BAN_LOG_PREFIX")
-          if iptables_prefix != "":
-             massloadcmd = "iptables -I ARTILLERY -s %s -j LOG --log-prefix \"%s\" -w 3" % (ips_to_block, iptables_prefix)
+          iptables_logprefix = read_config("HONEYPOT_BAN_LOG_PREFIX")
+          if iptables_logprefix != "":
+             massloadcmd = "iptables -I ARTILLERY -s %s -j LOG --log-prefix \"%s\" -w 3" % (ips_to_block, iptables_logprefix)
              subprocess.Popen(massloadcmd, shell=True).wait() 
           total_added += len(iplist)
           write_log("[*] Artillery - %d/%d - Added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
