@@ -532,6 +532,9 @@ def create_iptables_subset():
                     if is_posix():
                        if not ip.startswith("0."):
                           if is_valid_ipv4(ip.strip()):
+                              if read_config("HONEYPOT_BAN_CLASSC").lower() == "on":
+                                 if not ip.endswith("/24"):
+                                    ip = convert_to_classc(ip)
                               banlist.append(ip)
                     if is_windows():
                        ban(ip)
