@@ -38,6 +38,8 @@ if ('linux' or 'linux2' or 'darwin') in sys.platform:
 from src.core import *
 # from src.config import * # yaml breaks config reading - disabling
 
+check_config()
+
 if is_windows():#this is for launching script as admin from batchfile.
     if not isUserAdmin():# will prompt for user\pass and open in seperate window when you double click batchfile
         runAsAdmin()

@@ -22,7 +22,7 @@ import subprocess
 import urllib
 import socket
 import struct
-
+import sys
 
 # for python 2 vs 3 compatibility
 try:
@@ -45,13 +45,179 @@ import socket
 import traceback
 
 # grab the current time
-
 def grab_time():
     ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 def gethostname():
     return socket.gethostname()
+
+# create a brand new config file
+def create_config(configpath, configdefaults, keyorder):
+   configpath = configpath
+   configfile = open(configpath, "w")
+   print("[*] Creating/updating config file '%s'" % configpath)
+   write_log("%s [$] Artillery - creating config file %s" % (grab_time(), configpath))
+   banner = "#############################################################################################\n"
+   banner += "#\n"
+   banner += "# This is the Artillery configuration file. Change these variables and flags to change how\n"
+   banner += "# this behaves.\n"
+   banner += "#\n"
+   banner += "# Artillery written by: Dave Kennedy (ReL1K)\n"
+   banner += "# Website: https://www.binarydefense.com\n"
+   banner += "# Email: info [at] binarydefense.com\n"
+   banner += "# Download: git clone https://github.com/binarydefense/artillery artillery/\n"
+   banner += "# Install: python setup.py\n"
+   banner += "#\n"
+   banner += "#############################################################################################\n"
+   banner += "#\n"
+   configfile.write(banner) 
+   for configkey in keyorder:
+      newline_comment = "\n# %s\n" % configdefaults[configkey][1]
+      newline_config = "%s=\"%s\"\n" % (configkey, configdefaults[configkey][0])
+      configfile.write(newline_comment)
+      configfile.write(newline_config)
+   configfile.close() 
+   return
+
+
+def check_config():
+    # populate defaults
+    configdefaults = {}
+    configdefaults["MONITOR"] = ["ON", "DETERMINE IF YOU WANT TO MONITOR OR NOT"]
+    configdefaults["MONITOR_FOLDERS"] = ["\"/var/www\",\"/etc/\"",  "THESE ARE THE FOLDERS TO MONITOR, TO ADD MORE, JUST DO \"/root\",\"/var/\", etc."]
+    configdefaults["MONITOR_FREQUENCY"] = ["60", "BASED ON SECONDS, 2 = 2 seconds."]
+    configdefaults["SSH_DEFAULT_PORT_CHECK"] = ["ON", "CHECK/WARN IF SSH IS RUNNING ON PORT 22"]
+    configdefaults["EXCLUDE"] = ["","EXCLUDE CERTAIN DIRECTORIES OR FILES. USE FOR EXAMPLE: /etc/passwd,/etc/hosts.allow"]
+    configdefaults["HONEYPOT_BAN"] = ["OFF", "DO YOU WANT TO AUTOMATICALLY BAN ON THE HONEYPOT"]
+    configdefaults["HONEYPOT_BAN_CLASSC"] = ["OFF","WHEN BANNING, DO YOU WANT TO BAN ENTIRE CLASS C AT ONCE INSTEAD OF INDIVIDUAL IP ADDRESS"]
+    configdefaults["HONEYPOT_BAN_LOG_PREFIX"] = ["","PUT A PREFIX ON ALL BANNED IP ADDRESSES. HELPFUL FOR WHEN TRYING TO PARSE OR SHOW DETECTIONS THAT YOU ARE PIPING OFF TO OTHER SYSTEMS. WHEN SET, PREFIX IPTABLES LOG ENTRIES WITH THE PROVIDED TEXT"]
+    configdefaults["WHITELIST_IP"] = ["127.0.0.1,localhost", "WHITELIST IP ADDRESSES, SPECIFY BY COMMAS ON WHAT IP ADDRESSES YOU WANT TO WHITELIST"]
+    configdefaults["TCPPORTS"] = ["22,1433,8080,21,5060,5061,5900,25,3389,53,110,1723,1337,10000,5800,44443,16993","TCP PORTS TO SPAWN HONEYPOT FOR"]
+    configdefaults["UDPPORTS"] = ["123,53,5060,5061,3478", "UDP PORTS TO SPAWN HONEYPOT FOR"]
+    configdefaults["HONEYPOT_AUTOACCEPT"] = ["ON", "SHOULD THE HONEYPOT AUTOMATICALLY ADD ACCEPT RULES TO THE ARTILLERY CHAIN FOR ANY PORTS ITS LISTENING ON"]
+    configdefaults["EMAIL_ALERTS"] = ["OFF","SHOULD EMAIL ALERTS BE SENT"]
+    configdefaults["SMTP_USERNAME"] = ["","CURRENT SUPPORT IS FOR SMTP. ENTER YOUR USERNAME AND PASSWORD HERE FOR STARTTLS AUTHENTICATION. LEAVE BLANK FOR OPEN RELAY"]
+    configdefaults["SMTP_PASSWORD"] = ["","ENTER SMTP PASSWORD HERE"]
+    configdefaults["ALERT_USER_EMAIL"] = ["enter_your_email_address_here@localhost","THIS IS WHO TO SEND THE ALERTS TO - EMAILS WILL BE SENT FROM ARTILLERY TO THIS ADDRESS"]
+    configdefaults["SMTP_FROM"] = ["Artillery_Incident@localhost","FOR SMTP ONLY HERE, THIS IS THE MAILTO"]
+    configdefaults["SMTP_ADDRESS"] = ["smtp.gmail.com","SMTP ADDRESS FOR SENDING EMAIL, DEFAULT IS GMAIL"]
+    configdefaults["SMTP_PORT"] = ["587","SMTP PORT FOR SENDING EMAILS DEFAULT IS GMAIL WITH STARTTLS"]
+    configdefaults["EMAIL_TIMER"] = ["ON","THIS WILL SEND EMAILS OUT DURING A CERTAIN FREQUENCY. IF THIS IS SET TO OFF, ALERTS WILL BE SENT IMMEDIATELY (CAN LEAD TO A LOT OF SPAM)"]
+    configdefaults["EMAIL_FREQUENCY"] = ["600", "HOW OFTEN DO YOU WANT TO SEND EMAIL ALERTS (DEFAULT 10 MINUTES) - IN SECONDS"]
+    configdefaults["SSH_BRUTE_MONITOR"] = ["ON", "DO YOU WANT TO MONITOR SSH BRUTE FORCE ATTEMPTS"]
+    configdefaults["SSH_BRUTE_ATTEMPTS"] = ["4", "HOW MANY ATTEMPTS BEFORE YOU BAN"]
+    configdefaults["FTP_BRUTE_MONITOR"] = ["OFF", "DO YOU WANT TO MONITOR FTP BRUTE FORCE ATTEMPTS"]
+    configdefaults["FTP_BRUTE_ATTEMPTS"] = ["4", "HOW MANY ATTEMPTS BEFORE YOU BAN"]
+    configdefaults["AUTO_UPDATE"] = ["ON", "DO YOU WANT TO DO AUTOMATIC UPDATES - ON OR OFF"]
+    configdefaults["ANTI_DOS"] = ["OFF", "ANTI DOS WILL CONFIGURE MACHINE TO THROTTLE CONNECTIONS, TURN THIS OFF IF YOU DO NOT WANT TO USE"]
+    configdefaults["ANTI_DOS_PORTS"] = ["80,443", "THESE ARE THE PORTS THAT WILL PROVIDE ANTI_DOS PROTECTION"]
+    configdefaults["ANTI_DOS_THROTTLE_CONNECTIONS"] = ["50", "THIS WILL THROTTLE HOW MANY CONNECTIONS PER MINUTE ARE ALLOWED HOWEVER THE BUST WILL ENFORCE THIS"]
+    configdefaults["ANTI_DOS_LIMIT_BURST"] = ["200", "THIS WILL ONLY ALLOW A CERTAIN BURST PER MINUTE THEN WILL ENFORCE AND NOT ALLOW ANYMORE TO CONNECT"]
+    configdefaults["ACCESS_LOG"] = ["/var/log/apache2/access.log", "THIS IS THE PATH FOR THE APACHE ACCESS LOG"]
+    configdefaults["ERROR_LOG"] = ["/var/log/apache2/error.log", "THIS IS THE PATH FOR THE APACHE ERROR LOG"]
+    configdefaults["BIND_INTERFACE"] = ["","THIS ALLOWS YOU TO SPECIFY AN IP ADDRESS. LEAVE THIS BLANK TO BIND TO ALL INTERFACES."]
+    configdefaults["THREAT_INTELLIGENCE_FEED"] = ["ON", "TURN ON INTELLIGENCE FEED, CALL TO https://www.binarydefense.com/banlist.txt IN ORDER TO GET ALREADY KNOWN MALICIOUS IP ADDRESSES. WILL PULL EVERY 24 HOURS"]
+    configdefaults["THREAT_FEED"] = ["https://www.binarydefense.com/banlist.txt","CONFIGURE THIS TO BE WHATEVER THREAT FEED YOU WANT BY DEFAULT IT WILL USE BINARY DEFENSE - NOTE YOU CAN SPECIFY MULTIPLE THREAT FEEDS BY DOING #http://urlthreatfeed1,http://urlthreadfeed2"]
+    configdefaults["THREAT_SERVER"] = ["OFF", "A THREAT SERVER IS A SERVER THAT WILL COPY THE BANLIST.TXT TO A PUBLIC HTTP LOCATION TO BE PULLED BY OTHER ARTILLERY SERVER. THIS IS USED IF YOU DO NOT WANT TO USE THE STANDARD BINARY DEFENSE ONE."]
+    configdefaults["THREAT_LOCATION"] = ["/var/www/","PUBLIC LOCATION TO PULL VIA HTTP ON THE THREAT SERVER. NOTE THAT THREAT SERVER MUST BE SET TO ON"]
+    configdefaults["ROOT_CHECK"] = ["ON", "THIS CHECKS TO SEE WHAT PERMISSIONS ARE RUNNING AS ROOT IN A WEB SERVER DIRECTORY"]
+    configdefaults["SYSLOG_TYPE"] = ["LOCAL", "Specify SYSLOG TYPE to be local, file or remote. LOCAL will pipe to syslog, REMOTE will pipe to remote SYSLOG, and file will send to alerts.log in local artillery directory"]
+    configdefaults["LOG_MESSAGE_ALERT"] = ["%s [!] Artillery has detected an attack from IP address: %s for a connection on a honeypot port: %s", "ALERT LOG MESSAGES (IMPORTANT: Everything except the %s are optional.  e.g. a minimal message would be \"%s %s %s\" which would be time, ipaddress, port number"]
+    configdefaults["LOG_MESSAGE_BAN"] = ["%s [!] Artillery has blocked (and blacklisted) an attack from IP address: %s for a connection to a honeypot restricted port: %s", "BAN LOG MESSAGES (IMPORTANT: Everything except the %s are optional.  e.g. a minimal message would be \"%s %s %s\" which would be time, ipaddress, port number"]
+    configdefaults["SYSLOG_REMOTE_HOST"] = ["192.168.0.1","IF YOU SPECIFY SYSLOG TYPE TO REMOTE, SPECIFY A REMOTE SYSLOG SERVER TO SEND ALERTS TO"]
+    configdefaults["SYSLOG_REMOTE_PORT"] = ["514", "IF YOU SPECIFY SYSLOG TYPE OF REMOTE, SEPCIFY A REMOTE SYSLOG PORT TO SEND ALERTS TO"]
+    configdefaults["CONSOLE_LOGGING"] = ["ON", "TURN ON CONSOLE LOGGING"]
+    configdefaults["RECYCLE_IPS"] = ["OFF", "RECYCLE LOGS AFTER A CERTAIN AMOUNT OF TIME - THIS WILL WIPE ALL IP ADDRESSES AND START FROM SCRATCH AFTER A CERTAIN INTERVAL"] 
+    configdefaults["ARTILLERY_REFRESH"] = ["604800", "RECYCLE INTERVAL AFTER A CERTAIN AMOUNT OF MINUTES IT WILL OVERWRITE THE LOG WITH A BLANK ONE AND ELIMINATE THE IPS - DEFAULT IS 7 DAYS"]
+    configdefaults["SOURCE_FEEDS"] = ["OFF", "PULL ADDITIONAL SOURCE FEEDS FOR BANNED IP LISTS FROM MULTIPLE OTHER SOURCES OTHER THAN ARTILLERY"] 
+
+    keyorder = []
+    keyorder.append("MONITOR")
+    keyorder.append("MONITOR_FOLDERS")
+    keyorder.append("MONITOR_FREQUENCY")
+    keyorder.append("SSH_DEFAULT_PORT_CHECK")
+    keyorder.append("EXCLUDE")
+    keyorder.append("HONEYPOT_BAN")
+    keyorder.append("HONEYPOT_BAN_CLASSC")
+    keyorder.append("HONEYPOT_BAN_LOG_PREFIX")
+    keyorder.append("WHITELIST_IP")
+    keyorder.append("TCPPORTS")
+    keyorder.append("UDPPORTS")
+    keyorder.append("HONEYPOT_AUTOACCEPT")
+    keyorder.append("EMAIL_ALERTS")
+    keyorder.append("SMTP_USERNAME")
+    keyorder.append("SMTP_PASSWORD")
+    keyorder.append("ALERT_USER_EMAIL")
+    keyorder.append("SMTP_FROM")
+    keyorder.append("SMTP_ADDRESS")
+    keyorder.append("SMTP_PORT")
+    keyorder.append("EMAIL_TIMER")
+    keyorder.append("EMAIL_FREQUENCY")
+    keyorder.append("SSH_BRUTE_MONITOR")
+    keyorder.append("SSH_BRUTE_ATTEMPTS")
+    keyorder.append("FTP_BRUTE_MONITOR")
+    keyorder.append("FTP_BRUTE_ATTEMPTS")
+    keyorder.append("AUTO_UPDATE")
+    keyorder.append("ANTI_DOS")
+    keyorder.append("ANTI_DOS_PORTS")
+    keyorder.append("ANTI_DOS_THROTTLE_CONNECTIONS")
+    keyorder.append("ANTI_DOS_LIMIT_BURST")
+    keyorder.append("ACCESS_LOG")
+    keyorder.append("ERROR_LOG")
+    keyorder.append("BIND_INTERFACE")
+    keyorder.append("THREAT_INTELLIGENCE_FEED")
+    keyorder.append("THREAT_FEED")
+    keyorder.append("THREAT_SERVER")
+    keyorder.append("THREAT_LOCATION")
+    keyorder.append("ROOT_CHECK")
+    keyorder.append("SYSLOG_TYPE")
+    keyorder.append("LOG_MESSAGE_ALERT")
+    keyorder.append("LOG_MESSAGE_BAN")
+    keyorder.append("SYSLOG_REMOTE_HOST")
+    keyorder.append("SYSLOG_REMOTE_PORT")
+    keyorder.append("CONSOLE_LOGGING")
+    keyorder.append("RECYCLE_IPS")
+    keyorder.append("ARTILLERY_REFRESH")
+    keyorder.append("SOURCE_FEEDS")
+    for key in configdefaults:
+      if not key in keyorder:
+         keyorder.append(key)
+
+
+    # read config file
+    createnew = False
+    configpath = get_config_path()
+    if os.path.exists(configpath):
+         # read existing config file, update dict
+         print("[*] Checking existing config file '%s'" % configpath)
+         for configkey in configdefaults:
+              if config_exists(configkey):
+                 currentcomment = configdefaults[configkey][1]
+                 currentvalue = read_config(configkey)
+                 configdefaults[configkey] = [currentvalue, currentcomment]
+    else:
+       createnew = True
+       #config file does not exist, determine new path
+       if is_posix():
+          configpath = "config"
+       if is_windows():
+          program_files = os.environ["PROGRAMFILES(X86)"]
+          configpath = program_files + "\\Artillery\\config"
+    
+    # write dict to file
+    create_config(configpath, configdefaults, keyorder)
+  
+    if createnew:
+      msg = "[!] Artillery WARNING - A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery again." % configpath
+      print(msg)
+      write_log(msg)
+      sys.exit(1) 
+
+    return
+
+
+
 
 def get_config_path():
     path = ""
@@ -66,6 +232,18 @@ def get_config_path():
         if os.path.isfile(program_files + "\\Artillery\\config"):
             path = program_files + "\\Artillery\\config"
     return path
+
+# check if a certain config parameter exists in the current config file
+def config_exists(param):
+    path = get_config_path()
+    fileopen = open(path, "r")
+    paramfound = False
+    for line in fileopen:
+        if not line.startswith("#"):
+            match = re.search(param + "=", line)
+            if match:
+               paramfound = True
+    return paramfound
 
 
 def read_config(param):
