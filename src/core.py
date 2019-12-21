@@ -306,7 +306,7 @@ def execOScmd(cmd, logmsg=""):
     outputlines = []
     for l in outputobj:
         thisline = l.decode()
-        print(thisline)
+        #print(thisline)
         outputlines.append(thisline.replace('\\n','').replace("'",""))
     return outputlines
 
