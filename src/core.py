@@ -200,7 +200,7 @@ def check_config():
        createnew = True
        #config file does not exist, determine new path
        if is_posix():
-          configpath = "config"
+          configpath = "/var/artillery/config"
        if is_windows():
           program_files = os.environ["PROGRAMFILES(X86)"]
           configpath = program_files + "\\Artillery\\config"
