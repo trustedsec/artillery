@@ -47,8 +47,12 @@ class SocketListener((SocketServer.BaseRequestHandler)):
 
         # try the actual sending and banning
         try:
-            self.request.send(fake_string)
             ip = self.client_address[0]
+            try:
+                self.request.send(fake_string)
+            except Exception as e:
+                print("[!] Unable to send data to %s:%s" % (ip, self.server.server_address[1]))
+                pass
             if is_valid_ipv4(ip):
                 # ban the mofos
                 if not is_whitelisted_ip(ip):

@@ -294,21 +294,44 @@ def is_windows():
 if is_windows():
     from .events import HoneyPotEvent #check events.py for reasoning.
 
+# execute OS command and to wait until it's finished
+def execOScmd(cmd, logmsg=""):
+    if logmsg != "":
+        write_log("%s [*] Artillery execOSCmd: %s" % (grab_time(), logmsg))
+    p = subprocess.Popen('%s' % cmd,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         shell=True)
+    outputobj = iter(p.stdout.readline, b'')
+    outputlines = []
+    for l in outputobj:
+        thisline = l.decode()
+        print(thisline)
+        outputlines.append(thisline.replace('\\n','').replace("'",""))
+    return outputlines
+
+
+# execute OS commands Asynchronously
+# this one takes an array
+# first element is application, arguments are in additional array elements
+def execOScmdAsync(cmdarray):
+    p = subprocess.Popen(cmdarray) 
+    #p.terminate()
+    return
+
+
+
 def create_iptables_subset():
     if is_posix():
         ban_check = read_config("HONEYPOT_BAN").lower()
         if ban_check == "on":
             # remove previous entry if it already exists
-            subprocess.Popen("iptables -D INPUT -j ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            execOScmd("iptables -D INPUT -j ARTILLERY", "Deleting ARTILLERY IPTables Chain")
             # create new chain
             write_log("[*] Artillery - Flushing iptables chain, creating a new one")
-            subprocess.Popen("iptables -N ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            subprocess.Popen("iptables -F ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
-            subprocess.Popen("iptables -I INPUT -j ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            execOScmd("iptables -N ARTILLERY -w 3")
+            execOScmd("iptables -F ARTILLERY -w 3")
+            execOScmd("iptables -I INPUT -j ARTILLERY -w 3")
 
     if os.path.isfile(check_banlist_path()):
         banfile = open(check_banlist_path(), "r")
@@ -696,9 +719,10 @@ def format_ips(url):
     ips = ""
     for urls in url:
         try:
-            write_log("[*] Artillery - grabbing feed from %s" % str(urls))
+            write_log("%s [*] Artillery - grabbing feed from %s" % (grab_time(),str(urls)))
             urls = str(urls)
             f = urlopen(urls).readlines()
+            write_log("%s [*] Artillery - retrieved %d lines from %s" % (grab_time(),len(f), str(urls)))
             for line in f:
                 line = line.rstrip()
                 # stupid conversion from py2 to py3 smh
