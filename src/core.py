@@ -286,52 +286,56 @@ def is_config_enabled(param):
 def ban(ip):
     # ip check routine to see if its a valid IP address
     ip = ip.rstrip()
-    if not ip.startswith("#"):
-        if not ip.startswith("0."):
-            if is_valid_ipv4(ip.strip()):
-                # if we are running nix variant then trigger ban through
-                # iptables
-                if is_posix():
-                    if not is_already_banned(ip):
-                        ban_check = read_config("HONEYPOT_BAN").lower()
-                        # if we are actually banning IP addresses
-                        if ban_check == "on":
-                            ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
-                            if ban_classc == "on":
-                                ip = convert_to_classc(ip)
-                            subprocess.Popen(
+    ban_check = read_config("HONEYPOT_BAN").lower()
+    ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+    if ban_check == "on":
+       if not ip.startswith("#"):
+           if not ip.startswith("0."):
+               if is_valid_ipv4(ip.strip()):
+                   # if we are running nix variant then trigger ban through
+                   # iptables
+                   if is_posix():
+                       if not is_already_banned(ip):
+                           if ban_classc == "on":
+                                   ip = convert_to_classc(ip)
+                           subprocess.Popen(
                                 "iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-                        iptables_logprefix = read_config("HONEYPOT_BAN_LOG_PREFIX")
-                        if iptables_logprefix != "":
-                           subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j LOG --log-prefix \"%s\"" % (ip, iptables_logprefix), shell=True).wait() 
+                           iptables_logprefix = read_config("HONEYPOT_BAN_LOG_PREFIX")
+                           if iptables_logprefix != "":
+                              subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j LOG --log-prefix \"%s\"" % (ip, iptables_logprefix), shell=True).wait() 
 
 
-                # if running windows then route attacker to some bs address.
-                if is_windows():
-                    #lets try and write an event log
-                    HoneyPotEvent()
-                    #now lets block em or mess with em route somewhere else?
-                    subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip),
-                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                   # if running windows then route attacker to some bs address.
+                   if is_windows():
+                       #lets try and write an event log
+                       HoneyPotEvent()
+                       #now lets block em or mess with em route somewhere else?
+                       routecmd = "route ADD %s MASK 255.255.255.255 10.255.255.255" % ip
+                       if ban_classc == "on":
+                          ip = convert_to_classc(ip)
+                          ipparts = ip.split(".")
+                          routecmd = "route ADD %s.%s.%s.0 MASK 255.255.255.0 10.255.255.255" % (ipparts[0], ipparts[1], ipparts[2])
+                       subprocess.Popen("%s" % (routecmd),
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 
-                # add new IP to banlist
-                fileopen = open(globals.g_banlist, "r")
-                data = fileopen.read()
-                if ip not in data:
-                    filewrite = open(globals.g_banlist, "a")
-                    filewrite.write(ip + "\n")
-                    #print("Added %s to file" % ip)
-                    filewrite.close()
-                    sort_banlist()
+                   # add new IP to banlist
+                   fileopen = open(globals.g_banlist, "r")
+                   data = fileopen.read()
+                   if ip not in data:
+                       filewrite = open(globals.g_banlist, "a")
+                       filewrite.write(ip + "\n")
+                       #print("Added %s to file" % ip)
+                       filewrite.close()
+                       sort_banlist()
 
-                if read_config("LOCAL_BANLIST").lower() == "on":
-                    fileopen = open(globals.g_localbanlist, "r")
-                    data = fileopen.read()
-                    if ip not in data:
-                        filewrite = open(globals.g_localbanlist, "a")
-                        filewrite.write(ip+"\n")
-                        filewrite.close()
+                   if read_config("LOCAL_BANLIST").lower() == "on":
+                       fileopen = open(globals.g_localbanlist, "r")
+                       data = fileopen.read()
+                       if ip not in data:
+                           filewrite = open(globals.g_localbanlist, "a")
+                           filewrite.write(ip+"\n")
+                           filewrite.close()
 
 
 
