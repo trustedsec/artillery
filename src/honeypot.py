@@ -100,13 +100,13 @@ def listentcp_server(tcpport, bind_interface):
             if ban_check == "on":
                 subprocess.Popen(
                     "iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT -w 3" % port, shell=True).wait()
-                write_log("[*] Artillery - Created iptables rule to accept incoming traffic to tcp %s" % port)
+                write_log("Created iptables rule to accept incoming traffic to tcp %s" % port)
         server.serve_forever()
     # if theres already something listening on this port
     except Exception:
         # write a log if we are unable to bind to an interface
-        write_log("[!] %s: Artillery was unable to bind to TCP port: %s. This could be to an active port in use." % (
-            grab_time(), port))
+        write_log("Artillery was unable to bind to TCP port: %s. This could be to an active port in use." % (
+            port),2)
         errormsg = socket.gethostname() + " | %s | Artillery error - unable to bind to TCP port %s" % (grab_time(), port)
         send_mail(errormsg, errormsg)
         pass
@@ -126,13 +126,13 @@ def listenudp_server(udpport, bind_interface):
             if ban_check == "on":
                 subprocess.Popen(
                     "iptables -A ARTILLERY -p udp --dport %s  -j ACCEPT -w 3" % port, shell=True).wait()
-                write_log("[*] Artillery - Created iptables rule to accept incoming traffic to udp %s" % port)
+                write_log("Created iptables rule to accept incoming traffic to udp %s" % port)
         server.serve_forever()
       # if theres already something listening on this port
       except Exception:
         # write a log if we are unable to bind to an interface
-        write_log("[!] %s: Artillery was unable to bind to UDP port: %s. This could be to an active port in use." % (
-            grab_time(), port))
+        write_log("Artillery was unable to bind to UDP port: %s. This could be to an active port in use." % (
+            port),2)
         errormsg = socket.gethostname() + " | %s | Artillery error - unable to bind to UDP port %s" % (grab_time(), port)
         send_mail(errormsg, errormsg)
         pass

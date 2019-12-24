@@ -59,7 +59,7 @@ def create_config(configpath, configdefaults, keyorder):
    configpath = configpath
    configfile = open(configpath, "w")
    write_console("Creating/updating config file '%s'" % configpath)
-   write_log("%s [$] Artillery - creating config file %s" % (grab_time(), configpath))
+   write_log("Creating config file %s" % (configpath))
    banner = "#############################################################################################\n"
    banner += "#\n"
    banner += "# This is the Artillery configuration file. Change these variables and flags to change how\n"
@@ -212,9 +212,9 @@ def check_config():
     create_config(globals.g_configfile, configdefaults, keyorder)
   
     if createnew:
-      msg = "[!] Artillery WARNING - A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery again." % globals.g_configfile
+      msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery again." % globals.g_configfile
       write_console(msg)
-      write_log(msg)
+      write_log(msg,1)
       sys.exit(1) 
 
     return
@@ -492,7 +492,7 @@ if is_windows():
 # execute OS command and to wait until it's finished
 def execOScmd(cmd, logmsg=""):
     if logmsg != "":
-        write_log("%s [*] Artillery execOSCmd: %s" % (grab_time(), logmsg))
+        write_log("execOSCmd: %s" % (logmsg))
     p = subprocess.Popen('%s' % cmd,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE,
@@ -527,7 +527,7 @@ def create_iptables_subset():
             # remove previous entry if it already exists
             execOScmd("iptables -D INPUT -j ARTILLERY", "Deleting ARTILLERY IPTables Chain")
             # create new chain
-            write_log("[*] Artillery - Flushing iptables chain, creating a new one")
+            write_log("Flushing iptables chain, creating a new one")
             execOScmd("iptables -N ARTILLERY -w 3")
             execOScmd("iptables -F ARTILLERY -w 3")
             execOScmd("iptables -I INPUT -j ARTILLERY -w 3")
@@ -568,7 +568,7 @@ def create_iptables_subset():
        unique_banlist = (list(set_banlist))
        entries_at_once = 750
        total_nr = len(unique_banlist)
-       write_log("[*] Artillery - Mass loading %d entries from banlist" % total_nr)
+       write_log("Mass loading %d entries from banlist" % total_nr)
        write_console("    Found %d unique entries in banlist" % total_nr) 
        nr_of_lists = int(len(unique_banlist) / entries_at_once) + 1
        iplists = get_sublists(unique_banlist, nr_of_lists)
@@ -587,7 +587,7 @@ def create_iptables_subset():
              massloadcmd = "iptables -I ARTILLERY -s %s -j LOG --log-prefix \"%s\" -w 3" % (ips_to_block, iptables_logprefix)
              subprocess.Popen(massloadcmd, shell=True).wait() 
           total_added += len(iplist)
-          write_log("[*] Artillery - %d/%d - Added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
+          write_log("%d/%d - Added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
           if logindex >= logthreshold:
               write_console("    %d/%d : Update: Added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
               logindex = 0
@@ -726,8 +726,14 @@ def threat_server():
 # send the message then if its local or remote
 
 
-def syslog(message):
+def syslog(message, alerttype):
     type = read_config("SYSLOG_TYPE").lower()
+    if alerttype == 0:
+        alertindicator = "[+]"
+    elif alerttype == 1:
+        alertindicator = "[-]"
+    elif alerttype == 2:
+        alertindicator = "[!!]"
 
     # if we are sending remote syslog
     if type == "remote":
@@ -759,7 +765,8 @@ def syslog(message):
         # send the syslog message
         remote_syslog = read_config("SYSLOG_REMOTE_HOST")
         remote_port = int(read_config("SYSLOG_REMOTE_PORT"))
-        syslog_send(message, host=remote_syslog, port=remote_port)
+        syslogmsg = "%s %s Artillery: %s" % (grab_time(), alertindicator, message) 
+        syslog_send(syslogmsg, host=remote_syslog, port=remote_port)
 
     # if we are sending local syslog messages
     if type == "local":
@@ -768,7 +775,7 @@ def syslog(message):
         handler = logging.handlers.SysLogHandler(address='/dev/log')
         my_logger.addHandler(handler)
         for line in message.splitlines():
-            my_logger.critical(line + "\n")
+            my_logger.critical("%s %s Artillery: %s\n" % (grab_time(), alertindicator, line))
 
     # if we don't want to use local syslog and just write to file in
     # logs/alerts.log
@@ -782,7 +789,7 @@ def syslog(message):
             filewrite.close()
 
         filewrite = open("%s/logs/alerts.log" % globals.g_apppath, "a")
-        filewrite.write(message + "\n")
+        filewrite.write("%s %s Artillery: %s\n" % (grab_time(), alertindicator, message))
         filewrite.close()
 
 def write_console(alert):
@@ -793,9 +800,12 @@ def write_console(alert):
     return
 
 
-def write_log(alert):
+def write_log(alert, alerttype=0):
+    # alerttype 0 = normal/information [+]
+    # alerttype 1 = warning [-]
+    # alerttype 2 = error [!!]
     if is_posix():
-        syslog(alert)
+        syslog(alert, alerttype)
     #changed path to be more consistant across windows versions
     if is_windows():
         program_files = os.environ["PROGRAMFILES(X86)"]
@@ -865,16 +875,16 @@ def mail(to, subject, text):
             mailServer.login(user, pwd)
 
         # send the mail
-        write_log("%s Artillery - Sending email to %s: %s" % (grab_time(), to, subject))
+        write_log("Sending email to %s: %s" % (to, subject))
         mailServer.sendmail(smtp_from, to, msg.as_string())
         mailServer.close()
 
     except Exception as err:
-        write_log("[!] %s: Error, Artillery was unable to log into the mail server %s:%d" % (
-            grab_time(), smtp_address, smtp_port))
+        write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
+            grab_time(), smtp_address, smtp_port),2)
         emsg = traceback.format_exc()
-        write_log("[!] Printing error: " + str(err))
-        write_log("[!] %s" % emsg)
+        write_log("Error: " + str(err),2)
+        write_log(" %s" % emsg,2)
         write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
         write_console("[!] Error: %s" % emsg)
 
@@ -894,8 +904,7 @@ def kill_artillery():
         # depends on OS on integer
         # pid = int(pid[2])
         for i in pid:
-            write_log("[!] %s: Killing the old Artillery process..." %
-                      (grab_time()))
+            write_log("Killing the old Artillery process...")
             print("[!] %s: Killing Old Artillery Process...." % (grab_time()))
             os.kill(i, signal.SIGKILL)
 
@@ -935,10 +944,10 @@ def format_ips(url):
     ips = ""
     for urls in url:
         try:
-            write_log("%s [*] Artillery - grabbing feed from %s" % (grab_time(),str(urls)))
+            write_log("Grabbing feed from %s" % (str(urls)))
             urls = str(urls)
             f = urlopen(urls).readlines()
-            write_log("%s [*] Artillery - retrieved %d lines from %s" % (grab_time(),len(f), str(urls)))
+            write_log("Retrieved %d lines from %s" % (len(f), str(urls)))
             for line in f:
                 line = line.rstrip()
                 # stupid conversion from py2 to py3 smh
@@ -955,7 +964,7 @@ def format_ips(url):
                     "HTTPError: Error 404, URL {} not found.".format(urls))
 
             else:
-                write_log("Received URL Error, Reason: {}".format(err))
+                write_log("Received URL Error, Reason: {}".format(err),1)
                 return
 
     try:
@@ -993,7 +1002,7 @@ def format_ips(url):
                                 uniquenewentries += 1
         # close the file
         filewrite.close()
-        write_log("%s [*] Artillery - Added %d new unique entries to banlist" % (grab_time(), uniquenewentries)) 
+        write_log("Added %d new unique entries to banlist" % (uniquenewentries)) 
     except Exception as err:
         print("Error identified as :" + str(err) + " with line: " + str(line))
         pass

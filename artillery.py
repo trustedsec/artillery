@@ -64,7 +64,7 @@ if is_windows():#this is for launching script as admin from batchfile.
         #will work on better way
         from src.events import ArtilleryStartEvent
         # let the local(txt))logfile know artillery has started successfully
-        write_log("[*] %s: Artillery has started successfully." % (grab_time()))
+        write_log("Artillery has started successfully.")
         # write to windows log to let know artillery has started
         ArtilleryStartEvent()
         #create temp datebase and continue
@@ -175,7 +175,7 @@ try:
 
     # let the program to continue to run
     write_console("All set.")
-    write_log("%s [*] Artillery is up and running" % grab_time())
+    write_log("Artillery is up and running")
     while 1:
         try:
             time.sleep(100000)
@@ -193,6 +193,6 @@ except KeyboardInterrupt:
 except Exception as e:
     emsg = traceback.format_exc()
     print("General exception: " + format(e) + "\n" + emsg)
-    write_log("%s [!] Error launching Artillery\n%s" % (grab_time(),emsg))
+    write_log("Error launching Artillery\n%s" % (emsg),2)
 
     sys.exit()
