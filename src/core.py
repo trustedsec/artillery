@@ -728,7 +728,10 @@ def threat_server():
 
 def syslog(message, alerttype):
     type = read_config("SYSLOG_TYPE").lower()
-    if alerttype == 0:
+    alertindicator = ""
+    if alerttype == -1:
+        alertindicator = ""
+    elif alerttype == 0:
         alertindicator = "[+]"
     elif alerttype == 1:
         alertindicator = "[-]"
@@ -765,7 +768,9 @@ def syslog(message, alerttype):
         # send the syslog message
         remote_syslog = read_config("SYSLOG_REMOTE_HOST")
         remote_port = int(read_config("SYSLOG_REMOTE_PORT"))
-        syslogmsg = "%s %s Artillery: %s" % (grab_time(), alertindicator, message) 
+        syslogmsg = message
+        if alertindicator != "":
+           syslogmsg = "%s %s Artillery: %s" % (grab_time(), alertindicator, message) 
         syslog_send(syslogmsg, host=remote_syslog, port=remote_port)
 
     # if we are sending local syslog messages
@@ -775,7 +780,10 @@ def syslog(message, alerttype):
         handler = logging.handlers.SysLogHandler(address='/dev/log')
         my_logger.addHandler(handler)
         for line in message.splitlines():
-            my_logger.critical("%s %s Artillery: %s\n" % (grab_time(), alertindicator, line))
+            if alertindicator != "":
+                my_logger.critical("%s %s Artillery: %s\n" % (grab_time(), alertindicator, line))
+            else:
+                my_logger.critical("%s\n" % line)
 
     # if we don't want to use local syslog and just write to file in
     # logs/alerts.log
@@ -801,6 +809,7 @@ def write_console(alert):
 
 
 def write_log(alert, alerttype=0):
+    # alerttype -1 = overrule
     # alerttype 0 = normal/information [+]
     # alerttype 1 = warning [-]
     # alerttype 2 = error [!!]
@@ -834,7 +843,7 @@ def warn_the_good_guys(subject, alert):
     if is_config_enabled("CONSOLE_LOGGING"):
         print("{}".format(alert))
 
-    write_log(alert)
+    write_log(alert,-1)
 
 # send the actual email
 
