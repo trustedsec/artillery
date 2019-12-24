@@ -288,6 +288,12 @@ def ban(ip):
     ip = ip.rstrip()
     ban_check = read_config("HONEYPOT_BAN").lower()
     ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+    test_ip = ip
+    if "/" in test_ip:
+        test_ip = test_ip.split("/")[0]
+    if is_whitelisted_ip(test_ip):
+        write_log("Not banning IP %s, whitelisted" % test_ip)
+        return
     if ban_check == "on":
        if not ip.startswith("#"):
            if not ip.startswith("0."):
@@ -542,8 +548,6 @@ def create_iptables_subset():
         if not os.path.isfile(globals.g_localbanlist):
             create_empty_file(globals.g_localbanlist)
     
-    whitelist = read_config("WHITELIST_IP")
-
     # if we are banning
     banlist = []
     if read_config("HONEYPOT_BAN").lower() == "on":
