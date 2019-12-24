@@ -134,7 +134,7 @@ def check_config():
     configdefaults["ARTILLERY_REFRESH"] = ["604800", "RECYCLE INTERVAL AFTER A CERTAIN AMOUNT OF MINUTES IT WILL OVERWRITE THE LOG WITH A BLANK ONE AND ELIMINATE THE IPS - DEFAULT IS 7 DAYS"]
     configdefaults["SOURCE_FEEDS"] = ["OFF", "PULL ADDITIONAL SOURCE FEEDS FOR BANNED IP LISTS FROM MULTIPLE OTHER SOURCES OTHER THAN ARTILLERY"] 
     configdefaults["LOCAL_BANLIST"] = ["OFF", "CREATE A SEPARATE LOCAL BANLIST FILE (USEFUL IF YOU'RE ALSO USING A THREAT FEED AND WANT TO HAVE A FILE THAT CONTAINS THE IPs THAT HAVE BEEN BANNED LOCALLY"]
-    configdefaults["THREAT_FILE"] = ["banlist.txt", "FILE TO COPY TO THREAT_LOCATION, TO ACT AS A THREAT_SERVER. CHANGE TO \"localbanlist.txt\" IF YOU HAVE ENABLED \"LOCAL_BANLIST\" AND WISH TO HOST YOUR LOCAL BANLIST"] 
+    configdefaults["THREAT_FILE"] = ["banlist.txt", "FILE TO COPY TO THREAT_LOCATION, TO ACT AS A THREAT_SERVER. CHANGE TO \"localbanlist.txt\" IF YOU HAVE ENABLED \"LOCAL_BANLIST\" AND WISH TO HOST YOUR LOCAL BANLIST. IF YOU WISH TO COPY BOTH FILES, SEPARATE THE FILES WITH A COMMA - f.i. \"banlist.txt,localbanlist.txt\""] 
 
     keyorder = []
     keyorder.append("MONITOR")
@@ -722,16 +722,17 @@ def printCIDR(attacker_ip):
 
 def threat_server():
     public_http = read_config("THREAT_LOCATION")
-    banfile = read_config("THREAT_FILE")
-    if banfile == "":
-        banfile = globals.g_banfile
-    else:
-        banfile = globals.g_apppath + "/" + banfile
     if os.path.isdir(public_http):
-        while 1:
-            subprocess.Popen("cp '%s' '%s'" %
-                             (banfile, public_http), shell=True).wait()
-            time.sleep(300)
+       banfiles = read_config("THREAT_FILE")
+       if banfiles == "":
+          banfiles = globals.g_banfile
+       banfileparts = banfiles.split(",")
+       while 1:
+          for banfile in banfileparts:
+             thisfile = globals.g_apppath + "/" + banfile
+             subprocess.Popen("cp '%s' '%s'" % (thisfile, public_http), shell=True).wait()
+             write_log("ThreatServer: Copy '%s' to '%s'" % (banfile, public_http))
+          time.sleep(300)
 
 # send the message then if its local or remote
 
