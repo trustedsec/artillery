@@ -526,6 +526,26 @@ def create_empty_file(filepath):
     filewrite.close()
 
 
+def write_banlist_banner(filepath):
+    filewrite = open(filepath, "w")
+    banner = """#
+#
+#
+# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed
+# https://www.binarydefense.com
+#
+# Note that this is for public use only.
+# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.
+# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.
+#
+#
+#
+"""
+    filewrite.write(banner)
+    filewrite.close()
+
+
+
 def create_iptables_subset():
     if is_posix():
         ban_check = read_config("HONEYPOT_BAN").lower()
@@ -542,11 +562,13 @@ def create_iptables_subset():
         banfile = open(check_banlist_path(), "r")
     else:
         create_empty_file(globals.g_banlist)
+        write_banlist_banner(globals.g_banlist)
         banfile = open(globals.g_banlist, "r")
 
     if read_config("LOCAL_BANLIST").lower() == "on":
         if not os.path.isfile(globals.g_localbanlist):
             create_empty_file(globals.g_localbanlist)
+            write_banlist_banner(globals.g_localbanlist)
     
     # if we are banning
     banlist = []
@@ -959,6 +981,7 @@ def refresh_log():
         time.sleep(interval)
         # overwrite the log with nothing
         create_empty_file(globals.g_banlist)
+        write_banlist_banner(globals.g_banlist)
 
 
 # format the ip addresses and check to ensure they aren't duplicates
