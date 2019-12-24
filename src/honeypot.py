@@ -141,21 +141,25 @@ def listenudp_server(udpport, bind_interface):
 
 
 def main(tcpports, udpports, bind_interface):
+    # pull the banlist path
+    # consider removing, will handle whitelisted IPs somewhere else
+    #if os.path.isfile("check_banlist_path"):
+    #    banlist_path = globals.g_banlist
+    #    fileopen = file(banlist_path, "r")
+    #    for line in fileopen:
+    #        # remove any bogus characters
+    #        line = line.rstrip()
+    #        # ban actual IP addresses
+    #        if honeypot_ban:
+    #            whitelist = read_config("WHITELIST_IP")
+    #            match = re.search(line, whitelist)
+    #            if not match:
+    #                # ban the ipaddress
+    #                ban(line)
+    #            else:
+    #                if line != "":
+    #                   write_log("Not banning %s, whitelisted" % line)
 
-        # pull the banlist path
-    if os.path.isfile("check_banlist_path"):
-        banlist_path = check_banlist_path()
-        fileopen = file(banlist_path, "r")
-        for line in fileopen:
-            # remove any bogus characters
-            line = line.rstrip()
-            # ban actual IP addresses
-            if honeypot_ban:
-                whitelist = read_config("WHITELIST_IP")
-                match = re.search(line, whitelist)
-                if not match:
-                        # ban the ipaddress
-                    ban(line)
     # split into tuple
     tports = tcpports.split(",")
     for tport in tports:

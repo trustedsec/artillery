@@ -541,27 +541,33 @@ def create_iptables_subset():
     if read_config("LOCAL_BANLIST").lower() == "on":
         if not os.path.isfile(globals.g_localbanlist):
             create_empty_file(globals.g_localbanlist)
-
+    
+    whitelist = read_config("WHITELIST_IP")
 
     # if we are banning
     banlist = []
     if read_config("HONEYPOT_BAN").lower() == "on":
-            # iterate through lines in ban file and ban them if not already
-            # banned
+        # iterate through lines in ban file and ban them if not already
+        # banned
         for ip in banfile:
-            if not ip.startswith("#") and not ip.replace(" ","") == "":
-                 #no need to check if IP has been banned already, chain is empty and list will be converted to unique set anyway
-                 #if not is_already_banned(ip):
-                    ip = ip.strip()
+           if not ip.startswith("#") and not ip.replace(" ","") == "":
+              ip = ip.strip()
+              if ip != "":
+                 test_ip = ip
+                 if "/" in test_ip:
+                     test_ip = test_ip.split("/")[0]
+                 if not is_whitelisted_ip(test_ip):
                     if is_posix():
                        if not ip.startswith("0."):
-                          if is_valid_ipv4(ip.strip()):
-                              if read_config("HONEYPOT_BAN_CLASSC").lower() == "on":
-                                 if not ip.endswith("/24"):
-                                    ip = convert_to_classc(ip)
-                              banlist.append(ip)
+                           if is_valid_ipv4(ip.strip()):
+                               if read_config("HONEYPOT_BAN_CLASSC").lower() == "on":
+                                  if not ip.endswith("/24"):
+                                     ip = convert_to_classc(ip)
+                               banlist.append(ip)
                     if is_windows():
                        ban(ip)
+                 else:
+                    write_log("Not banning IP %s, whitelisted" % ip)
     if len(banlist) > 0:
        # convert banlist into unique list
        set_banlist = set(banlist)
