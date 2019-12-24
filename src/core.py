@@ -770,7 +770,8 @@ def syslog(message, alerttype):
         remote_port = int(read_config("SYSLOG_REMOTE_PORT"))
         syslogmsg = message
         if alertindicator != "":
-           syslogmsg = "%s %s Artillery: %s" % (grab_time(), alertindicator, message) 
+            syslogmsg = "Artillery%s: %s" % (alertindicator, message)
+           #syslogmsg = "%s %s Artillery: %s" % (grab_time(), alertindicator, message) 
         syslog_send(syslogmsg, host=remote_syslog, port=remote_port)
 
     # if we are sending local syslog messages
@@ -781,7 +782,8 @@ def syslog(message, alerttype):
         my_logger.addHandler(handler)
         for line in message.splitlines():
             if alertindicator != "":
-                my_logger.critical("%s %s Artillery: %s\n" % (grab_time(), alertindicator, line))
+                my_logger.critical("Artillery%s: %s\n" % (alertindicator, line))
+                #my_logger.critical("%s %s Artillery: %s\n" % (grab_time(), alertindicator, line))
             else:
                 my_logger.critical("%s\n" % line)
 
@@ -797,7 +799,7 @@ def syslog(message, alerttype):
             filewrite.close()
 
         filewrite = open("%s/logs/alerts.log" % globals.g_apppath, "a")
-        filewrite.write("%s %s Artillery: %s\n" % (grab_time(), alertindicator, message))
+        filewrite.write("Artillery%s: %s\n" % (alertindicator, message))
         filewrite.close()
 
 def write_console(alert):
