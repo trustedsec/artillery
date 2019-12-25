@@ -991,7 +991,16 @@ def format_ips(url):
         try:
             write_log("Grabbing feed from %s" % (str(urls)))
             urls = str(urls)
-            f = urlopen(urls).readlines()
+            f = []
+            if urls.startswith("http"):
+               f = urlopen(urls).readlines()
+            else:
+               # try reading it as a file
+               try:
+                   f = open(urls,"r").readlines()
+               except:
+                   write_log("Unable to read '%s'" % urls)
+                   pass
             write_log("Retrieved %d lines from %s" % (len(f), str(urls)))
             for line in f:
                 line = line.rstrip()
