@@ -753,7 +753,7 @@ def threat_server():
           for banfile in banfileparts:
              thisfile = globals.g_apppath + "/" + banfile
              subprocess.Popen("cp '%s' '%s'" % (thisfile, public_http), shell=True).wait()
-             write_log("ThreatServer: Copy '%s' to '%s'" % (thisfile, public_http))
+             #write_log("ThreatServer: Copy '%s' to '%s'" % (thisfile, public_http))
           time.sleep(300)
 
 # send the message then if its local or remote
