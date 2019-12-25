@@ -989,7 +989,7 @@ def format_ips(url):
     ips = ""
     for urls in url:
         try:
-            write_log("Grabbing feed from %s" % (str(urls)))
+            write_log("Grabbing feed from '%s'" % (str(urls)))
             urls = str(urls)
             f = []
             if urls.startswith("http"):
@@ -999,7 +999,7 @@ def format_ips(url):
                try:
                    f = open(urls,"r").readlines()
                except:
-                   write_log("Unable to read '%s'" % urls)
+                   write_log("Unable to read '%s'" % urls,2)
                    pass
             write_log("Retrieved %d lines from %s" % (len(f), str(urls)))
             for line in f:
