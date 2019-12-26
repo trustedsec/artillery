@@ -765,11 +765,11 @@ def syslog(message, alerttype):
     if alerttype == -1:
         alertindicator = ""
     elif alerttype == 0:
-        alertindicator = "[+]"
+        alertindicator = "[INFO]"
     elif alerttype == 1:
-        alertindicator = "[-]"
+        alertindicator = "[WARN]"
     elif alerttype == 2:
-        alertindicator = "[!!]"
+        alertindicator = "[ERROR]"
 
     # if we are sending remote syslog
     if type == "remote":
