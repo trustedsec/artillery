@@ -81,7 +81,10 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     warn_the_good_guys(subject, alert)
 
                     # close the socket
-                    self.request.close()
+                    try:
+                       self.request.close()
+                    except:
+                        pass
 
                     # if it isn't whitelisted and we are set to ban
                     ban(ip)
