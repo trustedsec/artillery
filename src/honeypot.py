@@ -61,18 +61,23 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (
                         now, ip)
                     alert = ""
+                    message = log_message_alert
                     if honeypot_ban:
-                        log_message_ban = log_message_ban.replace("%time%", now)
-                        log_message_ban = log_message_ban.replace("%ip%", ip)
-                        log_message_ban = log_message_ban.replace("%port%", port)
-                        if "%" in log_message_ban:
-                           alert = log_message_ban % (now, ip, port)
+                        message = log_message_ban
+                    message = message.replace("%time%", now)
+                    message = message.replace("%ip%", ip)
+                    message = message.replace("%port%", port)
+                    if "%" in message:
+                        alert = message
+                        nrvars = message.count("%")
+                        if nrvars  == 1:
+                            alert = message % (now)
+                        elif nrvars == 2:
+                            alert = message % (now, ip)
+                        elif nrvars == 3:
+                            alert = message % (now, ip, port)
                     else:
-                        log_message_alert = log_message_alert.replace("%time%", now)
-                        log_message_alert = log_message_alert.replace("%ip%", ip)
-                        log_message_alert = log_message_alert.replace("%port%", port)
-                        if "%" in log_message_alert:
-                            alert = log_message_alert % (now, ip, port)
+                        alert = message
 
                     warn_the_good_guys(subject, alert)
 
@@ -81,6 +86,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
 
                     # if it isn't whitelisted and we are set to ban
                     ban(ip)
+                else:
+                    write_log("Ignore connection from %s to port %s, whitelisted" % (ip, self.server.server_address[1]))
 
         except Exception as e:
             emsg = traceback.format_exc()
