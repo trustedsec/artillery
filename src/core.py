@@ -125,8 +125,8 @@ def check_config():
     configdefaults["THREAT_LOCATION"] = ["/var/www/","PUBLIC LOCATION TO PULL VIA HTTP ON THE THREAT SERVER. NOTE THAT THREAT SERVER MUST BE SET TO ON"]
     configdefaults["ROOT_CHECK"] = ["ON", "THIS CHECKS TO SEE WHAT PERMISSIONS ARE RUNNING AS ROOT IN A WEB SERVER DIRECTORY"]
     configdefaults["SYSLOG_TYPE"] = ["LOCAL", "Specify SYSLOG TYPE to be local, file or remote. LOCAL will pipe to syslog, REMOTE will pipe to remote SYSLOG, and file will send to alerts.log in local artillery directory"]
-    configdefaults["LOG_MESSAGE_ALERT"] = ["%s [!] Artillery has detected an attack from IP address: %s for a connection on a honeypot port: %s", "ALERT LOG MESSAGES (IMPORTANT: Everything except the %s are optional.  e.g. a minimal message would be \"%s %s %s\" which would be time, ipaddress, port number"]
-    configdefaults["LOG_MESSAGE_BAN"] = ["%s [!] Artillery has blocked (and blacklisted) an attack from IP address: %s for a connection to a honeypot restricted port: %s", "BAN LOG MESSAGES (IMPORTANT: Everything except the %s are optional.  e.g. a minimal message would be \"%s %s %s\" which would be time, ipaddress, port number"]
+    configdefaults["LOG_MESSAGE_ALERT"] = ["Artillery has detected an attack from %ip% for a connection on a honeypot port %port%", "ALERT LOG MESSAGES (You can use the following variables: %time%, %ip%, %port%)"]
+    configdefaults["LOG_MESSAGE_BAN"] = ["Artillery has blocked (and blacklisted) an attack from %ip% for a connection to a honeypot restricted port %port%", "BAN LOG MESSAGES (You can use the following variables: %time%, %ip%, %port%)"]
     configdefaults["SYSLOG_REMOTE_HOST"] = ["192.168.0.1","IF YOU SPECIFY SYSLOG TYPE TO REMOTE, SPECIFY A REMOTE SYSLOG SERVER TO SEND ALERTS TO"]
     configdefaults["SYSLOG_REMOTE_PORT"] = ["514", "IF YOU SPECIFY SYSLOG TYPE OF REMOTE, SEPCIFY A REMOTE SYSLOG PORT TO SEND ALERTS TO"]
     configdefaults["CONSOLE_LOGGING"] = ["ON", "TURN ON CONSOLE LOGGING"]
@@ -878,7 +878,7 @@ def warn_the_good_guys(subject, alert):
     if is_config_enabled("CONSOLE_LOGGING"):
         print("{}".format(alert))
 
-    write_log(alert,-1)
+    write_log(alert,1)
 
 # send the actual email
 

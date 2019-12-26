@@ -62,11 +62,18 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                         now, ip)
                     alert = ""
                     if honeypot_ban:
-                        alert = log_message_ban % (
-                            now, ip, port)
+                        log_message_ban = log_message_ban.replace("%time%", now)
+                        log_message_ban = log_message_ban.replace("%ip%", ip)
+                        log_message_ban = log_message_ban.replace("%port%", port)
+                        if "%" in log_message_ban:
+                           alert = log_message_ban % (now, ip, port)
                     else:
-                        alert = log_message_alert % (
-                            now, ip, port)
+                        log_message_alert = log_message_alert.replace("%time%", now)
+                        log_message_alert = log_message_alert.replace("%ip%", ip)
+                        log_message_alert = log_message_alert.replace("%port%", port)
+                        if "%" in log_message_alert:
+                            alert = log_message_alert % (now, ip, port)
+
                     warn_the_good_guys(subject, alert)
 
                     # close the socket
