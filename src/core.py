@@ -610,6 +610,7 @@ def create_iptables_subset():
 
     if len(banlist) > 0:
        # convert banlist into unique list
+       write_log("Filtering duplicate entries in banlist")
        set_banlist = set(banlist)
        unique_banlist = (list(set_banlist))
        entries_at_once = 750
