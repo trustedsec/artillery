@@ -52,13 +52,13 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                 write_log("Honeypot detected incoming connection from %s to port %s" % (ip, self.server.server_address[1]))
                 self.request.send(fake_string)
             except Exception as e:
-                print("[!] Unable to send data to %s:%s" % (ip, self.server.server_address[1]))
+                write_console("Unable to send data to %s:%s" % (ip, str(self.server.server_address[1])))
                 pass
             if is_valid_ipv4(ip):
                 # ban the mofos
                 if not is_whitelisted_ip(ip):
                     now = str(datetime.datetime.today())
-                    port = self.server.server_address[1]
+                    port = str(self.server.server_address[1])
                     subject = "%s [!] Artillery has detected an attack from the IP Address: %s" % (
                         now, ip)
                     alert = ""
@@ -67,7 +67,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                         message = log_message_ban
                     message = message.replace("%time%", now)
                     message = message.replace("%ip%", ip)
-                    message = message.replace("%port%", port)
+                    message = message.replace("%port%", str(port))
                     alert = message
                     if "%" in message:
                         nrvars = message.count("%")
@@ -76,7 +76,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                         elif nrvars == 2:
                             alert = message % (now, ip)
                         elif nrvars == 3:
-                            alert = message % (now, ip, port)
+                            alert = message % (now, ip, str(port))
 
                     warn_the_good_guys(subject, alert)
 
@@ -92,6 +92,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
             emsg = traceback.format_exc()
             print("[!] Error detected. Printing: " + str(e))
             print(emsg)
+            write_log(emsg,2)
             print("")
             pass
 
