@@ -1013,10 +1013,9 @@ def format_ips(url):
                 # Error 404, page not found!
                 write_log(
                     "HTTPError: Error 404, URL {} not found.".format(urls))
-
             else:
-                write_log("Received URL Error, Reason: {}".format(err),1)
-                return
+                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
+                continue 
 
     try:
         if is_windows():
