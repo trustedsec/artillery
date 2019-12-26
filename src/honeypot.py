@@ -49,7 +49,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
         try:
             ip = self.client_address[0]
             try:
-                write_log("Honeypot detected incoming connection from %s to port %s" % (ip, self.server.server_address[0]))
+                write_log("Honeypot detected incoming connection from %s to port %s" % (ip, self.server.server_address[1]))
                 self.request.send(fake_string)
             except Exception as e:
                 print("[!] Unable to send data to %s:%s" % (ip, self.server.server_address[1]))
