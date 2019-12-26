@@ -558,24 +558,35 @@ def create_iptables_subset():
             execOScmd("iptables -F ARTILLERY -w 3")
             execOScmd("iptables -I INPUT -j ARTILLERY -w 3")
 
-    if os.path.isfile(check_banlist_path()):
-        banfile = open(check_banlist_path(), "r")
-    else:
+    bannedips = []
+
+    if not os.path.isfile(globals.g_banlist):
         create_empty_file(globals.g_banlist)
         write_banlist_banner(globals.g_banlist)
-        banfile = open(globals.g_banlist, "r")
+    
+    banfile = open(globals.g_banlist, "r").readlines()
+    write_log("Read %d lines in '%s'" % (len(banfile), globals.g_banlist))
+
+    for ip in banfile:
+        if not ip in bannedips:
+           bannedips.append(ip)
 
     if read_config("LOCAL_BANLIST").lower() == "on":
         if not os.path.isfile(globals.g_localbanlist):
             create_empty_file(globals.g_localbanlist)
             write_banlist_banner(globals.g_localbanlist)
-    
+        localbanfile = open(globals.g_localbanlist,"r").readlines()
+        write_log("Read %d lines in '%s'" % (len(localbanfile), globals.g_localbanlist))
+        for ip in localbanfile:
+            if not ip in bannedips:
+                bannedips.append(ip)
+
     # if we are banning
     banlist = []
     if read_config("HONEYPOT_BAN").lower() == "on":
-        # iterate through lines in ban file and ban them if not already
+        # iterate through lines from ban file(s) and ban them if not already
         # banned
-        for ip in banfile:
+        for ip in bannedips:
            if not ip.startswith("#") and not ip.replace(" ","") == "":
               ip = ip.strip()
               if ip != "":
@@ -594,14 +605,17 @@ def create_iptables_subset():
                        ban(ip)
                  else:
                     write_log("Not banning IP %s, whitelisted" % ip)
+        if read_config("LOCAL_BANLIST").lower() == "on":
+            localbanfile = open(globals.g_localbanlist,"r").readlines()
+
     if len(banlist) > 0:
        # convert banlist into unique list
        set_banlist = set(banlist)
        unique_banlist = (list(set_banlist))
        entries_at_once = 750
        total_nr = len(unique_banlist)
-       write_log("Mass loading %d entries from banlist" % total_nr)
-       write_console("    Found %d unique entries in banlist" % total_nr) 
+       write_log("Mass loading %d unique entries from banlist(s)" % total_nr)
+       write_console("    Mass loading %d unique entries from banlist(s)" % total_nr) 
        nr_of_lists = int(len(unique_banlist) / entries_at_once) + 1
        iplists = get_sublists(unique_banlist, nr_of_lists)
        listindex = 1
