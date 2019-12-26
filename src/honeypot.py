@@ -49,6 +49,7 @@ class SocketListener((SocketServer.BaseRequestHandler)):
         try:
             ip = self.client_address[0]
             try:
+                write_log("Honeypot detected incoming connection from %s to port %s" % (ip, self.server.server_address[0]))
                 self.request.send(fake_string)
             except Exception as e:
                 print("[!] Unable to send data to %s:%s" % (ip, self.server.server_address[1]))
@@ -149,28 +150,8 @@ def listenudp_server(udpport, bind_interface):
         send_mail(errormsg, errormsg)
         pass
 
-# check to see which ports we are using and ban if ports are touched
-
 
 def main(tcpports, udpports, bind_interface):
-    # pull the banlist path
-    # consider removing, will handle whitelisted IPs somewhere else
-    #if os.path.isfile("check_banlist_path"):
-    #    banlist_path = globals.g_banlist
-    #    fileopen = file(banlist_path, "r")
-    #    for line in fileopen:
-    #        # remove any bogus characters
-    #        line = line.rstrip()
-    #        # ban actual IP addresses
-    #        if honeypot_ban:
-    #            whitelist = read_config("WHITELIST_IP")
-    #            match = re.search(line, whitelist)
-    #            if not match:
-    #                # ban the ipaddress
-    #                ban(line)
-    #            else:
-    #                if line != "":
-    #                   write_log("Not banning %s, whitelisted" % line)
 
     # split into tuple
     tports = tcpports.split(",")
