@@ -67,8 +67,8 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                     message = message.replace("%time%", now)
                     message = message.replace("%ip%", ip)
                     message = message.replace("%port%", port)
+                    alert = message
                     if "%" in message:
-                        alert = message
                         nrvars = message.count("%")
                         if nrvars  == 1:
                             alert = message % (now)
@@ -76,8 +76,6 @@ class SocketListener((SocketServer.BaseRequestHandler)):
                             alert = message % (now, ip)
                         elif nrvars == 3:
                             alert = message % (now, ip, port)
-                    else:
-                        alert = message
 
                     warn_the_good_guys(subject, alert)
 
