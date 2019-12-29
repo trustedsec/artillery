@@ -99,60 +99,87 @@ class SocketListener((SocketServer.BaseRequestHandler)):
             print("")
             pass
 
-# here we define a basic server
 
+def open_sesame(porttype, port):
+    if honeypot_autoaccept:
+        cmd = "iptables -D ARTILLERY -p %s --dport %s -j ACCEPT -w 3" % (porttype, port)
+        execOScmd(cmd)
+        cmd = "iptables -A ARTILLERY -p %s --dport %s -j ACCEPT -w 3" % (porttype, port)
+        execOScmd(cmd)
+        write_log("Created iptables rule to accept incoming connection to %s %s" % (porttype, port))
+
+
+# here we define a basic server
 
 def listentcp_server(tcpport, bind_interface):
   if not tcpport == "":
     port = int(tcpport)
-    try:
-        if bind_interface == "":
-            server = SocketServer.ThreadingTCPServer(
-                ('', port), SocketListener)
-        else:
-            server = SocketServer.ThreadingTCPServer(
-                ('%s' % bind_interface, port), SocketListener)
-        if honeypot_autoaccept:
-            ban_check = read_config("HONEYPOT_BAN").lower()
-            if ban_check == "on":
-                subprocess.Popen(
-                    "iptables -A ARTILLERY -p tcp --dport %s  -j ACCEPT -w 3" % port, shell=True).wait()
-                write_log("Created iptables rule to accept incoming traffic to tcp %s" % port)
-        server.serve_forever()
-    # if theres already something listening on this port
-    except Exception:
-        # write a log if we are unable to bind to an interface
-        write_log("Artillery was unable to bind to TCP port: %s. This could be to an active port in use." % (
-            port),2)
-        errormsg = socket.gethostname() + " | %s | Artillery error - unable to bind to TCP port %s" % (grab_time(), port)
-        send_mail(errormsg, errormsg)
-        pass
+    bindsuccess = False
+    errormsg = ""
+    nrattempts = 0
+    while nrattempts < 5 and not bindsuccess:
+        nrattempts += 1
+        bindsuccess = True
+        try:
+            nrattempts += 1
+            if bind_interface == "":
+                server = SocketServer.ThreadingTCPServer(
+                    ('', port), SocketListener)
+            else:
+                server = SocketServer.ThreadingTCPServer(
+                    ('%s' % bind_interface, port), SocketListener)
+            open_sesame("tcp", port)
+            server.serve_forever()
+        # if theres already something listening on this port
+        except Exception as err:
+            errormsg += socket.gethostname() + " | %s | Artillery error - unable to bind to TCP port %s\n" % (grab_time(), port)
+            errormsg += str(err)
+            errormsg += "\n"
+            bindsuccess = False
+            time.sleep(2)
+            continue 
+
+    if not bindsuccess:
+        binderror = "Artillery was unable to bind to TCP port %s. This could be due to an active port in use.\n" % (port)
+        subject = socket.gethostname() + " | Artillery error - unable to bind to TCP port %s" % port 
+        binderror += errormsg
+        write_log(binderror, 2)
+        send_mail(subject, binderror)
+
 
 def listenudp_server(udpport, bind_interface):
    if not udpport == "": 
       port = int(udpport)
-      try:
-        if bind_interface == "":
-            server = SocketServer.ThreadingUDPServer(
-                ('', port), SocketListener)
-        else:
-            server = SocketServer.ThreadingUDPServer(
-                ('%s' % bind_interface, port), SocketListener)
-        if honeypot_autoaccept:
-            ban_check = read_config("HONEYPOT_BAN").lower()
-            if ban_check == "on":
-                subprocess.Popen(
-                    "iptables -A ARTILLERY -p udp --dport %s  -j ACCEPT -w 3" % port, shell=True).wait()
-                write_log("Created iptables rule to accept incoming traffic to udp %s" % port)
-        server.serve_forever()
-      # if theres already something listening on this port
-      except Exception:
-        # write a log if we are unable to bind to an interface
-        write_log("Artillery was unable to bind to UDP port: %s. This could be to an active port in use." % (
-            port),2)
-        errormsg = socket.gethostname() + " | %s | Artillery error - unable to bind to UDP port %s" % (grab_time(), port)
-        send_mail(errormsg, errormsg)
-        pass
+      bindsuccess = False
+      errormsg = ""
+      nrattempts = 0
+      while nrattempts < 5 and not bindsuccess:
+          nrattempts += 1
+          bindsuccess = True
+          try:
+            if bind_interface == "":
+                server = SocketServer.ThreadingUDPServer(
+                    ('', port), SocketListener)
+            else:
+                server = SocketServer.ThreadingUDPServer(
+                    ('%s' % bind_interface, port), SocketListener)
+            open_sesame("udp", port) 
+            server.serve_forever()
+          # if theres already something listening on this port
+          except Exception as err:
+            errormsg += socket.gethostname() + " | %s | Artillery error - unable to bind to UDP port %s\n" % (grab_time(), port)
+            errormsg += str(err)
+            errormsg += "\n"
+            bindsuccess = False
+            time.sleep(2)
+            continue
+
+      if not bindsuccess:
+          bind_error = "Artillery was unable to bind to UDP port %s. This could be due to an active port in use.\n" % (port)
+          subject = socket.gethostname() + " | Artillery error - unable to bind to UDP port %s" % port
+          binderror += errormsg
+          write_log(binderror, 2)
+          send_mail(subject, binderror)
 
 
 def main(tcpports, udpports, bind_interface):
@@ -160,11 +187,13 @@ def main(tcpports, udpports, bind_interface):
     # split into tuple
     tports = tcpports.split(",")
     for tport in tports:
+        write_log("Set up listener for tcp port %s" % tport)
         thread.start_new_thread(listentcp_server, (tport, bind_interface,))
 
     # split into tuple
     uports = udpports.split(",")
     for uport in uports:
+        write_log("Set up listener for udp port %s" % uport)
         thread.start_new_thread(listenudp_server, (uport, bind_interface,))
 
 # launch the application
