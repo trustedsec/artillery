@@ -15,7 +15,6 @@ kill_artillery()
 
 print("[*] %s: Restarting Artillery Server..." % (grab_time()))
 if os.path.isfile("/var/artillery/artillery.py"):
-    write_log("[*] %s: Restarting the Artillery Server process..." %
-              (grab_time()))
+    write_log("Restarting the Artillery Server process...",1)
     subprocess.Popen("python /var/artillery/artillery.py &",
                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
