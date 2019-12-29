@@ -187,14 +187,18 @@ def main(tcpports, udpports, bind_interface):
     # split into tuple
     tports = tcpports.split(",")
     for tport in tports:
-        write_log("Set up listener for tcp port %s" % tport)
-        thread.start_new_thread(listentcp_server, (tport, bind_interface,))
+        tport = tport.replace(" ","")
+        if tport != "":
+           write_log("Set up listener for tcp port %s" % tport)
+           thread.start_new_thread(listentcp_server, (tport, bind_interface,))
 
     # split into tuple
     uports = udpports.split(",")
     for uport in uports:
-        write_log("Set up listener for udp port %s" % uport)
-        thread.start_new_thread(listenudp_server, (uport, bind_interface,))
+        uport = uport.replace(" ","")
+        if uport != "":
+           write_log("Set up listener for udp port %s" % uport)
+           thread.start_new_thread(listenudp_server, (uport, bind_interface,))
 
 # launch the application
 main(tcpports, udpports, bind_interface)
