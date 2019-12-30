@@ -393,7 +393,7 @@ def update():
             pullmsg = ""
             for l in newpull:
                 pullmsg += "%s\n" % l
-            msg = "Tried to fix git pull issue. Git pull now says\n %s" % l
+            msg = "Tried to fix git pull issue. Git pull now says:" 
             write_log(msg, 2)
             write_console(msg)
             write_log(pullmsg)
