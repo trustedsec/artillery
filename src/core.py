@@ -396,7 +396,7 @@ def update():
             msg = "Tried to fix git pull issue. Git pull now says:" 
             write_log(msg, 2)
             write_console(msg)
-            write_log(pullmsg)
+            write_log(pullmsg,2)
             write_console(pullmsg)
 
         else:
