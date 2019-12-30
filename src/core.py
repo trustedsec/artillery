@@ -348,6 +348,9 @@ def ban(ip):
 
 def update():
     if is_posix():
+        write_log("Running auto update (git pull)")
+        write_console("Running auto update (git pull)")
+
         if os.path.isdir(globals.g_apppath + "/.svn"):
             print(
                 "[!] Old installation detected that uses subversion. Fixing and moving to github.")
@@ -360,8 +363,45 @@ def update():
                 print(
                     "[!] Something failed. Please type 'git clone https://github.com/binarydefense/artillery %s' to fix!" % globals.g_apppath)
 
-        subprocess.Popen("cd %s;git pull" % globals.g_apppath,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        #subprocess.Popen("cd %s;git pull" % globals.g_apppath,
+        #                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        update = execOScmd("cd %s; git pull" % globals.g_apppath)
+        errorfound = False
+        abortfound = False
+        errormsg = ""
+        for l in update:
+            errormsg += "%s\n" % l
+            if "error:" in l:
+                errorfound = True
+            if "Aborting" in l:
+                abortfound = True
+        if errorfound and abortfound:
+            msg = "Error updating artillery, git pull was aborted. Error:\n%s" % errormsg
+            write_log(msg,2)
+            write_console(msg)
+            msg = "I will make a cop of the config file, run git stash, and restore config file"
+            write_log(msg,2)
+            write_console(msg)
+            saveconfig = "cp '%s' '%s.old'" % (globals.g_configfile, globals.g_configfile)
+            execOScmd(saveconfig)
+            gitstash = "git stash"
+            execOScmd(gitstash)
+            gitpull = "git pull"
+            newpull = execOScmd(gitpull)
+            restoreconfig = "cp '%s.old' '%s'" % (globals.g_configfile, globals.g_configfile)
+            execOScmd(restoreconfig)
+            pullmsg = ""
+            for l in newpull:
+                pullmsg += "%s\n" % l
+            msg = "Tried to fix git pull issue. Git pull now says\n %s" % l
+            write_log(msg, 2)
+            write_console(msg)
+            write_log(pullmsg)
+            write_console(pullmsg)
+
+        else:
+            msg = "Output 'git pull':\n%s" % errormsg
+            write_log(msg)
 
 
 def addressInNetwork(ip, net):
