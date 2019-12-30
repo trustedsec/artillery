@@ -1,4 +1,26 @@
 ~~~~~~~~~~~~~~~~~~~~~~
+version 2.3            12/29/2019
+~~~~~~~~~~~~~~~~~~~~~~
+
+*  Created a “write_console”  (use “write_console” instead of “print”).  Write_console will only print something if console logging is enabled.
+* Changed the “write_log” function.  Syslog messages now have a uniform format: Artillery[XXXXX] – Message, XXXXX can be INFO, WARN or ERROR
+* Add support for %time%, %ip% and %port% variables in the LOG_MESSAGE_BAN and LOG_MESSAGE_ALERT variables.  The old “%s %s %s” sequence (time, ip, port) feature is still preserved, but new installations will use the new format.
+* The config file will be created by artillery (if it doesn’t exist already), and will be read/regenerated every time you launch artillery. 
+* This allows you to define new config variables (and their default value) inside core.py, so everyone (with an existing/older installation of artillery) will also get the new variables
+* Removes the need to have a “config“ file in the github repository.  
+* Overall, stability & error handling improvements:
+* Less likely for artillery to crash entirely (if, for instance, no TCPPORTS or UDPPORTS are given, or if something goes wrong during socket listener setup / request closure)
+* Tcp & udp honeypot servers will attempt to bind to a port for a number of times before giving up. (I’ve had a few cases where “systemctl restart artillery” actually failed to bind to a port, and the solution was just to wait a little longer….  )
+* Improved the management of iptables rules – increased changes that the required chains are properly flushed, recreated and populated (without duplicates).
+* Introduced some global variables, to avoid hardcoding file paths
+* Improved check if IP/range is whitelisted
+* Verbose logging in syslog – artillery is writing a lot more info to syslog, hopefully not too much :)
+* Added ability to create a second banlist file, which will only contain the IP addresses/class C networks that have been detected / blocked on this instance of artillery.  This means that, even if the artillery instance is using an external feed (which will get merged into banlist.txt), you can still serve the locally detected IP addresses/ranges as a feed to other systems.  The second file is called localbanlist.txt. 
+* Note: Since all entries in this localbanlist.txt file are also written to banlist.txt, the localbanlist.txt will not be imported during artillery load.
+* You can now also specify a local filepath (in addition to a URL) as THREAT_FEED (See also previous point – if you scp a localbanlist.txt file to another system, that other system can pick it up from the local filesystem)
+* You can provide multiple files as THREAT_SERVER (so technically you can set it to “banlist.txt,localbanlist.txt” and both files will be copied to the webserver path.)
+
+~~~~~~~~~~~~~~~~~~~~~~
 version 2.2            12/20/2019
 ~~~~~~~~~~~~~~~~~~~~~~
 
