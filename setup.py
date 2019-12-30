@@ -172,6 +172,7 @@ if answer.lower() in ["yes", "y"]:
     else:
         choice = 'y'
     if choice in ["yes", "y"]:
+        check_config()
         if is_posix():
             # this cmd is what they were refering to as "no longer supported"? from update-rc.d on install.
             # It looks like service starts but you have to manually launch artillery

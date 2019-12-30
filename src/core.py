@@ -22,7 +22,7 @@ import subprocess
 import urllib
 import socket
 import struct
-
+import sys
 
 # for python 2 vs 3 compatibility
 try:
@@ -42,28 +42,214 @@ import signal
 from string import *
 # from string import split, join
 import socket
+import traceback
+
+import globals
+
 # grab the current time
-
-
-
 def grab_time():
     ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+def gethostname():
+    return socket.gethostname()
+
+# create a brand new config file
+def create_config(configpath, configdefaults, keyorder):
+   configpath = configpath
+   configfile = open(configpath, "w")
+   write_console("Creating/updating config file '%s'" % configpath)
+   write_log("Creating config file %s" % (configpath))
+   banner = "#############################################################################################\n"
+   banner += "#\n"
+   banner += "# This is the Artillery configuration file. Change these variables and flags to change how\n"
+   banner += "# this behaves.\n"
+   banner += "#\n"
+   banner += "# Artillery written by: Dave Kennedy (ReL1K)\n"
+   banner += "# Website: https://www.binarydefense.com\n"
+   banner += "# Email: info [at] binarydefense.com\n"
+   banner += "# Download: git clone https://github.com/binarydefense/artillery artillery/\n"
+   banner += "# Install: python setup.py\n"
+   banner += "#\n"
+   banner += "#############################################################################################\n"
+   banner += "#\n"
+   configfile.write(banner) 
+   for configkey in keyorder:
+      newline_comment = "\n# %s\n" % configdefaults[configkey][1]
+      newline_config = "%s=\"%s\"\n" % (configkey, configdefaults[configkey][0])
+      configfile.write(newline_comment)
+      configfile.write(newline_config)
+   configfile.close() 
+   return
+
+
+def check_config():
+    # populate defaults
+    configdefaults = {}
+    configdefaults["MONITOR"] = ["ON", "DETERMINE IF YOU WANT TO MONITOR OR NOT"]
+    configdefaults["MONITOR_FOLDERS"] = ["\"/var/www\",\"/etc/\"",  "THESE ARE THE FOLDERS TO MONITOR, TO ADD MORE, JUST DO \"/root\",\"/var/\", etc."]
+    configdefaults["MONITOR_FREQUENCY"] = ["60", "BASED ON SECONDS, 2 = 2 seconds."]
+    configdefaults["SSH_DEFAULT_PORT_CHECK"] = ["ON", "CHECK/WARN IF SSH IS RUNNING ON PORT 22"]
+    configdefaults["EXCLUDE"] = ["","EXCLUDE CERTAIN DIRECTORIES OR FILES. USE FOR EXAMPLE: /etc/passwd,/etc/hosts.allow"]
+    configdefaults["HONEYPOT_BAN"] = ["OFF", "DO YOU WANT TO AUTOMATICALLY BAN ON THE HONEYPOT"]
+    configdefaults["HONEYPOT_BAN_CLASSC"] = ["OFF","WHEN BANNING, DO YOU WANT TO BAN ENTIRE CLASS C AT ONCE INSTEAD OF INDIVIDUAL IP ADDRESS"]
+    configdefaults["HONEYPOT_BAN_LOG_PREFIX"] = ["","PUT A PREFIX ON ALL BANNED IP ADDRESSES. HELPFUL FOR WHEN TRYING TO PARSE OR SHOW DETECTIONS THAT YOU ARE PIPING OFF TO OTHER SYSTEMS. WHEN SET, PREFIX IPTABLES LOG ENTRIES WITH THE PROVIDED TEXT"]
+    configdefaults["WHITELIST_IP"] = ["127.0.0.1,localhost", "WHITELIST IP ADDRESSES, SPECIFY BY COMMAS ON WHAT IP ADDRESSES YOU WANT TO WHITELIST"]
+    configdefaults["TCPPORTS"] = ["22,1433,8080,21,5060,5061,5900,25,3389,53,110,1723,1337,10000,5800,44443,16993","TCP PORTS TO SPAWN HONEYPOT FOR"]
+    configdefaults["UDPPORTS"] = ["123,53,5060,5061,3478", "UDP PORTS TO SPAWN HONEYPOT FOR"]
+    configdefaults["HONEYPOT_AUTOACCEPT"] = ["ON", "SHOULD THE HONEYPOT AUTOMATICALLY ADD ACCEPT RULES TO THE ARTILLERY CHAIN FOR ANY PORTS ITS LISTENING ON"]
+    configdefaults["EMAIL_ALERTS"] = ["OFF","SHOULD EMAIL ALERTS BE SENT"]
+    configdefaults["SMTP_USERNAME"] = ["","CURRENT SUPPORT IS FOR SMTP. ENTER YOUR USERNAME AND PASSWORD HERE FOR STARTTLS AUTHENTICATION. LEAVE BLANK FOR OPEN RELAY"]
+    configdefaults["SMTP_PASSWORD"] = ["","ENTER SMTP PASSWORD HERE"]
+    configdefaults["ALERT_USER_EMAIL"] = ["enter_your_email_address_here@localhost","THIS IS WHO TO SEND THE ALERTS TO - EMAILS WILL BE SENT FROM ARTILLERY TO THIS ADDRESS"]
+    configdefaults["SMTP_FROM"] = ["Artillery_Incident@localhost","FOR SMTP ONLY HERE, THIS IS THE MAILTO"]
+    configdefaults["SMTP_ADDRESS"] = ["smtp.gmail.com","SMTP ADDRESS FOR SENDING EMAIL, DEFAULT IS GMAIL"]
+    configdefaults["SMTP_PORT"] = ["587","SMTP PORT FOR SENDING EMAILS DEFAULT IS GMAIL WITH STARTTLS"]
+    configdefaults["EMAIL_TIMER"] = ["ON","THIS WILL SEND EMAILS OUT DURING A CERTAIN FREQUENCY. IF THIS IS SET TO OFF, ALERTS WILL BE SENT IMMEDIATELY (CAN LEAD TO A LOT OF SPAM)"]
+    configdefaults["EMAIL_FREQUENCY"] = ["600", "HOW OFTEN DO YOU WANT TO SEND EMAIL ALERTS (DEFAULT 10 MINUTES) - IN SECONDS"]
+    configdefaults["SSH_BRUTE_MONITOR"] = ["ON", "DO YOU WANT TO MONITOR SSH BRUTE FORCE ATTEMPTS"]
+    configdefaults["SSH_BRUTE_ATTEMPTS"] = ["4", "HOW MANY ATTEMPTS BEFORE YOU BAN"]
+    configdefaults["FTP_BRUTE_MONITOR"] = ["OFF", "DO YOU WANT TO MONITOR FTP BRUTE FORCE ATTEMPTS"]
+    configdefaults["FTP_BRUTE_ATTEMPTS"] = ["4", "HOW MANY ATTEMPTS BEFORE YOU BAN"]
+    configdefaults["AUTO_UPDATE"] = ["ON", "DO YOU WANT TO DO AUTOMATIC UPDATES - ON OR OFF"]
+    configdefaults["ANTI_DOS"] = ["OFF", "ANTI DOS WILL CONFIGURE MACHINE TO THROTTLE CONNECTIONS, TURN THIS OFF IF YOU DO NOT WANT TO USE"]
+    configdefaults["ANTI_DOS_PORTS"] = ["80,443", "THESE ARE THE PORTS THAT WILL PROVIDE ANTI_DOS PROTECTION"]
+    configdefaults["ANTI_DOS_THROTTLE_CONNECTIONS"] = ["50", "THIS WILL THROTTLE HOW MANY CONNECTIONS PER MINUTE ARE ALLOWED HOWEVER THE BUST WILL ENFORCE THIS"]
+    configdefaults["ANTI_DOS_LIMIT_BURST"] = ["200", "THIS WILL ONLY ALLOW A CERTAIN BURST PER MINUTE THEN WILL ENFORCE AND NOT ALLOW ANYMORE TO CONNECT"]
+    configdefaults["ACCESS_LOG"] = ["/var/log/apache2/access.log", "THIS IS THE PATH FOR THE APACHE ACCESS LOG"]
+    configdefaults["ERROR_LOG"] = ["/var/log/apache2/error.log", "THIS IS THE PATH FOR THE APACHE ERROR LOG"]
+    configdefaults["BIND_INTERFACE"] = ["","THIS ALLOWS YOU TO SPECIFY AN IP ADDRESS. LEAVE THIS BLANK TO BIND TO ALL INTERFACES."]
+    configdefaults["THREAT_INTELLIGENCE_FEED"] = ["ON", "TURN ON INTELLIGENCE FEED, CALL TO https://www.binarydefense.com/banlist.txt IN ORDER TO GET ALREADY KNOWN MALICIOUS IP ADDRESSES. WILL PULL EVERY 24 HOURS"]
+    configdefaults["THREAT_FEED"] = ["https://www.binarydefense.com/banlist.txt","CONFIGURE THIS TO BE WHATEVER THREAT FEED YOU WANT BY DEFAULT IT WILL USE BINARY DEFENSE - NOTE YOU CAN SPECIFY MULTIPLE THREAT FEEDS BY DOING #http://urlthreatfeed1,http://urlthreadfeed2"]
+    configdefaults["THREAT_SERVER"] = ["OFF", "A THREAT SERVER IS A SERVER THAT WILL COPY THE BANLIST.TXT TO A PUBLIC HTTP LOCATION TO BE PULLED BY OTHER ARTILLERY SERVER. THIS IS USED IF YOU DO NOT WANT TO USE THE STANDARD BINARY DEFENSE ONE."]
+    configdefaults["THREAT_LOCATION"] = ["/var/www/","PUBLIC LOCATION TO PULL VIA HTTP ON THE THREAT SERVER. NOTE THAT THREAT SERVER MUST BE SET TO ON"]
+    configdefaults["ROOT_CHECK"] = ["ON", "THIS CHECKS TO SEE WHAT PERMISSIONS ARE RUNNING AS ROOT IN A WEB SERVER DIRECTORY"]
+    configdefaults["SYSLOG_TYPE"] = ["LOCAL", "Specify SYSLOG TYPE to be local, file or remote. LOCAL will pipe to syslog, REMOTE will pipe to remote SYSLOG, and file will send to alerts.log in local artillery directory"]
+    configdefaults["LOG_MESSAGE_ALERT"] = ["Artillery has detected an attack from %ip% for a connection on a honeypot port %port%", "ALERT LOG MESSAGES (You can use the following variables: %time%, %ip%, %port%)"]
+    configdefaults["LOG_MESSAGE_BAN"] = ["Artillery has blocked (and blacklisted) an attack from %ip% for a connection to a honeypot restricted port %port%", "BAN LOG MESSAGES (You can use the following variables: %time%, %ip%, %port%)"]
+    configdefaults["SYSLOG_REMOTE_HOST"] = ["192.168.0.1","IF YOU SPECIFY SYSLOG TYPE TO REMOTE, SPECIFY A REMOTE SYSLOG SERVER TO SEND ALERTS TO"]
+    configdefaults["SYSLOG_REMOTE_PORT"] = ["514", "IF YOU SPECIFY SYSLOG TYPE OF REMOTE, SEPCIFY A REMOTE SYSLOG PORT TO SEND ALERTS TO"]
+    configdefaults["CONSOLE_LOGGING"] = ["ON", "TURN ON CONSOLE LOGGING"]
+    configdefaults["RECYCLE_IPS"] = ["OFF", "RECYCLE LOGS AFTER A CERTAIN AMOUNT OF TIME - THIS WILL WIPE ALL IP ADDRESSES AND START FROM SCRATCH AFTER A CERTAIN INTERVAL"] 
+    configdefaults["ARTILLERY_REFRESH"] = ["604800", "RECYCLE INTERVAL AFTER A CERTAIN AMOUNT OF MINUTES IT WILL OVERWRITE THE LOG WITH A BLANK ONE AND ELIMINATE THE IPS - DEFAULT IS 7 DAYS"]
+    configdefaults["SOURCE_FEEDS"] = ["OFF", "PULL ADDITIONAL SOURCE FEEDS FOR BANNED IP LISTS FROM MULTIPLE OTHER SOURCES OTHER THAN ARTILLERY"] 
+    configdefaults["LOCAL_BANLIST"] = ["OFF", "CREATE A SEPARATE LOCAL BANLIST FILE (USEFUL IF YOU'RE ALSO USING A THREAT FEED AND WANT TO HAVE A FILE THAT CONTAINS THE IPs THAT HAVE BEEN BANNED LOCALLY"]
+    configdefaults["THREAT_FILE"] = ["banlist.txt", "FILE TO COPY TO THREAT_LOCATION, TO ACT AS A THREAT_SERVER. CHANGE TO \"localbanlist.txt\" IF YOU HAVE ENABLED \"LOCAL_BANLIST\" AND WISH TO HOST YOUR LOCAL BANLIST. IF YOU WISH TO COPY BOTH FILES, SEPARATE THE FILES WITH A COMMA - f.i. \"banlist.txt,localbanlist.txt\""] 
+
+    keyorder = []
+    keyorder.append("MONITOR")
+    keyorder.append("MONITOR_FOLDERS")
+    keyorder.append("MONITOR_FREQUENCY")
+    keyorder.append("SSH_DEFAULT_PORT_CHECK")
+    keyorder.append("EXCLUDE")
+    keyorder.append("HONEYPOT_BAN")
+    keyorder.append("HONEYPOT_BAN_CLASSC")
+    keyorder.append("HONEYPOT_BAN_LOG_PREFIX")
+    keyorder.append("WHITELIST_IP")
+    keyorder.append("TCPPORTS")
+    keyorder.append("UDPPORTS")
+    keyorder.append("HONEYPOT_AUTOACCEPT")
+    keyorder.append("EMAIL_ALERTS")
+    keyorder.append("SMTP_USERNAME")
+    keyorder.append("SMTP_PASSWORD")
+    keyorder.append("ALERT_USER_EMAIL")
+    keyorder.append("SMTP_FROM")
+    keyorder.append("SMTP_ADDRESS")
+    keyorder.append("SMTP_PORT")
+    keyorder.append("EMAIL_TIMER")
+    keyorder.append("EMAIL_FREQUENCY")
+    keyorder.append("SSH_BRUTE_MONITOR")
+    keyorder.append("SSH_BRUTE_ATTEMPTS")
+    keyorder.append("FTP_BRUTE_MONITOR")
+    keyorder.append("FTP_BRUTE_ATTEMPTS")
+    keyorder.append("AUTO_UPDATE")
+    keyorder.append("ANTI_DOS")
+    keyorder.append("ANTI_DOS_PORTS")
+    keyorder.append("ANTI_DOS_THROTTLE_CONNECTIONS")
+    keyorder.append("ANTI_DOS_LIMIT_BURST")
+    keyorder.append("ACCESS_LOG")
+    keyorder.append("ERROR_LOG")
+    keyorder.append("BIND_INTERFACE")
+    keyorder.append("THREAT_INTELLIGENCE_FEED")
+    keyorder.append("THREAT_FEED")
+    keyorder.append("THREAT_SERVER")
+    keyorder.append("THREAT_LOCATION")
+    keyorder.append("THREAT_FILE")
+    keyorder.append("LOCAL_BANLIST")
+    keyorder.append("ROOT_CHECK")
+    keyorder.append("SYSLOG_TYPE")
+    keyorder.append("LOG_MESSAGE_ALERT")
+    keyorder.append("LOG_MESSAGE_BAN")
+    keyorder.append("SYSLOG_REMOTE_HOST")
+    keyorder.append("SYSLOG_REMOTE_PORT")
+    keyorder.append("CONSOLE_LOGGING")
+    keyorder.append("RECYCLE_IPS")
+    keyorder.append("ARTILLERY_REFRESH")
+    keyorder.append("SOURCE_FEEDS")
+    for key in configdefaults:
+      if not key in keyorder:
+         keyorder.append(key)
+
+
+    # read config file
+    createnew = False
+    configpath = get_config_path()
+    if os.path.exists(configpath):
+         # read existing config file, update dict
+         write_console("Checking existing config file '%s'" % configpath)
+         for configkey in configdefaults:
+              if config_exists(configkey):
+                 currentcomment = configdefaults[configkey][1]
+                 currentvalue = read_config(configkey)
+                 configdefaults[configkey] = [currentvalue, currentcomment]
+              else:
+                 write_console("    Adding new config key '%s', default value '%s'" % (configkey,configdefaults[configkey][0]))
+    else:
+       createnew = True
+       #config file does not exist, determine new path
+    
+    # write dict to file
+    create_config(globals.g_configfile, configdefaults, keyorder)
+  
+    if createnew:
+      msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery again." % globals.g_configfile
+      write_console(msg)
+      write_log(msg,1)
+      sys.exit(1) 
+
+    return
+
+
+
 
 def get_config_path():
-    path = ""
-    if is_posix():
-        if os.path.isfile("/var/artillery/config"):
-            path = "/var/artillery/config"
-        if os.path.isfile("config"):
-            path = "config"
+    #path = ""
+    #if is_posix():
+    #    if os.path.isfile("/var/artillery/config"):
+    #        path = "/var/artillery/config"
+    #    if os.path.isfile("config"):
+    #        path = "config"
     #changed path to be more consistant across windows versions
-    if is_windows():
-        program_files = os.environ["PROGRAMFILES(X86)"]
-        if os.path.isfile(program_files + "\\Artillery\\config"):
-            path = program_files + "\\Artillery\\config"
+    #if is_windows():
+    #    program_files = os.environ["PROGRAMFILES(X86)"]
+    #    if os.path.isfile(program_files + "\\Artillery\\config"):
+    #        path = program_files + "\\Artillery\\config"
+    path = globals.g_configfile
     return path
+
+
+
+# check if a certain config parameter exists in the current config file
+def config_exists(param):
+    path = get_config_path()
+    fileopen = open(path, "r")
+    paramfound = False
+    for line in fileopen:
+        if not line.startswith("#"):
+            match = re.search(param + "=", line)
+            if match:
+               paramfound = True
+    return paramfound
 
 
 def read_config(param):
@@ -77,6 +263,15 @@ def read_config(param):
                 line = line.replace('"', "")
                 line = line.split("=")
                 return line[1]
+    return ""
+
+
+def convert_to_classc(param):
+   ipparts = param.split('.')
+   classc = ""
+   if len(ipparts) == 4:
+       classc = ipparts[0]+"."+ipparts[1]+"."+ipparts[2]+".0/24"
+   return classc
 
 
 def is_config_enabled(param):
@@ -91,58 +286,122 @@ def is_config_enabled(param):
 def ban(ip):
     # ip check routine to see if its a valid IP address
     ip = ip.rstrip()
-    if not ip.startswith("#"):
-        if not ip.startswith("0."):
-            if is_valid_ipv4(ip.strip()):
-                # if we are running nix variant then trigger ban through
-                # iptables
-                if is_posix():
-                    if not is_already_banned(ip):
-                        ban_check = read_config("HONEYPOT_BAN").lower()
-                        # if we are actually banning IP addresses
-                        if ban_check == "on":
-                            subprocess.Popen(
+    ban_check = read_config("HONEYPOT_BAN").lower()
+    ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+    test_ip = ip
+    if "/" in test_ip:
+        test_ip = test_ip.split("/")[0]
+    if is_whitelisted_ip(test_ip):
+        write_log("Not banning IP %s, whitelisted" % test_ip)
+        return
+    if ban_check == "on":
+       if not ip.startswith("#"):
+           if not ip.startswith("0."):
+               if is_valid_ipv4(ip.strip()):
+                   # if we are running nix variant then trigger ban through
+                   # iptables
+                   if is_posix():
+                       if not is_already_banned(ip):
+                           if ban_classc == "on":
+                                   ip = convert_to_classc(ip)
+                           subprocess.Popen(
                                 "iptables -I ARTILLERY 1 -s %s -j DROP" % ip, shell=True).wait()
-                    # After the server is banned, add it to the banlist if it's
-                    # not already in there
-                    fileopen = open("/var/artillery/banlist.txt", "r")
-                    data = fileopen.read()
-                    if ip not in data:
-                        filewrite = open("/var/artillery/banlist.txt", "a")
-                        filewrite.write(ip + "\n")
-                        filewrite.close()
-                        sort_banlist()
+                           iptables_logprefix = read_config("HONEYPOT_BAN_LOG_PREFIX")
+                           if iptables_logprefix != "":
+                              subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j LOG --log-prefix \"%s\"" % (ip, iptables_logprefix), shell=True).wait() 
 
-                # if running windows then route attacker to some bs address.
-                if is_windows():
-                    #lets try and write an event log
-                    HoneyPotEvent()
-                    #now lets block em or mess with em route somewhere else?
-                    subprocess.Popen("route ADD %s MASK 255.255.255.255 10.255.255.255" % (ip),
-                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                    fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r")
-                    data = fileopen.read()
-                    if ip not in data:
-                        filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
-                        filewrite.write(ip + "\n")
-                        filewrite.close()
-                        sort_banlist()
+
+                   # if running windows then route attacker to some bs address.
+                   if is_windows():
+                       #lets try and write an event log
+                       HoneyPotEvent()
+                       #now lets block em or mess with em route somewhere else?
+                       routecmd = "route ADD %s MASK 255.255.255.255 10.255.255.255" % ip
+                       if ban_classc == "on":
+                          ip = convert_to_classc(ip)
+                          ipparts = ip.split(".")
+                          routecmd = "route ADD %s.%s.%s.0 MASK 255.255.255.0 10.255.255.255" % (ipparts[0], ipparts[1], ipparts[2])
+                       subprocess.Popen("%s" % (routecmd),
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+
+                   # add new IP to banlist
+                   fileopen = open(globals.g_banlist, "r")
+                   data = fileopen.read()
+                   if ip not in data:
+                       filewrite = open(globals.g_banlist, "a")
+                       filewrite.write(ip + "\n")
+                       #print("Added %s to file" % ip)
+                       filewrite.close()
+                       sort_banlist()
+
+                   if read_config("LOCAL_BANLIST").lower() == "on":
+                       fileopen = open(globals.g_localbanlist, "r")
+                       data = fileopen.read()
+                       if ip not in data:
+                           filewrite = open(globals.g_localbanlist, "a")
+                           filewrite.write(ip+"\n")
+                           filewrite.close()
+
+
+
 
 def update():
     if is_posix():
-        if os.path.isdir("/var/artillery/.svn"):
+        write_log("Running auto update (git pull)")
+        write_console("Running auto update (git pull)")
+
+        if os.path.isdir(globals.g_apppath + "/.svn"):
             print(
                 "[!] Old installation detected that uses subversion. Fixing and moving to github.")
             try:
-                shutil.rmtree("/var/artillery")
+                if len(globals.g_apppath) > 1:
+                    shutil.rmtree(globals.g_apppath)
                 subprocess.Popen(
                     "git clone https://github.com/binarydefense/artillery", shell=True).wait()
             except:
                 print(
-                    "[!] Something failed. Please type 'git clone https://github.com/binarydefense/artillery /var/artillery' to fix!")
+                    "[!] Something failed. Please type 'git clone https://github.com/binarydefense/artillery %s' to fix!" % globals.g_apppath)
 
-        subprocess.Popen("cd /var/artillery;git pull",
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        #subprocess.Popen("cd %s;git pull" % globals.g_apppath,
+        #                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        update = execOScmd("cd %s; git pull" % globals.g_apppath)
+        errorfound = False
+        abortfound = False
+        errormsg = ""
+        for l in update:
+            errormsg += "%s\n" % l
+            if "error:" in l:
+                errorfound = True
+            if "Aborting" in l:
+                abortfound = True
+        if errorfound and abortfound:
+            msg = "Error updating artillery, git pull was aborted. Error:\n%s" % errormsg
+            write_log(msg,2)
+            write_console(msg)
+            msg = "I will make a cop of the config file, run git stash, and restore config file"
+            write_log(msg,2)
+            write_console(msg)
+            saveconfig = "cp '%s' '%s.old'" % (globals.g_configfile, globals.g_configfile)
+            execOScmd(saveconfig)
+            gitstash = "git stash"
+            execOScmd(gitstash)
+            gitpull = "git pull"
+            newpull = execOScmd(gitpull)
+            restoreconfig = "cp '%s.old' '%s'" % (globals.g_configfile, globals.g_configfile)
+            execOScmd(restoreconfig)
+            pullmsg = ""
+            for l in newpull:
+                pullmsg += "%s\n" % l
+            msg = "Tried to fix git pull issue. Git pull now says:" 
+            write_log(msg, 2)
+            write_console(msg)
+            write_log(pullmsg,2)
+            write_console(pullmsg)
+
+        else:
+            msg = "Output 'git pull':\n%s" % errormsg
+            write_log(msg)
 
 
 def addressInNetwork(ip, net):
@@ -171,6 +430,10 @@ def is_whitelisted_ip(ip):
 
 
 def is_valid_ipv4(ip):
+    # if IP is cidr, strip net
+    if "/" in ip:
+       ipparts = ip.split("/")
+       ip = ipparts[0]
     if not ip.startswith("#"):
         pattern = re.compile(r"""
     ^
@@ -212,31 +475,31 @@ def is_valid_ipv4(ip):
 def check_banlist_path():
     path = ""
     if is_posix():
-        if os.path.isfile("banlist.txt"):
-            path = "banlist.txt"
+        #if os.path.isfile("banlist.txt"):
+        #    path = "banlist.txt"
 
-        if os.path.isfile("/var/artillery/banlist.txt"):
-            path = "/var/artillery/banlist.txt"
+        if os.path.isfile(globals.g_banlist):
+            path = globals.g_banlist
 
         # if path is blank then try making the file
         if path == "":
-            if os.path.isdir("/var/artillery"):
-                filewrite = open("/var/artillery/banlist.txt", "w")
+            if os.path.isdir(globals.g_apppath):
+                filewrite = open(globals.g_banlist, "w")
                 filewrite.write(
                     "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
-                path = "/var/artillery/banlist.txt"
+                path = globals.g_banlist
     #changed path to be more consistant across windows versions
     if is_windows():
-        program_files = os.environ["PROGRAMFILES(X86)"]
-        if os.path.isfile(program_files + "\\Artillery\\banlist.txt"):
+        #program_files = os.environ["PROGRAMFILES(X86)"]
+        if os.path.isfile(globals.g_banlist):
             # grab the path
-            path = program_files + "\\Artillery\\banlist.txt"
+            path = globals.g_banlist
         if path == "":
-            if os.path.isdir(program_files + "\\Artillery"):
-                path = program_files + "\\Artillery"
+            if os.path.isdir(globals.g_apppath):
+                path = globals.g_apppath
                 filewrite = open(
-                    program_files + "\\Artillery\\banlist.txt", "w")
+                    globals.g_banlist, "w")
                 filewrite.write(
                     "#\n#\n#\n# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed\n# https://www.binarydefense.com\n#\n# Note that this is for public use only.\n# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.\n# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.\n#\n#\n#\n")
                 filewrite.close()
@@ -247,13 +510,16 @@ def check_banlist_path():
 
 def prep_email(alert):
     if is_posix():
+        # check if folder program_junk exists
+        if not os.path.isdir("%s/src/program_junk" % globals.g_apppath):
+          os.mkdir("%s/src/program_junk" % globals.g_apppath)
         # write the file out to program_junk
         filewrite = open(
-            "/var/artillery/src/program_junk/email_alerts.log", "a")
+            "%s/src/program_junk/email_alerts.log" % globals.g_apppath, "a")
     if is_windows():
         program_files = os.environ["PROGRAMFILES(X86)"]
         filewrite = open(
-            program_files + "\\Artillery\\src\\program_junk\\email_alerts.log", "a")
+            "%s\\src\\program_junk\\email_alerts.log" % globals.g_apppath, "a")
     filewrite.write(alert)
     filewrite.close()
 
@@ -269,34 +535,160 @@ def is_windows():
 if is_windows():
     from .events import HoneyPotEvent #check events.py for reasoning.
 
+# execute OS command and to wait until it's finished
+def execOScmd(cmd, logmsg=""):
+    if logmsg != "":
+        write_log("execOSCmd: %s" % (logmsg))
+    p = subprocess.Popen('%s' % cmd,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         shell=True)
+    outputobj = iter(p.stdout.readline, b'')
+    outputlines = []
+    for l in outputobj:
+        thisline = l.decode()
+        #print(thisline)
+        outputlines.append(thisline.replace('\\n','').replace("'",""))
+    return outputlines
+
+
+# execute OS commands Asynchronously
+# this one takes an array
+# first element is application, arguments are in additional array elements
+def execOScmdAsync(cmdarray):
+    p = subprocess.Popen(cmdarray) 
+    #p.terminate()
+    return
+
+def create_empty_file(filepath):
+    filewrite = open(filepath, "w")
+    filewrite.write("")
+    filewrite.close()
+
+
+def write_banlist_banner(filepath):
+    filewrite = open(filepath, "w")
+    banner = """#
+#
+#
+# Binary Defense Systems Artillery Threat Intelligence Feed and Banlist Feed
+# https://www.binarydefense.com
+#
+# Note that this is for public use only.
+# The ATIF feed may not be used for commercial resale or in products that are charging fees for such services.
+# Use of these feeds for commerical (having others pay for a service) use is strictly prohibited.
+#
+#
+#
+"""
+    filewrite.write(banner)
+    filewrite.close()
+
+
+
 def create_iptables_subset():
     if is_posix():
         ban_check = read_config("HONEYPOT_BAN").lower()
         if ban_check == "on":
-            subprocess.Popen("iptables -N ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            subprocess.Popen("iptables -F ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            subprocess.Popen("iptables -I INPUT -j ARTILLERY",
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            # remove previous entry if it already exists
+            execOScmd("iptables -D INPUT -j ARTILLERY", "Deleting ARTILLERY IPTables Chain")
+            # create new chain
+            write_log("Flushing iptables chain, creating a new one")
+            execOScmd("iptables -N ARTILLERY -w 3")
+            execOScmd("iptables -F ARTILLERY -w 3")
+            execOScmd("iptables -I INPUT -j ARTILLERY -w 3")
 
-    if os.path.isfile(check_banlist_path()):
-        banfile = open(check_banlist_path(), "r")
-    else:
-        filewrite = open("banlist.txt", "w")
-        filewrite.write("")
-        filewrite.close()
-        banfile = open("banlist.txt", "r")
+    bannedips = []
+
+    if not os.path.isfile(globals.g_banlist):
+        create_empty_file(globals.g_banlist)
+        write_banlist_banner(globals.g_banlist)
+    
+    banfile = open(globals.g_banlist, "r").readlines()
+    write_log("Read %d lines in '%s'" % (len(banfile), globals.g_banlist))
+
+    for ip in banfile:
+        if not ip in bannedips:
+           bannedips.append(ip)
+
+    if read_config("LOCAL_BANLIST").lower() == "on":
+        if not os.path.isfile(globals.g_localbanlist):
+            create_empty_file(globals.g_localbanlist)
+            write_banlist_banner(globals.g_localbanlist)
+        localbanfile = open(globals.g_localbanlist,"r").readlines()
+        write_log("Read %d lines in '%s'" % (len(localbanfile), globals.g_localbanlist))
+        for ip in localbanfile:
+            if not ip in bannedips:
+                bannedips.append(ip)
 
     # if we are banning
+    banlist = []
     if read_config("HONEYPOT_BAN").lower() == "on":
-            # iterate through lines in ban file and ban them if not already
-            # banned
-        for ip in banfile:
-            if not ip.startswith("#"):
-                if not is_already_banned(ip):
-                    ip = ip.strip()
-                    ban(ip)
+        # iterate through lines from ban file(s) and ban them if not already
+        # banned
+        for ip in bannedips:
+           if not ip.startswith("#") and not ip.replace(" ","") == "":
+              ip = ip.strip()
+              if ip != "":
+                 test_ip = ip
+                 if "/" in test_ip:
+                     test_ip = test_ip.split("/")[0]
+                 if not is_whitelisted_ip(test_ip):
+                    if is_posix():
+                       if not ip.startswith("0."):
+                           if is_valid_ipv4(ip.strip()):
+                               if read_config("HONEYPOT_BAN_CLASSC").lower() == "on":
+                                  if not ip.endswith("/24"):
+                                     ip = convert_to_classc(ip)
+                               banlist.append(ip)
+                    if is_windows():
+                       ban(ip)
+                 else:
+                    write_log("Not banning IP %s, whitelisted" % ip)
+        if read_config("LOCAL_BANLIST").lower() == "on":
+            localbanfile = open(globals.g_localbanlist,"r").readlines()
+
+    if len(banlist) > 0:
+       # convert banlist into unique list
+       write_log("Filtering duplicate entries in banlist")
+       set_banlist = set(banlist)
+       unique_banlist = (list(set_banlist))
+       entries_at_once = 750
+       total_nr = len(unique_banlist)
+       write_log("Mass loading %d unique entries from banlist(s)" % total_nr)
+       write_console("    Mass loading %d unique entries from banlist(s)" % total_nr) 
+       nr_of_lists = int(len(unique_banlist) / entries_at_once) + 1
+       iplists = get_sublists(unique_banlist, nr_of_lists)
+       listindex = 1
+       logindex = 1
+       logthreshold = 25
+       if len(iplists) > 1000:
+           logthreshold = 100
+       total_added = 0
+       for iplist in iplists: 
+          ips_to_block = ','.join(iplist)
+          massloadcmd = "iptables -I ARTILLERY -s %s -j DROP -w 3" % ips_to_block
+          subprocess.Popen(massloadcmd, shell=True).wait()
+          iptables_logprefix = read_config("HONEYPOT_BAN_LOG_PREFIX")
+          if iptables_logprefix != "":
+             massloadcmd = "iptables -I ARTILLERY -s %s -j LOG --log-prefix \"%s\" -w 3" % (ips_to_block, iptables_logprefix)
+             subprocess.Popen(massloadcmd, shell=True).wait() 
+          total_added += len(iplist)
+          write_log("%d/%d - Added %d/%d IP entries to iptables chain." % (listindex, len(iplists), total_added, total_nr))
+          if logindex >= logthreshold:
+              write_console("    %d/%d : Update: Added %d/%d entries to iptables chain" % (listindex, len(iplists), total_added, total_nr)) 
+              logindex = 0
+          listindex +=1
+          logindex += 1
+       write_console("    %d/%d : Done: Added %d/%d entries to iptables chain, thank you for waiting." % (listindex-1, len(iplists), total_added, total_nr))
+
+
+def get_sublists(original_list, number_of_sub_list_wanted):
+    sublists = list()
+    for sub_list_count in range(number_of_sub_list_wanted): 
+        sublists.append(original_list[sub_list_count::number_of_sub_list_wanted])
+    return sublists
+
 
 
 def is_already_banned(ip):
@@ -306,6 +698,9 @@ def is_already_banned(ip):
         proc = subprocess.Popen("iptables -L ARTILLERY -n --line-numbers",
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         iptablesbanlist = proc.stdout.readlines()
+        ban_classc = read_config("HONEYPOT_BAN_CLASSC").lower()
+        if ban_classc == "on":
+           ip = convert_to_classc(ip)
         if ip in iptablesbanlist:
             return True
         else:
@@ -405,16 +800,31 @@ def printCIDR(attacker_ip):
 def threat_server():
     public_http = read_config("THREAT_LOCATION")
     if os.path.isdir(public_http):
-        while 1:
-            subprocess.Popen("cp /var/artillery/banlist.txt %s" %
-                             (public_http), shell=True).wait()
-            time.sleep(300)
+       banfiles = read_config("THREAT_FILE")
+       if banfiles == "":
+          banfiles = globals.g_banfile
+       banfileparts = banfiles.split(",")
+       while 1:
+          for banfile in banfileparts:
+             thisfile = globals.g_apppath + "/" + banfile
+             subprocess.Popen("cp '%s' '%s'" % (thisfile, public_http), shell=True).wait()
+             #write_log("ThreatServer: Copy '%s' to '%s'" % (thisfile, public_http))
+          time.sleep(300)
 
 # send the message then if its local or remote
 
 
-def syslog(message):
+def syslog(message, alerttype):
     type = read_config("SYSLOG_TYPE").lower()
+    alertindicator = ""
+    if alerttype == -1:
+        alertindicator = ""
+    elif alerttype == 0:
+        alertindicator = "[INFO]"
+    elif alerttype == 1:
+        alertindicator = "[WARN]"
+    elif alerttype == 2:
+        alertindicator = "[ERROR]"
 
     # if we are sending remote syslog
     if type == "remote":
@@ -446,7 +856,11 @@ def syslog(message):
         # send the syslog message
         remote_syslog = read_config("SYSLOG_REMOTE_HOST")
         remote_port = int(read_config("SYSLOG_REMOTE_PORT"))
-        syslog_send(message, host=remote_syslog, port=remote_port)
+        syslogmsg = message
+        if alertindicator != "":
+            syslogmsg = "Artillery%s: %s" % (alertindicator, message)
+           #syslogmsg = "%s %s Artillery: %s" % (grab_time(), alertindicator, message) 
+        syslog_send(syslogmsg, host=remote_syslog, port=remote_port)
 
     # if we are sending local syslog messages
     if type == "local":
@@ -455,38 +869,53 @@ def syslog(message):
         handler = logging.handlers.SysLogHandler(address='/dev/log')
         my_logger.addHandler(handler)
         for line in message.splitlines():
-            my_logger.critical(line + "\n")
+            if alertindicator != "":
+                my_logger.critical("Artillery%s: %s\n" % (alertindicator, line))
+                #my_logger.critical("%s %s Artillery: %s\n" % (grab_time(), alertindicator, line))
+            else:
+                my_logger.critical("%s\n" % line)
 
     # if we don't want to use local syslog and just write to file in
     # logs/alerts.log
     if type == "file":
-        if not os.path.isdir("/var/artillery/logs"):
-            os.makedirs("/var/artillery/logs")
+        if not os.path.isdir("%s/logs" % globals.g_apppath):
+            os.makedirs("%s/logs" % globals.g_apppath)
             
-        if not os.path.isfile("/var/artillery/logs/alerts.log"):
-            filewrite = open("/var/artillery/logs/alerts.log", "w")
+        if not os.path.isfile("%s/logs/alerts.log" % globals.g_apppath):
+            filewrite = open("%s/logs/alerts.log" % globals.g_apppath, "w")
             filewrite.write("***** Artillery Alerts Log *****\n")
             filewrite.close()
 
-        filewrite = open("/var/artillery/logs/alerts.log", "a")
-        filewrite.write(message + "\n")
+        filewrite = open("%s/logs/alerts.log" % globals.g_apppath, "a")
+        filewrite.write("Artillery%s: %s\n" % (alertindicator, message))
         filewrite.close()
 
+def write_console(alert):
+    if is_config_enabled("CONSOLE_LOGGING"):
+        alertlines = alert.split("\n")
+        for alertline in alertlines:
+            print("%s: %s" % (grab_time(), alertline))
+    return
 
-def write_log(alert):
+
+def write_log(alert, alerttype=0):
+    # alerttype -1 = overrule
+    # alerttype 0 = normal/information [+]
+    # alerttype 1 = warning [-]
+    # alerttype 2 = error [!!]
     if is_posix():
-        syslog(alert)
+        syslog(alert, alerttype)
     #changed path to be more consistant across windows versions
     if is_windows():
         program_files = os.environ["PROGRAMFILES(X86)"]
-        if not os.path.isdir(program_files + "\\Artillery\\logs"):
-            os.makedirs(program_files + "\\Artillery\\logs")
-        if not os.path.isfile(program_files + "\\Artillery\\logs\\alerts.log"):
+        if not os.path.isdir("%s\\logs" % globals.g_apppath):
+            os.makedirs("%s\\logs" % globals.g_apppath)
+        if not os.path.isfile("%s\\logs\\alerts.log" % globals.g_apppath):
             filewrite = open(
-                program_files + "\\Artillery\\logs\\alerts.log", "w")
+                "%s\\logs\\alerts.log" % globals.g_apppath, "w")
             filewrite.write("***** Artillery Alerts Log *****\n")
             filewrite.close()
-        filewrite = open(program_files + "\\Artillery\\logs\\alerts.log", "a")
+        filewrite = open("%s\\logs\\alerts.log" % globals.g_apppath, "a")
         filewrite.write(alert + "\n")
         filewrite.close()
 
@@ -494,18 +923,15 @@ def write_log(alert):
 def warn_the_good_guys(subject, alert):
     email_alerts = is_config_enabled("EMAIL_ALERTS")
     email_timer = is_config_enabled("EMAIL_TIMER")
-
+    subject = gethostname() + " | " + subject
     if email_alerts and not email_timer:
         send_mail(subject, alert)
 
     if email_alerts and email_timer:
         prep_email(alert + "\n")
 
-    if is_config_enabled("CONSOLE_LOGGING"):
-        print("{}".format(alert))
-
-    write_log(alert)
-
+    write_log(alert,1)
+    write_console(alert)
 # send the actual email
 
 
@@ -545,13 +971,18 @@ def mail(to, subject, text):
             mailServer.login(user, pwd)
 
         # send the mail
+        write_log("Sending email to %s: %s" % (to, subject))
         mailServer.sendmail(smtp_from, to, msg.as_string())
         mailServer.close()
 
     except Exception as err:
-        write_log("[!] %s: Error, Artillery was unable to log into the mail server" % (
-            grab_time()))
-        write_log("[!] Printing error: " + str(err))
+        write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
+            grab_time(), smtp_address, smtp_port),2)
+        emsg = traceback.format_exc()
+        write_log("Error: " + str(err),2)
+        write_log(" %s" % emsg,2)
+        write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
+        write_console("[!] Error: %s" % emsg)
 
 # kill running instances of artillery
 
@@ -569,8 +1000,7 @@ def kill_artillery():
         # depends on OS on integer
         # pid = int(pid[2])
         for i in pid:
-            write_log("[!] %s: Killing the old Artillery process..." %
-                      (grab_time()))
+            write_log("Killing the old Artillery process...")
             print("[!] %s: Killing Old Artillery Process...." % (grab_time()))
             os.kill(i, signal.SIGKILL)
 
@@ -582,7 +1012,6 @@ def kill_artillery():
 def cleanup_artillery():
     ban_check = read_config("HONEYPOT_BAN").lower()
     if ban_check == "on":
-
         subprocess.Popen("iptables -D INPUT -j ARTILLERY",
                          stdout=subprocess.PIP, stderr=subprocess.PIPE, shell=True)
         subprocess.Popen("iptables -X ARTILLERY",
@@ -603,9 +1032,8 @@ def refresh_log():
         # sleep until interval is up
         time.sleep(interval)
         # overwrite the log with nothing
-        filewrite = open("/var/artillery/banlist.txt", "w")
-        filewrite.write("")
-        filewrite.close()
+        create_empty_file(globals.g_banlist)
+        write_banlist_banner(globals.g_banlist)
 
 
 # format the ip addresses and check to ensure they aren't duplicates
@@ -613,8 +1041,19 @@ def format_ips(url):
     ips = ""
     for urls in url:
         try:
+            write_log("Grabbing feed from '%s'" % (str(urls)))
             urls = str(urls)
-            f = urlopen(urls).readlines()
+            f = []
+            if urls.startswith("http"):
+               f = urlopen(urls).readlines()
+            else:
+               # try reading it as a file
+               try:
+                   f = open(urls,"r").readlines()
+               except:
+                   write_log("Unable to read '%s'" % urls,2)
+                   pass
+            write_log("Retrieved %d lines from %s" % (len(f), str(urls)))
             for line in f:
                 line = line.rstrip()
                 # stupid conversion from py2 to py3 smh
@@ -629,24 +1068,24 @@ def format_ips(url):
                 # Error 404, page not found!
                 write_log(
                     "HTTPError: Error 404, URL {} not found.".format(urls))
-
             else:
-                write_log("Received URL Error, Reason: {}".format(err))
-                return
+                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
+                continue 
 
     try:
         if is_windows():
             #added this for the banlist windows 7 successfully pulls banlist with python 2.7.
             #windows 8/10 with python 3.6 fail with 403 Forbidden error. has to do with format_ips
             #function above. python 3.6 urlopen sends the wrong headers
-            fileopen = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "r").read()
+            fileopen = open(globals.g_banlist, "r").read()
             # write the file
-            filewrite = open("C:\\Program Files (x86)\\Artillery\\banlist.txt", "a")
+            filewrite = open(globals.g_banlist, "a")
         if is_posix():
-            fileopen = open("/var/artillery/banlist.txt", "r").read()
+            fileopen = open(globals.g_banlist, "r").read()
             # write the file
-            filewrite = open("/var/artillery/banlist.txt", "a")
+            filewrite = open(globals.g_banlist, "a")
         # iterate through
+        uniquenewentries = 0
         for line in ips.split("\n"):
             line = line.rstrip()
             # we are using OTX reputation here
@@ -658,13 +1097,17 @@ def format_ips(url):
             if not "#" in line:
                 if not "//" in line:
                     # if we don't have the IP yet
+                    if read_config("HONEYPOT_BAN_CLASSC").lower() == "on":
+                        line = convert_to_classc(line)
                     if not line in fileopen:
                         # make sure valid ipv4
                         if not line.startswith("0."):
                             if is_valid_ipv4(line.strip()):
                                 filewrite.write(line + "\n")
+                                uniquenewentries += 1
         # close the file
         filewrite.close()
+        write_log("Added %d new unique entries to banlist" % (uniquenewentries)) 
     except Exception as err:
         print("Error identified as :" + str(err) + " with line: " + str(line))
         pass
@@ -686,7 +1129,7 @@ def pull_source_feeds():
                        'https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist', 'http://malc0de.com/bl/IP_Blacklist.txt', 'https://reputation.alienvault.com/reputation.unix']
                 counter = 1
 
-        # if we are using threati ntelligence feeds
+        # if we are using threat intelligence feeds
         if read_config("THREAT_INTELLIGENCE_FEED").lower() == "on":
             threat_feed = read_config("THREAT_FEED")
             if threat_feed != "":
@@ -705,9 +1148,9 @@ def pull_source_feeds():
 #re ordered this section to included windows
 def sort_banlist():
     if is_windows():
-        ips = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "r").readlines()
+        ips = open(globals.g_banlist, "r").readlines()
     if is_posix():
-        ips = open("/var/artillery/banlist.txt", "r").readlines()
+        ips = open(globals.g_banlist, "r").readlines()
 
 
     banner = """#
@@ -726,7 +1169,7 @@ def sort_banlist():
     ip_filter = ""
     for ip in ips:
         if is_valid_ipv4(ip.strip()):
-            if not ip.startswith("0."):
+            if not ip.startswith("0.") and not ip == "":
                 ip_filter = ip_filter + ip.rstrip() + "\n"
     ips = ip_filter
     ips = ips.replace(banner, "")
@@ -734,17 +1177,19 @@ def sort_banlist():
     ips = ips.split("\n")
     ips = [_f for _f in ips if _f]
     ips = list(filter(str.strip, ips))
-    tempips = [socket.inet_aton(ip) for ip in ips]
+    tempips = [socket.inet_aton(ip.split("/")[0]) for ip in ips]
     tempips.sort()
     tempips.reverse()
     if is_windows():
-        filewrite = open("C:\\Program Files (x86)\\Artillery\\Banlist.txt", "w")
+        filewrite = open(globals.g_banlist, "w")
     if is_posix():
-        filewrite = open("/var/artillery/banlist.txt", "w")
+        filewrite = open(globals.g_banlist, "w")
     ips2 = [socket.inet_ntoa(ip) for ip in tempips]
     ips_parsed = ""
     for ips in ips2:
         if not ips.startswith("0."):
+            if ips.endswith(".0"):
+               ips += "/24"
             ips_parsed = ips + "\n" + ips_parsed
     filewrite.write(banner + "\n" + ips_parsed)
     filewrite.close()
