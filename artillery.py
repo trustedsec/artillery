@@ -21,7 +21,7 @@ import traceback
 
 # import artillery global variables
 import src.globals
-
+from src.core import *
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 
@@ -32,7 +32,6 @@ if not os.path.isfile(src.globals.g_appfile):
     import setup
 
 
-from src.core import *
 # from src.config import * # yaml breaks config reading - disabling
 
 check_config()
