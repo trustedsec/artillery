@@ -52,7 +52,7 @@ def init_globals():
     if 'win32' in sys.platform:
         programfolder = os.environ["PROGRAMFILES(X86)"]
         globals.g_apppath = programfolder + "\\Artillery"
-        appfile = globals.g_apppath + "\\artillery.py"
+        globals.g_appfile = globals.g_apppath + "\\artillery.py"
         globals.g_configfile = globals.g_apppath + "\\config"
         globals.g_banlist = globals.g_apppath + "\\banlist.txt"
         globals.g_localbanlist = globals.g_apppath + "\\localbanlist.txt"
@@ -60,7 +60,7 @@ def init_globals():
     # consolidated nix* variants
     if ('linux' or 'linux2' or 'darwin') in sys.platform:
         globals.g_apppath = "/var/artillery"
-        appfile = globals.g_apppath + "/artillery.py"
+        globals.g_appfile = globals.g_apppath + "/artillery.py"
         globals.g_configfile = globals.g_apppath + "/config"
         globals.g_banlist = globals.g_apppath + "/banlist.txt"
         globals.g_localbanlist = globals.g_apppath + "/localbanlist.txt"
