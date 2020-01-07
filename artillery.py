@@ -21,32 +21,17 @@ import traceback
 
 # import artillery global variables
 import src.globals
-
+from src.core import *
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
-appfile = ""
-if 'win32' in sys.platform:
-    programfolder = os.environ["PROGRAMFILES(X86)"] 
-    src.globals.g_apppath = programfolder + "\\Artillery"
-    appfile = src.globals.g_apppath + "\\artillery.py"
-    src.globals.g_configfile = src.globals.g_apppath + "\\config"
-    src.globals.g_banlist = src.globals.g_apppath + "\\banlist.txt"
-    src.globals.g_localbanlist = src.globals.g_apppath + "\\localbanlist.txt"
 
-# consolidated nix* variants
-if ('linux' or 'linux2' or 'darwin') in sys.platform:
-    src.globals.g_apppath = "/var/artillery"
-    appfile = src.globals.g_apppath + "/artillery.py"
-    src.globals.g_configfile = src.globals.g_apppath + "/config"
-    src.globals.g_banlist = src.globals.g_apppath + "/banlist.txt"
-    src.globals.g_localbanlist = src.globals.g_apppath + "/localbanlist.txt"
+init_globals()
 
-if not os.path.isfile(appfile):
+if not os.path.isfile(src.globals.g_appfile):
     print("[*] Artillery is not installed, running setup.py..")
     import setup
 
 
-from src.core import *
 # from src.config import * # yaml breaks config reading - disabling
 
 check_config()

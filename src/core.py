@@ -33,6 +33,7 @@ except ImportError:
     from urllib import urlopen
 
 import os
+import sys
 import time
 import shutil
 import logging
@@ -46,11 +47,31 @@ import traceback
 
 import globals
 
+# initialize global vars 
+def init_globals():
+    if 'win32' in sys.platform:
+        programfolder = os.environ["PROGRAMFILES(X86)"]
+        globals.g_apppath = programfolder + "\\Artillery"
+        globals.g_appfile = globals.g_apppath + "\\artillery.py"
+        globals.g_configfile = globals.g_apppath + "\\config"
+        globals.g_banlist = globals.g_apppath + "\\banlist.txt"
+        globals.g_localbanlist = globals.g_apppath + "\\localbanlist.txt"
+
+    # consolidated nix* variants
+    if ('linux' or 'linux2' or 'darwin') in sys.platform:
+        globals.g_apppath = "/var/artillery"
+        globals.g_appfile = globals.g_apppath + "/artillery.py"
+        globals.g_configfile = globals.g_apppath + "/config"
+        globals.g_banlist = globals.g_apppath + "/banlist.txt"
+        globals.g_localbanlist = globals.g_apppath + "/localbanlist.txt"
+
+
 # grab the current time
 def grab_time():
     ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+# get hostname
 def gethostname():
     return socket.gethostname()
 
@@ -212,7 +233,7 @@ def check_config():
     create_config(globals.g_configfile, configdefaults, keyorder)
   
     if createnew:
-      msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery again." % globals.g_configfile
+      msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery (again)." % globals.g_configfile
       write_console(msg)
       write_log(msg,1)
       sys.exit(1) 
