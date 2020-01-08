@@ -25,6 +25,7 @@ from src.core import *
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 
+#
 init_globals()
 
 if not os.path.isfile(src.globals.g_appfile):

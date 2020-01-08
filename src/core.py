@@ -45,7 +45,8 @@ from string import *
 import socket
 import traceback
 
-import globals
+from . import globals
+
 
 # initialize global vars 
 def init_globals():

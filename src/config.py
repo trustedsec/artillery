@@ -6,7 +6,7 @@
 
 import os
 import platform
-import globals
+from . import globals
 
 if platform.system() == "Windows":
     import ntpath
