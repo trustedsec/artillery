@@ -91,7 +91,7 @@ try:
         thread.start_new_thread(update, ())
 
     # import base monitoring of fs
-    if is_config_enabled("MONITOR"):
+    if is_config_enabled("MONITOR") and is_posix():
         from src.monitor import *
 
     # port ranges to spawn
@@ -104,9 +104,10 @@ try:
         write_console("Creating iptables entries, hold on.")
         create_iptables_subset()
         write_console("iptables entries created.")
-        write_console("Activating anti DoS.")
-        # start anti_dos
-        import src.anti_dos
+        if is_config_enabled("ANTI_DOS"):
+            write_console("Activating anti DoS.")
+            # start anti_dos
+            import src.anti_dos
 
     # spawn honeypot
     write_console("Launching honeypot.") 
@@ -123,9 +124,10 @@ try:
         import src.ftp_monitor
 
     # start monitor engine
-    if is_posix():
+    if is_config_enabled("MONITOR") and is_posix():
         write_console("Launching monitor engines.")
         import src.monitor
+    if is_config_enabled("SYSTEM_HARDENING") and is_posix():
         # check hardening
         write_console("Check system hardening.")
         import src.harden
