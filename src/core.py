@@ -567,7 +567,14 @@ def execOScmd(cmd, logmsg=""):
     outputobj = iter(p.stdout.readline, b'')
     outputlines = []
     for l in outputobj:
-        thisline = l.decode()
+        thisline = ""
+        try:
+            thisline = l.decode()
+        except:
+            try:
+                thisline = l.decode('utf8')
+            except:
+                thisline = "<unable to decode>"
         #print(thisline)
         outputlines.append(thisline.replace('\\n','').replace("'",""))
     return outputlines
