@@ -112,22 +112,22 @@ try:
     import src.honeypot
 
     # spawn ssh monitor
-    if is_config_enabled("SSH_BRUTE_MONITOR"):
+    if is_config_enabled("SSH_BRUTE_MONITOR") and is_posix():
         write_console("Launching SSH Bruteforce monitor.")
         import src.ssh_monitor
 
     # spawn ftp monitor
-    if is_config_enabled("FTP_BRUTE_MONITOR"):
+    if is_config_enabled("FTP_BRUTE_MONITOR") and is_posix():
         write_console("Launching FTP Bruteforce monitor.")
         import src.ftp_monitor
 
     # start monitor engine
-    write_console("Launching monitor engines.")
-    import src.monitor
-
-    # check hardening
-    write_console("Check system hardening.")
-    import src.harden
+    if is_posix():
+        write_console("Launching monitor engines.")
+        import src.monitor
+        # check hardening
+        write_console("Check system hardening.")
+        import src.harden
 
     # start the email handler
     write_console("Launching email handler.")
