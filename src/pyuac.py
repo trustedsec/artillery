@@ -97,7 +97,7 @@ def runAsAdmin(cmdLine=None, wait=True):
                               lpVerb=lpVerb,
                               lpFile=cmd,
                               lpParameters=params)
-
+    
     if wait:
         procHandle = procInfo['hProcess']    
         obj = win32event.WaitForSingleObject(procHandle, win32event.INFINITE)
@@ -107,6 +107,7 @@ def runAsAdmin(cmdLine=None, wait=True):
         rc = None
 
     return rc
+    sys.exit()
 
 def test():
     """A simple test function; check if we're admin, and if not relaunch

@@ -14,7 +14,12 @@ try:
     from email import Encoders
     from email.utils import formatdate
 except ImportError:
-    from email import *
+    
+    from email.mime.multipart import MIMEMultipart
+    from email.utils import formatdate
+    from email.mime.base import MIMEBase
+    from email.mime.text import MIMEText
+    from email import encoders
 
 import os
 import re
@@ -118,7 +123,7 @@ def check_config():
     configdefaults["HONEYPOT_BAN_CLASSC"] = ["OFF","WHEN BANNING, DO YOU WANT TO BAN ENTIRE CLASS C AT ONCE INSTEAD OF INDIVIDUAL IP ADDRESS"]
     configdefaults["HONEYPOT_BAN_LOG_PREFIX"] = ["","PUT A PREFIX ON ALL BANNED IP ADDRESSES. HELPFUL FOR WHEN TRYING TO PARSE OR SHOW DETECTIONS THAT YOU ARE PIPING OFF TO OTHER SYSTEMS. WHEN SET, PREFIX IPTABLES LOG ENTRIES WITH THE PROVIDED TEXT"]
     configdefaults["WHITELIST_IP"] = ["127.0.0.1,localhost", "WHITELIST IP ADDRESSES, SPECIFY BY COMMAS ON WHAT IP ADDRESSES YOU WANT TO WHITELIST"]
-    configdefaults["TCPPORTS"] = ["22,1433,8080,21,5060,5061,5900,25,3389,53,110,1723,1337,10000,5800,44443,16993","TCP PORTS TO SPAWN HONEYPOT FOR"]
+    configdefaults["TCPPORTS"] = ["22,1433,8080,21,5060,5061,5900,25,53,110,1723,1337,10000,5800,44443,16993","TCP PORTS TO SPAWN HONEYPOT FOR"]
     configdefaults["UDPPORTS"] = ["123,53,5060,5061,3478", "UDP PORTS TO SPAWN HONEYPOT FOR"]
     configdefaults["HONEYPOT_AUTOACCEPT"] = ["ON", "SHOULD THE HONEYPOT AUTOMATICALLY ADD ACCEPT RULES TO THE ARTILLERY CHAIN FOR ANY PORTS ITS LISTENING ON"]
     configdefaults["EMAIL_ALERTS"] = ["OFF","SHOULD EMAIL ALERTS BE SENT"]
@@ -239,7 +244,7 @@ def check_config():
       msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery (again)." % globals.g_configfile
       write_console(msg)
       write_log(msg,1)
-      sys.exit(1) 
+      #sys.exit(1) 
 
     return
 
@@ -991,20 +996,20 @@ def mail(to, subject, text):
         msg.attach(MIMEText(text))
         # prep the smtp server
         mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-        # send ehlo
-        mailServer.ehlo()
-        # if we aren't using open relays
-        if user != "":
+        if user == '':
+            write_console("[!] Email username is blank. please provide address in config file")
+        else:
+            # send ehlo
+            mailServer.ehlo()
             # tls support?
             mailServer.starttls()
             # some servers require ehlo again
             mailServer.ehlo()
             mailServer.login(user, pwd)
-
-        # send the mail
-        write_log("Sending email to %s: %s" % (to, subject))
-        mailServer.sendmail(smtp_from, to, msg.as_string())
-        mailServer.close()
+            # send the mail
+            write_log("Sending email to %s: %s" % (to, subject))
+            mailServer.sendmail(smtp_from, to, msg.as_string())
+            mailServer.close()
 
     except Exception as err:
         write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
