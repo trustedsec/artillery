@@ -9,7 +9,7 @@ try: import thread
 except ImportError: import _thread as thread
 from src.core import *
 
-import globals
+from . import globals
 
 monitor_frequency = int(read_config("MONITOR_FREQUENCY"))
 ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")

@@ -25,6 +25,7 @@ from src.core import *
 #
 # Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 
+#
 init_globals()
 
 if not os.path.isfile(src.globals.g_appfile):
@@ -90,7 +91,7 @@ try:
         thread.start_new_thread(update, ())
 
     # import base monitoring of fs
-    if is_config_enabled("MONITOR"):
+    if is_config_enabled("MONITOR") and is_posix():
         from src.monitor import *
 
     # port ranges to spawn
@@ -103,31 +104,33 @@ try:
         write_console("Creating iptables entries, hold on.")
         create_iptables_subset()
         write_console("iptables entries created.")
-        write_console("Activating anti DoS.")
-        # start anti_dos
-        import src.anti_dos
+        if is_config_enabled("ANTI_DOS"):
+            write_console("Activating anti DoS.")
+            # start anti_dos
+            import src.anti_dos
 
     # spawn honeypot
     write_console("Launching honeypot.") 
     import src.honeypot
 
     # spawn ssh monitor
-    if is_config_enabled("SSH_BRUTE_MONITOR"):
+    if is_config_enabled("SSH_BRUTE_MONITOR") and is_posix():
         write_console("Launching SSH Bruteforce monitor.")
         import src.ssh_monitor
 
     # spawn ftp monitor
-    if is_config_enabled("FTP_BRUTE_MONITOR"):
+    if is_config_enabled("FTP_BRUTE_MONITOR") and is_posix():
         write_console("Launching FTP Bruteforce monitor.")
         import src.ftp_monitor
 
     # start monitor engine
-    write_console("Launching monitor engines.")
-    import src.monitor
-
-    # check hardening
-    write_console("Check system hardening.")
-    import src.harden
+    if is_config_enabled("MONITOR") and is_posix():
+        write_console("Launching monitor engines.")
+        import src.monitor
+    if is_config_enabled("SYSTEM_HARDENING") and is_posix():
+        # check hardening
+        write_console("Check system hardening.")
+        import src.harden
 
     # start the email handler
     write_console("Launching email handler.")
