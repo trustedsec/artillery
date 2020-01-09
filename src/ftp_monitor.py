@@ -20,7 +20,7 @@ monitor_time = int(monitor_time)
 ftp_attempts = read_config("FTP_BRUTE_ATTEMPTS")
 # check for whitelist
 
-import globals
+from . import globals
 
 def ftp_monitor(monitor_time):
     while 1:

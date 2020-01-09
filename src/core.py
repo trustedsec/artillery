@@ -33,6 +33,7 @@ except ImportError:
     from urllib import urlopen
 
 import os
+import sys
 import time
 import shutil
 import logging
@@ -44,13 +45,34 @@ from string import *
 import socket
 import traceback
 
-import globals
+from . import globals
+
+
+# initialize global vars 
+def init_globals():
+    if 'win32' in sys.platform:
+        programfolder = os.environ["PROGRAMFILES(X86)"]
+        globals.g_apppath = programfolder + "\\Artillery"
+        globals.g_appfile = globals.g_apppath + "\\artillery.py"
+        globals.g_configfile = globals.g_apppath + "\\config"
+        globals.g_banlist = globals.g_apppath + "\\banlist.txt"
+        globals.g_localbanlist = globals.g_apppath + "\\localbanlist.txt"
+
+    # consolidated nix* variants
+    if ('linux' or 'linux2' or 'darwin') in sys.platform:
+        globals.g_apppath = "/var/artillery"
+        globals.g_appfile = globals.g_apppath + "/artillery.py"
+        globals.g_configfile = globals.g_apppath + "/config"
+        globals.g_banlist = globals.g_apppath + "/banlist.txt"
+        globals.g_localbanlist = globals.g_apppath + "/localbanlist.txt"
+
 
 # grab the current time
 def grab_time():
     ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+# get hostname
 def gethostname():
     return socket.gethostname()
 
@@ -89,6 +111,7 @@ def check_config():
     configdefaults["MONITOR"] = ["ON", "DETERMINE IF YOU WANT TO MONITOR OR NOT"]
     configdefaults["MONITOR_FOLDERS"] = ["\"/var/www\",\"/etc/\"",  "THESE ARE THE FOLDERS TO MONITOR, TO ADD MORE, JUST DO \"/root\",\"/var/\", etc."]
     configdefaults["MONITOR_FREQUENCY"] = ["60", "BASED ON SECONDS, 2 = 2 seconds."]
+    configdefaults["SYSTEM_HARDENING"] = ["ON", "PERFORM CERTAIN SYSTEM HARDENING CHECKS"]
     configdefaults["SSH_DEFAULT_PORT_CHECK"] = ["ON", "CHECK/WARN IF SSH IS RUNNING ON PORT 22"]
     configdefaults["EXCLUDE"] = ["","EXCLUDE CERTAIN DIRECTORIES OR FILES. USE FOR EXAMPLE: /etc/passwd,/etc/hosts.allow"]
     configdefaults["HONEYPOT_BAN"] = ["OFF", "DO YOU WANT TO AUTOMATICALLY BAN ON THE HONEYPOT"]
@@ -140,6 +163,7 @@ def check_config():
     keyorder.append("MONITOR")
     keyorder.append("MONITOR_FOLDERS")
     keyorder.append("MONITOR_FREQUENCY")
+    keyorder.append("SYSTEM_HARDENING")
     keyorder.append("SSH_DEFAULT_PORT_CHECK")
     keyorder.append("EXCLUDE")
     keyorder.append("HONEYPOT_BAN")
@@ -212,7 +236,7 @@ def check_config():
     create_config(globals.g_configfile, configdefaults, keyorder)
   
     if createnew:
-      msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery again." % globals.g_configfile
+      msg = "A brand new config file '%s' was created. Please review the file, change as needed, and launch artillery (again)." % globals.g_configfile
       write_console(msg)
       write_log(msg,1)
       sys.exit(1) 
@@ -546,7 +570,14 @@ def execOScmd(cmd, logmsg=""):
     outputobj = iter(p.stdout.readline, b'')
     outputlines = []
     for l in outputobj:
-        thisline = l.decode()
+        thisline = ""
+        try:
+            thisline = l.decode()
+        except:
+            try:
+                thisline = l.decode('utf8')
+            except:
+                thisline = "<unable to decode>"
         #print(thisline)
         outputlines.append(thisline.replace('\\n','').replace("'",""))
     return outputlines
