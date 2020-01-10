@@ -102,12 +102,14 @@ class SocketListener((SocketServer.BaseRequestHandler)):
 
 def open_sesame(porttype, port):
     if honeypot_autoaccept:
-        cmd = "iptables -D ARTILLERY -p %s --dport %s -j ACCEPT -w 3" % (porttype, port)
-        execOScmd(cmd)
-        cmd = "iptables -A ARTILLERY -p %s --dport %s -j ACCEPT -w 3" % (porttype, port)
-        execOScmd(cmd)
-        write_log("Created iptables rule to accept incoming connection to %s %s" % (porttype, port))
-
+        if is_posix():
+            cmd = "iptables -D ARTILLERY -p %s --dport %s -j ACCEPT -w 3" % (porttype, port)
+            execOScmd(cmd)
+            cmd = "iptables -A ARTILLERY -p %s --dport %s -j ACCEPT -w 3" % (porttype, port)
+            execOScmd(cmd)
+            write_log("Created iptables rule to accept incoming connection to %s %s" % (porttype, port))
+        if is_windows():
+            pass
 
 # here we define a basic server
 
@@ -175,6 +177,7 @@ def listenudp_server(udpport, bind_interface):
             continue
 
       if not bindsuccess:
+          binderror = ''
           bind_error = "Artillery was unable to bind to UDP port %s. This could be due to an active port in use.\n" % (port)
           subject = socket.gethostname() + " | Artillery error - unable to bind to UDP port %s" % port
           binderror += errormsg

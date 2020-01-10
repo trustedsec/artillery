@@ -23,27 +23,20 @@ import traceback
 import src.globals
 from src.core import *
 #
-# Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
-
-#
 init_globals()
-
+# Tested on win 7/8/10 also on kali rolling. left this here for when someone tries to launch this directly before using setup.
 if not os.path.isfile(src.globals.g_appfile):
     print("[*] Artillery is not installed, running setup.py..")
     import setup
 
-
 # from src.config import * # yaml breaks config reading - disabling
-
-check_config()
 
 if is_windows():#this is for launching script as admin from batchfile.
     if not isUserAdmin():# will prompt for user\pass and open in seperate window when you double click batchfile
         runAsAdmin()
-    #removed below.These folders are created in setup.py
-    #if not os.path.isdir("C:\\Program Files (x86)\\Artillery\\database"):
-        #os.mkdir("C:\\Program Files (x86)\\Artillery\\database")
+    #
     if isUserAdmin():
+        check_config()
         #moved for issue #39 BinaryDefense to only import on windows. seemed like best place
         #not the best way but for now something will go into eventlog.
         #for people with subscriptions in there environment like myself.
@@ -71,6 +64,7 @@ if is_posix():
             print ("[*] You must be root to run this script!\r\n")
         sys.exit(1)
     else:
+        check_config()
         if not os.path.isdir(src.globals.g_apppath + "/database/"):
             os.makedirs(src.globals.g_apppath + "/database/")
         if not os.path.isfile(src.globals.g_apppath + "/database/temp.database"):
@@ -133,8 +127,9 @@ try:
         import src.harden
 
     # start the email handler
-    write_console("Launching email handler.")
-    import src.email_handler
+    if is_config_enabled("EMAIL_ALERTS") and is_posix():
+        write_console("Launching email handler.")
+        import src.email_handler
 
     # check to see if we are a threat server or not
     if is_config_enabled("THREAT_SERVER"):
