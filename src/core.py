@@ -1024,6 +1024,7 @@ def mail(to, subject, text):
         write_log(" %s" % emsg,2)
         write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
         write_console("[!] Error: %s" % emsg)
+        pass
 
 # kill running instances of artillery
 
@@ -1108,9 +1109,9 @@ def format_ips(url):
             if err == '404':
                 # Error 404, page not found!
                 write_log(
-                    "HTTPError: Error 404, URL {} not found.".format(urls))
+                    "HTTPError: Error 404, URL '%s' not found." % str(urls))
             else:
-                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
+                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, str(err)),1)
                 continue 
 
     try:
