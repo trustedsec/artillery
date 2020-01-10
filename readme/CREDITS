@@ -4,3 +4,4 @@ Thanks to Ryan Elkins for bug report
 Thanks to Larry Spohn for finding the bugs in honeypot.py
 Thanks to Jeff Bryner for finding some bugs and sending source for additional enhancements
 Thanks to Giulio Bortot for adding some patches for OSX support and OSX support for setup.py
+Thanks to corelanc0d3r for is awesome additions to Artillery including cidr notations, better logging and failing messages, prefix ban lhandler, and more.

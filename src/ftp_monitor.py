@@ -20,6 +20,7 @@ monitor_time = int(monitor_time)
 ftp_attempts = read_config("FTP_BRUTE_ATTEMPTS")
 # check for whitelist
 
+from . import globals
 
 def ftp_monitor(monitor_time):
     while 1:
@@ -30,9 +31,9 @@ def ftp_monitor(monitor_time):
             print("Has not found configuration file for ftp. Ftp monitor now stops.")
             break
 
-        if not os.path.isfile("/var/artillery/banlist.txt"):
+        if not os.path.isfile(globals.g_banlist):
             # create a blank file
-            filewrite = file("/var/artillery/banlist.txt", "w")
+            filewrite = file(globals.g_banlist, "w")
             filewrite.write("")
             filewrite.close()
 
@@ -42,7 +43,7 @@ def ftp_monitor(monitor_time):
             counter = 0
             for line in fileopen1:
                 counter = 0
-                fileopen2 = file("/var/artillery/banlist.txt", "r")
+                fileopen2 = file(globals.g_banlist, "r")
                 line = line.rstrip()
                 # search for bad ftp
                 match = re.search("CONNECT: Client", line)

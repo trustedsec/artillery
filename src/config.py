@@ -6,6 +6,8 @@
 
 import os
 import platform
+from . import globals
+
 if platform.system() == "Windows":
     import ntpath
 
@@ -18,14 +20,14 @@ def get_config_path():
     path = ""
     # ToDo: Support for command line argument pointing to config file.
     if is_posix():
-        if os.path.isfile("/var/artillery/config"):
-            path = "/var/artillery/config"
-        if os.path.isfile("config"):
-            path = "config"
+        if os.path.isfile(globals.g_configfile):
+            path = globals.g_configfile
+        #if os.path.isfile("config"):
+        #    path = "config"
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
-        if os.path.isfile(program_files + "\\Artillery\\config"):
-            path = program_files + "\\Artillery\\config"
+        program_files = os.environ["PROGRAMFILES(X86)"]
+        if os.path.isfile(globals.g_configfile):
+            path = globals.g_configfile
     return path
 
 

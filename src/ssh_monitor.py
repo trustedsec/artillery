@@ -9,6 +9,8 @@ try: import thread
 except ImportError: import _thread as thread
 from src.core import *
 
+from . import globals
+
 monitor_frequency = int(read_config("MONITOR_FREQUENCY"))
 ssh_attempts = read_config("SSH_BRUTE_ATTEMPTS")
 
@@ -39,9 +41,9 @@ def ssh_monitor(monitor_frequency):
                 fileopen1 = open("/var/log/faillog", "r")
                 counter = 1
 
-        if not os.path.isfile("/var/artillery/banlist.txt"):
+        if not os.path.isfile(globals.g_banlist):
             # create a blank file
-            filewrite = open("/var/artillery/banlist.txt", "w")
+            filewrite = open(globals.g_banlist, "w")
             filewrite.write("")
             filewrite.close()
 
@@ -51,7 +53,7 @@ def ssh_monitor(monitor_frequency):
             counter = 0
             for line in fileopen1:
                 counter = 0
-                fileopen2 = open("/var/artillery/banlist.txt", "r")
+                fileopen2 = open(globals.g_banlist, "r")
                 line = line.rstrip()
                 # search for bad ssh
                 match = re.search("Failed password for", line)

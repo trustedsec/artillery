@@ -15,7 +15,7 @@ from src.core import *
 mail_time = read_config("EMAIL_FREQUENCY")
 
 # this is what handles the loop for checking email alert frequencies
-
+import socket
 
 def check_alert():
     # loop forever
@@ -27,7 +27,7 @@ def check_alert():
                 "/var/artillery/src/program_junk/email_alerts.log", "r")
             data = fileopen.read()
             if is_config_enabled("EMAIL_ALERTS"):
-                send_mail("[!] Artillery has new notifications for you. [!]",
+                send_mail("[!] " + socket.gethostname() + " | Artillery has new notifications for you. [!]",
                           data)
                 # save this for later just in case we need it
                 shutil.move("/var/artillery/src/program_junk/email_alerts.log",

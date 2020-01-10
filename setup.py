@@ -16,6 +16,8 @@ from src.pyuac import * # UAC Check Script found it here.https://gist.github.com
 try: input = raw_input
 except NameError: pass
 
+import src.globals
+
 # Argument parse. Aimed to provide automatic deployment options
 interactive = True # Flag to select interactive install, typically prompting user to answer [y/n]
 parser = argparse.ArgumentParser(description='-y, optional non interactive install/uninstall with automatic \'yes\' selection. It must roon with root/admin privileges')
@@ -85,6 +87,7 @@ Written by: Dave Kennedy (ReL1K)
             answer = "uninstall"
 
 if answer.lower() in ["yes", "y"]:
+    init_globals()
     if is_posix():
         #kill_artillery()
 
@@ -166,7 +169,7 @@ if answer.lower() in ["yes", "y"]:
                 subprocess.Popen(
                     "chown root:wheel /Library/LaunchDaemons/com.artillery.plist", shell=True).wait()
 
-    
+    check_config()
     if interactive:
         choice = input("[*] Would you like to start Artillery now? [y/n]: ")
     else:
