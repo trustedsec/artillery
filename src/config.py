@@ -25,7 +25,7 @@ def get_config_path():
         #if os.path.isfile("config"):
         #    path = "config"
     if is_windows():
-        program_files = os.environ["ProgramFiles"]
+        program_files = os.environ["PROGRAMFILES(X86)"]
         if os.path.isfile(globals.g_configfile):
             path = globals.g_configfile
     return path
