@@ -1000,20 +1000,21 @@ def mail(to, subject, text):
         msg.attach(MIMEText(text))
         # prep the smtp server
         mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-        if user == '':
-            write_console("[!] Email username is blank. please provide address in config file")
-        else:
-            # send ehlo
-            mailServer.ehlo()
+        #if user == '':
+        #    write_console("[!] Email username is blank. please provide address in config file")
+        
+        # send ehlo
+        mailServer.ehlo()
+        if not user == "": 
             # tls support?
             mailServer.starttls()
             # some servers require ehlo again
             mailServer.ehlo()
             mailServer.login(user, pwd)
             # send the mail
-            write_log("Sending email to %s: %s" % (to, subject))
-            mailServer.sendmail(smtp_from, to, msg.as_string())
-            mailServer.close()
+        write_log("Sending email to %s: %s" % (to, subject))
+        mailServer.sendmail(smtp_from, to, msg.as_string())
+        mailServer.close()
 
     except Exception as err:
         write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
