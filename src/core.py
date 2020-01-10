@@ -434,11 +434,15 @@ def update():
 
 
 def addressInNetwork(ip, net):
-   ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
-   netstr, bits = net.split('/')
-   netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
-   mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
-   return (ipaddr & mask) == (netaddr & mask)
+   try:
+       ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
+       netstr, bits = net.split('/')
+       netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
+       mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+       return (ipaddr & mask) == (netaddr & mask)
+   except:
+       return False
+
 
 def is_whitelisted_ip(ip):
     # grab ips
@@ -665,7 +669,7 @@ def create_iptables_subset():
         for ip in bannedips:
            if not ip.startswith("#") and not ip.replace(" ","") == "":
               ip = ip.strip()
-              if ip != "":
+              if ip != "" and not ":" in ip:
                  test_ip = ip
                  if "/" in test_ip:
                      test_ip = test_ip.split("/")[0]
@@ -996,20 +1000,21 @@ def mail(to, subject, text):
         msg.attach(MIMEText(text))
         # prep the smtp server
         mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-        if user == '':
-            write_console("[!] Email username is blank. please provide address in config file")
-        else:
-            # send ehlo
-            mailServer.ehlo()
+        #if user == '':
+        #    write_console("[!] Email username is blank. please provide address in config file")
+        
+        # send ehlo
+        mailServer.ehlo()
+        if not user == "": 
             # tls support?
             mailServer.starttls()
             # some servers require ehlo again
             mailServer.ehlo()
             mailServer.login(user, pwd)
             # send the mail
-            write_log("Sending email to %s: %s" % (to, subject))
-            mailServer.sendmail(smtp_from, to, msg.as_string())
-            mailServer.close()
+        write_log("Sending email to %s: %s" % (to, subject))
+        mailServer.sendmail(smtp_from, to, msg.as_string())
+        mailServer.close()
 
     except Exception as err:
         write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
@@ -1019,6 +1024,7 @@ def mail(to, subject, text):
         write_log(" %s" % emsg,2)
         write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
         write_console("[!] Error: %s" % emsg)
+        pass
 
 # kill running instances of artillery
 
@@ -1103,9 +1109,9 @@ def format_ips(url):
             if err == '404':
                 # Error 404, page not found!
                 write_log(
-                    "HTTPError: Error 404, URL {} not found.".format(urls))
+                    "HTTPError: Error 404, URL '%s' not found." % str(urls))
             else:
-                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
+                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, str(err)),1)
                 continue 
 
     try:
