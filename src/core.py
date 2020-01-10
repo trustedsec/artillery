@@ -434,11 +434,15 @@ def update():
 
 
 def addressInNetwork(ip, net):
-   ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
-   netstr, bits = net.split('/')
-   netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
-   mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
-   return (ipaddr & mask) == (netaddr & mask)
+   try:
+       ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
+       netstr, bits = net.split('/')
+       netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
+       mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+       return (ipaddr & mask) == (netaddr & mask)
+   except:
+       return False
+
 
 def is_whitelisted_ip(ip):
     # grab ips
@@ -665,7 +669,7 @@ def create_iptables_subset():
         for ip in bannedips:
            if not ip.startswith("#") and not ip.replace(" ","") == "":
               ip = ip.strip()
-              if ip != "":
+              if ip != "" and not ":" in ip:
                  test_ip = ip
                  if "/" in test_ip:
                      test_ip = test_ip.split("/")[0]
