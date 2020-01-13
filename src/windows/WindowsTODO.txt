@@ -2,3 +2,6 @@ Just a note to upstream devs. I am in the process of building an event dll for w
 any questions please contact me through my git page.  
 
 									RH
+
+i am introducing a new file to assist with windows related functions. i have been doing testing with powershell and it has been good. i need to gather more info on host to enable most functions. some functions wont run or arent on certain systems. also this relates to other cmds as well
+this file contains predetermined values to look for and responds accordingly based on what it finds. for now i  am just intruducing partial lists for operation to limit issues and introduce things gradually
