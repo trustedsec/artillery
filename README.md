@@ -29,7 +29,7 @@ For those technical folks you can find all of the code in the following structur
 - ```restart_server.py``` - handles restarting software
 - ```remove_ban.py``` - removes ips from banlist
 - ```src/anti_dos.py``` - main monitoring module for Dos attacks
-- ```src/apache_monitor.py`` - main monitoring module for Apache web service
+- ```src/apache_monitor.py``` - main monitoring module for Apache web service
 - ```src/config.py``` - main module for configuration settings
 - ```src/email_handler.py``` - main module for handling email
 - ```src/events.py``` - main module for trigering events on windows systems
