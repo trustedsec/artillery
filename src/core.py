@@ -342,16 +342,24 @@ def ban(ip):
 
                    # if running windows then route attacker to some bs address.
                    if is_windows():
-                       #lets try and write an event log
-                       HoneyPotEvent()
-                       #now lets block em or mess with em route somewhere else?
-                       routecmd = "route ADD %s MASK 255.255.255.255 10.255.255.255" % ip
-                       if ban_classc == "on":
-                          ip = convert_to_classc(ip)
-                          ipparts = ip.split(".")
-                          routecmd = "route ADD %s.%s.%s.0 MASK 255.255.255.0 10.255.255.255" % (ipparts[0], ipparts[1], ipparts[2])
-                       subprocess.Popen("%s" % (routecmd),
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                      #lets try and write an event log
+                        HoneyPotEvent()
+                        #now lets block em or mess with em route somewhere else?
+                        routecmd = "route ADD %s MASK 255.255.255.255 10.255.255.255"
+                        if ban_check == 'on':
+                            #this is dangerous you can inadvertantly 
+                            #lock your self out of the network be careful with this
+                            #cool idea non the less
+                            if ban_classc == "on":
+                                ip = convert_to_classc(ip)
+                                ipparts = ip.split(".")
+                                routecmd = "route ADD %s.%s.%s.0 MASK 255.255.255.0 10.255.255.255" % (ipparts[0], ipparts[1], ipparts[2])
+                                subprocess.Popen("%s" % (routecmd),
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                            else:
+                                # or use the old way and just ban the individual ip
+                                subprocess.Popen(routecmd % (ip),
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 
                    # add new IP to banlist
@@ -1109,10 +1117,19 @@ def format_ips(url):
             if err == '404':
                 # Error 404, page not found!
                 write_log(
-                    "HTTPError: Error 404, URL '%s' not found." % str(urls))
+                    "HTTPError: Error 404, URL {} not found.".format(urls))
             else:
-                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, str(err)),1)
-                continue 
+                if is_windows():
+                    #had to convert all err to string on windows
+                    #write_log() complaind and spit out a bunch 
+                    #of exceptions about the format specifiers
+                    msg = format(err)
+                    msg_to_string =  "[!] Received URL Error trying to download feed from " + urls," Reason: " + msg
+                    final_msg = str(msg_to_string)
+                    write_log(final_msg)
+                if is_posix():
+                    write_log(
+                        "Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
 
     try:
         if is_windows():
