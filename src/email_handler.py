@@ -11,6 +11,8 @@ try: import thread
 except ImportError: import _thread as thread
 from src.core import *
 
+from . import globals
+
 # check how long to send the email
 mail_time = read_config("EMAIL_FREQUENCY")
 
@@ -20,18 +22,24 @@ import socket
 def check_alert():
     # loop forever
     while 1:
+        mail_log_file = ""
+        mail_old_log_file = ""
+        if is_posix():
+            mail_log_file = "%s/src/program_junk/email_alerts.log" % globals.g_apppath
+            mail_old_log_file = "%s/src/program_junk/email_alerts.old" % globals.g_apppath
+        if is_windows():
+            mail_log_file = "%s\\src\\program_junk\\email_alerts.log" % globals.g_apppath
+            mail_old_log_file = "%s\\src\\program_junk\\email_alerts.old" % globals.g_apppath
         # if the file is there, read it in then trigger email
-        if os.path.isfile("/var/artillery/src/program_junk/email_alerts.log"):
+        if os.path.isfile(mail_log_file):
             # read open the file to be sent
-            fileopen = file(
-                "/var/artillery/src/program_junk/email_alerts.log", "r")
+            fileopen = open(mail_log_file, "r")
             data = fileopen.read()
             if is_config_enabled("EMAIL_ALERTS"):
                 send_mail("[!] " + socket.gethostname() + " | Artillery has new notifications for you. [!]",
                           data)
                 # save this for later just in case we need it
-                shutil.move("/var/artillery/src/program_junk/email_alerts.log",
-                            "/var/artillery/src/program_junk/email_alerts.old")
+                shutil.move(mail_log_file, mail_old_log_file)
         time.sleep(int(mail_time))
 
 # start a threat for checking email frequency

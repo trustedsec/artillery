@@ -342,16 +342,24 @@ def ban(ip):
 
                    # if running windows then route attacker to some bs address.
                    if is_windows():
-                       #lets try and write an event log
-                       HoneyPotEvent()
-                       #now lets block em or mess with em route somewhere else?
-                       routecmd = "route ADD %s MASK 255.255.255.255 10.255.255.255" % ip
-                       if ban_classc == "on":
-                          ip = convert_to_classc(ip)
-                          ipparts = ip.split(".")
-                          routecmd = "route ADD %s.%s.%s.0 MASK 255.255.255.0 10.255.255.255" % (ipparts[0], ipparts[1], ipparts[2])
-                       subprocess.Popen("%s" % (routecmd),
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                      #lets try and write an event log
+                        HoneyPotEvent()
+                        #now lets block em or mess with em route somewhere else?
+                        routecmd = "route ADD %s MASK 255.255.255.255 10.255.255.255"
+                        if ban_check == 'on':
+                            #this is dangerous you can inadvertantly 
+                            #lock your self out of the network be careful with this
+                            #cool idea non the less
+                            if ban_classc == "on":
+                                ip = convert_to_classc(ip)
+                                ipparts = ip.split(".")
+                                routecmd = "route ADD %s.%s.%s.0 MASK 255.255.255.0 10.255.255.255" % (ipparts[0], ipparts[1], ipparts[2])
+                                subprocess.Popen("%s" % (routecmd),
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                            else:
+                                # or use the old way and just ban the individual ip
+                                subprocess.Popen(routecmd % (ip),
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 
                    # add new IP to banlist
@@ -434,11 +442,15 @@ def update():
 
 
 def addressInNetwork(ip, net):
-   ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
-   netstr, bits = net.split('/')
-   netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
-   mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
-   return (ipaddr & mask) == (netaddr & mask)
+   try:
+       ipaddr = int(''.join([ '%02x' % int(x) for x in ip.split('.') ]), 16)
+       netstr, bits = net.split('/')
+       netaddr = int(''.join([ '%02x' % int(x) for x in netstr.split('.') ]), 16)
+       mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+       return (ipaddr & mask) == (netaddr & mask)
+   except:
+       return False
+
 
 def is_whitelisted_ip(ip):
     # grab ips
@@ -665,7 +677,7 @@ def create_iptables_subset():
         for ip in bannedips:
            if not ip.startswith("#") and not ip.replace(" ","") == "":
               ip = ip.strip()
-              if ip != "":
+              if ip != "" and not ":" in ip:
                  test_ip = ip
                  if "/" in test_ip:
                      test_ip = test_ip.split("/")[0]
@@ -996,20 +1008,21 @@ def mail(to, subject, text):
         msg.attach(MIMEText(text))
         # prep the smtp server
         mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-        if user == '':
-            write_console("[!] Email username is blank. please provide address in config file")
-        else:
-            # send ehlo
-            mailServer.ehlo()
+        #if user == '':
+        #    write_console("[!] Email username is blank. please provide address in config file")
+        
+        # send ehlo
+        mailServer.ehlo()
+        if not user == "": 
             # tls support?
             mailServer.starttls()
             # some servers require ehlo again
             mailServer.ehlo()
             mailServer.login(user, pwd)
             # send the mail
-            write_log("Sending email to %s: %s" % (to, subject))
-            mailServer.sendmail(smtp_from, to, msg.as_string())
-            mailServer.close()
+        write_log("Sending email to %s: %s" % (to, subject))
+        mailServer.sendmail(smtp_from, to, msg.as_string())
+        mailServer.close()
 
     except Exception as err:
         write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
@@ -1019,6 +1032,7 @@ def mail(to, subject, text):
         write_log(" %s" % emsg,2)
         write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
         write_console("[!] Error: %s" % emsg)
+        pass
 
 # kill running instances of artillery
 
@@ -1105,8 +1119,17 @@ def format_ips(url):
                 write_log(
                     "HTTPError: Error 404, URL {} not found.".format(urls))
             else:
-                write_log("Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
-                continue 
+                if is_windows():
+                    #had to convert all err to string on windows
+                    #write_log() complaind and spit out a bunch 
+                    #of exceptions about the format specifiers
+                    msg = format(err)
+                    msg_to_string =  "[!] Received URL Error trying to download feed from " + urls," Reason: " + msg
+                    final_msg = str(msg_to_string)
+                    write_log(final_msg)
+                if is_posix():
+                    write_log(
+                        "Received URL Error trying to download feed from '%s', Reason: %s" (urls, format(err)),1)
 
     try:
         if is_windows():
