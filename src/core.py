@@ -991,49 +991,51 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 def mail(to, subject, text):
-    try:
-
-        user = read_config("SMTP_USERNAME")
-        pwd = read_config("SMTP_PASSWORD")
-        smtp_address = read_config("SMTP_ADDRESS")
-        # port we use, default is 25
-        smtp_port = int(read_config("SMTP_PORT"))
-        smtp_from = read_config("SMTP_FROM")
-        msg = MIMEMultipart()
-        msg['From'] = smtp_from
-        msg['To'] = to
-        msg['Date'] = formatdate(localtime=True)
-        msg['Message-Id'] = "<" + id_generator(20) + "." + smtp_from + ">"
-        msg['Subject'] = subject
-        msg.attach(MIMEText(text))
-        # prep the smtp server
-        mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
-        #if user == '':
-        #    write_console("[!] Email username is blank. please provide address in config file")
-        
-        # send ehlo
-        mailServer.ehlo()
-        if not user == "": 
-            # tls support?
-            mailServer.starttls()
-            # some servers require ehlo again
+    enabled = read_config("EMAIL_ALERTS")
+    if enabled == "ON":
+        try:
+            user = read_config("SMTP_USERNAME")
+            pwd = read_config("SMTP_PASSWORD")
+            smtp_address = read_config("SMTP_ADDRESS")
+            # port we use, default is 25
+            smtp_port = int(read_config("SMTP_PORT"))
+            smtp_from = read_config("SMTP_FROM")
+            msg = MIMEMultipart()
+            msg['From'] = smtp_from
+            msg['To'] = to
+            msg['Date'] = formatdate(localtime=True)
+            msg['Message-Id'] = "<" + id_generator(20) + "." + smtp_from + ">"
+            msg['Subject'] = subject
+            msg.attach(MIMEText(text))
+            # prep the smtp server
+            mailServer = smtplib.SMTP("%s" % (smtp_address), smtp_port)
+            #if user == '':
+            #    write_console("[!] Email username is blank. please provide address in config file")
+            
+            # send ehlo
             mailServer.ehlo()
-            mailServer.login(user, pwd)
-            # send the mail
-        write_log("Sending email to %s: %s" % (to, subject))
-        mailServer.sendmail(smtp_from, to, msg.as_string())
-        mailServer.close()
+            if not user == "": 
+                # tls support?
+                mailServer.starttls()
+                # some servers require ehlo again
+                mailServer.ehlo()
+                mailServer.login(user, pwd)
+                # send the mail
+            write_log("Sending email to %s: %s" % (to, subject))
+            mailServer.sendmail(smtp_from, to, msg.as_string())
+            mailServer.close()
 
-    except Exception as err:
-        write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
-            smtp_address, smtp_port),2)
-        emsg = traceback.format_exc()
-        write_log("Error: " + str(err),2)
-        write_log(" %s" % emsg,2)
-        write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
-        write_console("[!] Error: %s" % emsg)
-        pass
-
+        except Exception as err:
+            write_log("Error, Artillery was unable to log into the mail server %s:%d" % (
+                smtp_address, smtp_port),2)
+            emsg = traceback.format_exc()
+            write_log("Error: " + str(err),2)
+            write_log(" %s" % emsg,2)
+            write_console("[!] Artillery was unable to send email via %s:%d" % (smtp_address, smtp_port))
+            write_console("[!] Error: %s" % emsg)
+            pass
+    else:
+        write_console("[*] Email alerts are not enabled. please look @ %s to enable." % (globals.g_configfile))
 # kill running instances of artillery
 
 
